@@ -3664,3 +3664,357 @@ document.addEventListener('DOMContentLoaded', () => {
 
   return { html, css, js };
 }
+
+// -------------------------------------------------------------
+// CV (A4 PRINT) TEMPLATE GENERATOR
+// -------------------------------------------------------------
+function generateCVTemplate(data) {
+  const p = data.profile;
+  const accentColor = data.design.cvAccent || data.design.accentColor || '#6366f1';
+  
+  // Format avatar
+  let avatarPath = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
+  if (p.avatar) {
+    avatarPath = p.avatar;
+  }
+
+  const skillsHtml = data.skills.map(s => `
+    <div class="cv-skill">
+      <span class="cv-skill-name">${s.name}</span>
+      <div class="cv-skill-bar-bg">
+        <div class="cv-skill-bar" style="width: ${s.level}%"></div>
+      </div>
+    </div>
+  `).join('');
+
+  const timelineHtml = data.timeline.map(t => `
+    <div class="cv-timeline-item">
+      <div class="cv-timeline-date">${t.startDate} - ${t.endDate || 'Présent'}</div>
+      <div class="cv-timeline-content">
+        <h4>${t.role}</h4>
+        <h5>${t.organization}</h5>
+        <p>${t.description}</p>
+      </div>
+    </div>
+  `).join('');
+
+  const projectsHtml = data.projects.map(proj => `
+    <div class="cv-project-item">
+      <h4>${proj.title} <span>| ${proj.category}</span></h4>
+      <p>${proj.description}</p>
+      ${proj.technologies ? `<p class="cv-tech"><strong>Technologies:</strong> ${proj.technologies}</p>` : ''}
+    </div>
+  `).join('');
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV - ${p.name}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --cv-accent: ${accentColor};
+      --cv-text: #333333;
+      --cv-light: #666666;
+      --cv-bg: #ffffff;
+      --cv-sidebar: #f8f9fa;
+      --cv-border: #e9ecef;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--cv-text);
+      background: #e5e7eb;
+      font-size: 11pt;
+      line-height: 1.5;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    
+    .cv-page {
+      width: 210mm;
+      min-height: 297mm;
+      background: var(--cv-bg);
+      margin: 2rem auto;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* LEFT SIDEBAR */
+    .cv-sidebar {
+      width: 32%;
+      background-color: var(--cv-sidebar);
+      padding: 2.5rem 1.5rem;
+      border-right: 1px solid var(--cv-border);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .cv-avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin: 0 auto 1.5rem auto;
+      display: block;
+    }
+    
+    .cv-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--cv-text);
+      word-break: break-word;
+    }
+    
+    .cv-contact-item i {
+      color: var(--cv-accent);
+      width: 16px;
+      text-align: center;
+    }
+    
+    .cv-section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--cv-text);
+      border-bottom: 2px solid var(--cv-accent);
+      padding-bottom: 0.25rem;
+      margin: 2rem 0 1rem 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .cv-section-title-alt {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--cv-accent);
+      margin: 2rem 0 1rem 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .cv-skill {
+      margin-bottom: 0.75rem;
+    }
+    .cv-skill-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .cv-skill-bar-bg {
+      height: 4px;
+      background-color: #dee2e6;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .cv-skill-bar {
+      height: 100%;
+      background-color: var(--cv-accent);
+    }
+    
+    .cv-info-list {
+      list-style: none;
+      font-size: 0.85rem;
+      color: var(--cv-text);
+    }
+    .cv-info-list li {
+      margin-bottom: 0.5rem;
+    }
+    .cv-info-list strong {
+      display: block;
+      color: var(--cv-accent);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+    
+    /* RIGHT MAIN CONTENT */
+    .cv-main {
+      width: 68%;
+      padding: 3rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .cv-header-name {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--cv-text);
+      margin-bottom: 0.25rem;
+      letter-spacing: -1px;
+    }
+    
+    .cv-header-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--cv-accent);
+      margin-bottom: 1.5rem;
+    }
+    
+    .cv-bio {
+      font-size: 0.95rem;
+      color: var(--cv-light);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    
+    /* Timeline */
+    .cv-timeline-item {
+      display: flex;
+      margin-bottom: 1.5rem;
+      page-break-inside: avoid;
+    }
+    .cv-timeline-date {
+      width: 120px;
+      flex-shrink: 0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--cv-accent);
+      padding-right: 1rem;
+    }
+    .cv-timeline-content {
+      border-left: 2px solid var(--cv-border);
+      padding-left: 1rem;
+      position: relative;
+    }
+    .cv-timeline-content::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--cv-accent);
+    }
+    .cv-timeline-content h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+    }
+    .cv-timeline-content h5 {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--cv-light);
+      margin-bottom: 0.5rem;
+    }
+    .cv-timeline-content p {
+      font-size: 0.9rem;
+      color: var(--cv-text);
+    }
+    
+    /* Projects */
+    .cv-project-item {
+      margin-bottom: 1.25rem;
+      page-break-inside: avoid;
+    }
+    .cv-project-item h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .cv-project-item h4 span {
+      font-weight: 400;
+      color: var(--cv-light);
+      font-size: 0.9rem;
+    }
+    .cv-project-item p {
+      font-size: 0.9rem;
+      color: var(--cv-text);
+    }
+    .cv-tech {
+      margin-top: 0.25rem;
+      font-size: 0.8rem !important;
+      color: var(--cv-light) !important;
+    }
+    
+    @media print {
+      body {
+        background: transparent;
+        margin: 0;
+        padding: 0;
+      }
+      .cv-page {
+        margin: 0;
+        box-shadow: none;
+        width: 100%;
+        min-height: 100%;
+      }
+      @page {
+        size: A4;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="cv-page">
+    <aside class="cv-sidebar">
+      ${avatarPath ? `<img src="${avatarPath}" alt="Avatar" class="cv-avatar">` : ''}
+      
+      <div style="margin-bottom: 2rem;">
+        ${p.email ? `<div class="cv-contact-item"><i class="fas fa-envelope"></i> ${p.email}</div>` : ''}
+        ${p.phone ? `<div class="cv-contact-item"><i class="fas fa-phone"></i> ${p.phone}</div>` : ''}
+        ${p.address ? `<div class="cv-contact-item"><i class="fas fa-map-marker-alt"></i> ${p.address}</div>` : ''}
+        ${p.linkedin ? `<div class="cv-contact-item"><i class="fab fa-linkedin"></i> ${p.linkedin.replace('https://','')}</div>` : ''}
+        ${p.github ? `<div class="cv-contact-item"><i class="fab fa-github"></i> ${p.github.replace('https://','')}</div>` : ''}
+      </div>
+      
+      ${data.skills.length > 0 ? `
+      <h3 class="cv-section-title">Compétences</h3>
+      <div>${skillsHtml}</div>
+      ` : ''}
+      
+      <h3 class="cv-section-title">Informations</h3>
+      <ul class="cv-info-list">
+        ${p.languages ? `<li><strong>Langues</strong> ${p.languages}</li>` : ''}
+        ${p.availability ? `<li><strong>Disponibilité</strong> ${p.availability}</li>` : ''}
+        ${p.contract ? `<li><strong>Contrat recherché</strong> ${p.contract}</li>` : ''}
+        ${p.hobbies ? `<li><strong>Loisirs</strong> ${p.hobbies}</li>` : ''}
+      </ul>
+    </aside>
+    
+    <main class="cv-main">
+      <h1 class="cv-header-name">${p.name || 'Nom Prénom'}</h1>
+      <h2 class="cv-header-title">${p.title || 'Votre Titre Professionnel'}</h2>
+      
+      ${p.bio ? `<p class="cv-bio">${p.bio}</p>` : ''}
+      
+      ${data.timeline.length > 0 ? `
+      <h3 class="cv-section-title-alt">Expérience & Formation</h3>
+      <div class="cv-timeline">
+        ${timelineHtml}
+      </div>
+      ` : ''}
+      
+      ${data.projects.length > 0 ? `
+      <h3 class="cv-section-title-alt">Projets Récents</h3>
+      <div class="cv-projects">
+        ${projectsHtml}
+      </div>
+      ` : ''}
+      
+    </main>
+  </div>
+</body>
+</html>`;
+}

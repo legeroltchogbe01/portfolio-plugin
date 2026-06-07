@@ -71,6 +71,9 @@
         <a href="#" class="nav-item" data-target="sec-design">
           <i class="fas fa-palette"></i> Design & Thème
         </a>
+        <a href="#" class="nav-item" data-target="sec-cv">
+          <i class="fas fa-file-pdf"></i> Création de CV
+        </a>
         <a href="#" class="nav-item" data-target="sec-export">
           <i class="fas fa-file-archive"></i> Téléchargement
         </a>
@@ -337,7 +340,40 @@
           </div>
         </div>
 
-        <!-- SECTION 6: EXPORT / TÉLÉCHARGEMENT -->
+        <!-- SECTION 6: CREATION DE CV -->
+        <div id="sec-cv" class="editor-section">
+          <h2 class="section-title">Création de CV (PDF)</h2>
+          <p class="section-desc">Générez un Curriculum Vitae personnalisé. Ajustez le design puis téléchargez-le directement en PDF.</p>
+          
+          <h3 style="font-size: 1.1rem; margin: 1.5rem 0 1rem 0; color: var(--text-light)">1. Design du CV</h3>
+          <div class="color-picker-grid" style="margin-bottom: 2rem;">
+            <div class="color-input-wrapper">
+              <input type="color" id="cv-design-accent" value="#3b82f6" onchange="triggerUpdate(); document.getElementById('cv-accent-hex').innerText = this.value;">
+              <div class="color-picker-lbl">
+                <span>Couleur d'Accent</span>
+                <span id="cv-accent-hex">#3b82f6</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="export-card" style="margin-top: 1rem;">
+            <div class="export-icon" style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text;"><i class="fas fa-file-pdf"></i></div>
+            <h3 style="margin-bottom: 0.5rem">Votre CV est prêt</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem">
+              Le CV compile votre profil, vos compétences, vos projets et votre parcours professionnel dans une mise en page claire et professionnelle.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <button class="export-btn" style="background: var(--bg-input); border: 1px solid var(--border-light); color: white;" onclick="previewCV()">
+                <i class="fas fa-eye"></i> Aperçu
+              </button>
+              <button class="export-btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="downloadCV()">
+                <i class="fas fa-download"></i> Télécharger en PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 7: EXPORT / TÉLÉCHARGEMENT -->
         <div id="sec-export" class="editor-section">
           <h2 class="section-title">Téléchargement Direct</h2>
           <p class="section-desc">Générez et téléchargez votre portfolio compressé en fichier ZIP autonome, prêt à être hébergé partout (Vercel, Netlify, Github Pages, etc.).</p>
@@ -377,6 +413,7 @@
 
   <!-- CDN dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="templates.js"></script>
   <script src="app.js"></script>
 </body>

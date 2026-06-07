@@ -492,7 +492,8 @@ function getFormData() {
     timeline: [],
     design: {
       accentColor: accentVal,
-      secondaryColor: secondaryVal
+      secondaryColor: secondaryVal,
+      cvAccent: document.getElementById('cv-design-accent') ? document.getElementById('cv-design-accent').value : '#3b82f6'
     }
   };
 
@@ -601,6 +602,74 @@ function openPreviewWindow() {
   } else {
     showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
   }
+}
+
+// -------------------------------------------------------------
+// CV GENERATION SYSTEM
+// -------------------------------------------------------------
+function getCVHtml() {
+  const data = getFormData();
+  // Call the template generator from templates.js
+  return generateCVTemplate(data);
+}
+
+function previewCV() {
+  const html = getCVHtml();
+  const newWindow = window.open();
+  if (newWindow) {
+    newWindow.document.write(html);
+    newWindow.document.close();
+  } else {
+    showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
+  }
+}
+
+function downloadCV() {
+  const data = getFormData();
+  const htmlStr = generateCVTemplate(data);
+  
+  // Parse the generated HTML to extract the styles and the main container
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlStr, 'text/html');
+  const cvPage = doc.querySelector('.cv-page');
+  const styleEl = doc.querySelector('style');
+  
+  // Create a hidden container in the body
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.top = '-9999px';
+  container.appendChild(styleEl.cloneNode(true));
+  container.appendChild(cvPage);
+  document.body.appendChild(container);
+  
+  showToast("Génération du PDF en cours...", "success");
+  
+  // Give it a moment to load any images or fonts
+  setTimeout(() => {
+    const opt = {
+      margin:       0,
+      filename:     `CV_${data.profile.name.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    // Check if html2pdf is available
+    if (typeof html2pdf !== 'undefined') {
+      html2pdf().set(opt).from(cvPage).save().then(() => {
+        document.body.removeChild(container);
+        showToast("CV téléchargé avec succès !", "success");
+      }).catch(err => {
+        console.error(err);
+        document.body.removeChild(container);
+        showToast("Erreur lors de la génération.", "error");
+      });
+    } else {
+      document.body.removeChild(container);
+      showToast("La librairie PDF n'est pas chargée.", "error");
+    }
+  }, 500);
 }
 
 // -------------------------------------------------------------
