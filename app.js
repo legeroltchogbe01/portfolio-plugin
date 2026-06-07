@@ -130,28 +130,43 @@ function handleLogout() {
 // TAB NAVIGATION
 // -------------------------------------------------------------
 function initTabs() {
-  const navItems = document.querySelectorAll('.nav-item');
-  const sections = document.querySelectorAll('.editor-section');
+  // Legacy - now handled by switchTab()
+  switchTab('about');
+}
 
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      // Update nav active state
-      navItems.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
+function switchTab(tabName) {
+  // Map tab names to section IDs
+  const sectionMap = {
+    about: 'sec-about',
+    skills: 'sec-skills',
+    projects: 'sec-projects',
+    timeline: 'sec-timeline',
+    education: 'sec-education',
+    design: 'sec-design',
+    cv: 'sec-cv',
+    export: 'sec-export'
+  };
 
-      // Show targeted editor section
-      const targetId = item.getAttribute('data-target');
-      sections.forEach(sec => {
-        if (sec.id === targetId) {
-          sec.classList.add('active');
-        } else {
-          sec.classList.remove('active');
-        }
-      });
-    });
+  const targetId = sectionMap[tabName];
+  if (!targetId) return;
+
+  // Update all editor sections visibility
+  document.querySelectorAll('.editor-section').forEach(sec => {
+    if (sec.id === targetId) {
+      sec.classList.add('active');
+      sec.style.display = '';
+    } else {
+      sec.classList.remove('active');
+      sec.style.display = 'none';
+    }
   });
+
+  // Update nav active states
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  const activeTab = document.getElementById('tab-' + tabName);
+  if (activeTab) activeTab.classList.add('active');
 }
 
 // -------------------------------------------------------------
@@ -316,7 +331,6 @@ function addProjectItem(project = {}) {
   triggerUpdate();
 }
 
-// 3. Timeline Repeater
 function addTimelineItem(item = {}) {
   const container = document.getElementById('timeline-repeater');
   const cardId = 'timeline-' + Date.now() + Math.random().toString(36).substr(2, 4);
@@ -331,7 +345,7 @@ function addTimelineItem(item = {}) {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-graduation-cap"></i> Expérience / Diplôme</span>
+      <span class="repeater-card-title"><i class="fas fa-briefcase"></i> Expérience Professionnelle</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
         <i class="fas fa-trash"></i>
       </button>
@@ -339,28 +353,67 @@ function addTimelineItem(item = {}) {
     <div class="form-grid">
       <div class="form-group">
         <label>Titre / Rôle</label>
-        <input type="text" class="form-control time-input-role" placeholder="ex: Développeur Frontend Lead" value="${role}" oninput="triggerUpdate()">
+        <input type="text" class="form-control time-input-role" placeholder="ex: Développeur Web" value="${role}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Entreprise / Établissement</label>
-        <input type="text" class="form-control time-input-org" placeholder="ex: Sorbonne Université / TechCorp" value="${org}" oninput="triggerUpdate()">
+        <label>Entreprise</label>
+        <input type="text" class="form-control time-input-org" placeholder="ex: TechCorp" value="${org}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Date de début</label>
-        <input type="text" class="form-control time-input-start" placeholder="ex: Sept 2021" value="${start}" oninput="triggerUpdate()">
+        <label>Date de début (MM/YYYY)</label>
+        <input type="text" class="form-control time-input-start" placeholder="ex: 09/2021" value="${start}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
         <label>Date de fin</label>
-        <input type="text" class="form-control time-input-end" placeholder="ex: Présent / Janv 2023" value="${end}" oninput="triggerUpdate()">
+        <input type="text" class="form-control time-input-end" placeholder="ex: Présent" value="${end}" oninput="triggerUpdate()">
       </div>
       <div class="form-group form-group-full">
-        <label>Description des réalisations / cours</label>
-        <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous appris ou réalisé ?" oninput="triggerUpdate()">${desc}</textarea>
+        <label>Description des réalisations</label>
+        <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous réalisé ?" oninput="triggerUpdate()">${desc}</textarea>
       </div>
     </div>
   `;
   container.appendChild(card);
-  triggerUpdate();
+}
+
+function addEducationItem(item = {}) {
+  const container = document.getElementById('education-repeater');
+  const cardId = 'education-' + Date.now() + Math.random().toString(36).substr(2, 4);
+  const degree = item.degree || '';
+  const inst = item.institution || '';
+  const start = item.startDate || '';
+  const end = item.endDate || '';
+
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-graduation-cap"></i> Formation / Diplôme</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Diplôme / Spécialité</label>
+        <input type="text" class="form-control edu-input-degree" placeholder="ex: Master Informatique" value="${degree}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Établissement</label>
+        <input type="text" class="form-control edu-input-inst" placeholder="ex: Sorbonne Université" value="${inst}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Année de début</label>
+        <input type="text" class="form-control edu-input-start" placeholder="ex: 2018" value="${start}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Année d'obtention</label>
+        <input type="text" class="form-control edu-input-end" placeholder="ex: 2020" value="${end}" oninput="triggerUpdate()">
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
 }
 
 function removeRepeaterItem(cardId) {
@@ -515,6 +568,8 @@ function getFormData() {
     skills: [],
     projects: [],
     timeline: [],
+    experience: [],
+    education: [],
     design: {
       accentColor: accentVal,
       secondaryColor: secondaryVal,
@@ -557,22 +612,41 @@ function getFormData() {
     }
   });
 
-  // Compile Timeline
+  // Compile Experience (ATS)
   const timelineCards = document.querySelectorAll('#timeline-repeater .repeater-card');
   timelineCards.forEach(card => {
     const role = card.querySelector('.time-input-role').value;
     const org = card.querySelector('.time-input-org').value;
     const start = card.querySelector('.time-input-start').value;
     const end = card.querySelector('.time-input-end').value;
-    const desc = card.querySelector('.time-input-desc').value;
+    const desc = card.querySelector('.time-input-desc') ? card.querySelector('.time-input-desc').value : '';
 
     if (role.trim()) {
-      data.timeline.push({
+      const entry = {
         role: role.trim(),
         organization: org.trim(),
         startDate: start.trim(),
         endDate: end.trim(),
         description: desc.trim()
+      };
+      data.experience.push(entry);
+      data.timeline.push(entry); // backward compat
+    }
+  });
+
+  // Compile Education (ATS)
+  const eduCards = document.querySelectorAll('#education-repeater .repeater-card');
+  eduCards.forEach(card => {
+    const degree = card.querySelector('.edu-input-degree').value;
+    const inst = card.querySelector('.edu-input-inst').value;
+    const start = card.querySelector('.edu-input-start').value;
+    const end = card.querySelector('.edu-input-end').value;
+    if (degree.trim()) {
+      data.education.push({
+        degree: degree.trim(),
+        institution: inst.trim(),
+        startDate: start.trim(),
+        endDate: end.trim()
       });
     }
   });

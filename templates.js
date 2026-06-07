@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Portfolio Studio - Templates Engine
  * This file contains the template layouts, styling, and the compiler logic
  * to build the client-side portfolios.
@@ -25,10 +25,10 @@ function extractImageInfo(dataUrl, defaultName) {
 // Helper to compile personal recruitment specifications beautifully based on the active theme
 function getPersonalSpecsHtml(p, themeId) {
   const specs = [];
-  if (p.age) specs.push({ label: 'Âge', value: `${p.age} ans`, icon: 'fa-calendar-alt' });
-  if (p.experience) specs.push({ label: 'Expérience', value: `${p.experience} ans`, icon: 'fa-briefcase' });
+  if (p.age) specs.push({ label: 'Ã‚ge', value: `${p.age} ans`, icon: 'fa-calendar-alt' });
+  if (p.experience) specs.push({ label: 'ExpÃ©rience', value: `${p.experience} ans`, icon: 'fa-briefcase' });
   if (p.location) specs.push({ label: 'Localisation', value: p.location, icon: 'fa-map-marker-alt' });
-  if (p.availability) specs.push({ label: 'Disponibilité', value: p.availability, icon: 'fa-clock' });
+  if (p.availability) specs.push({ label: 'DisponibilitÃ©', value: p.availability, icon: 'fa-clock' });
   if (p.contract) specs.push({ label: 'Contrat', value: p.contract, icon: 'fa-file-contract' });
   if (p.languages) specs.push({ label: 'Langues', value: p.languages, icon: 'fa-language' });
   if (p.hobbies) specs.push({ label: 'Loisirs', value: p.hobbies, icon: 'fa-heart' });
@@ -157,7 +157,7 @@ function getMinimalistTemplate(data, avatarPath, projects) {
   const timelineHtml = data.timeline.map(t => `
     <div class="timeline-item reveal">
       <div class="timeline-meta">
-        <span class="timeline-period">${t.startDate} - ${t.endDate || 'Présent'}</span>
+        <span class="timeline-period">${t.startDate} - ${t.endDate || 'PrÃ©sent'}</span>
         <span class="timeline-org">${t.organization}</span>
       </div>
       <div class="timeline-content">
@@ -193,7 +193,7 @@ function getMinimalistTemplate(data, avatarPath, projects) {
     <div class="container header-container">
       <a href="#" class="logo">${p.name || 'Portfolio'}</a>
       <nav class="nav">
-        <a href="#about">À Propos</a>
+        <a href="#about">Ã€ Propos</a>
         <a href="#projects">Projets</a>
         <a href="#experience">Parcours</a>
         <a href="#contact">Contact</a>
@@ -212,7 +212,7 @@ function getMinimalistTemplate(data, avatarPath, projects) {
         <div class="hero-text">
           <span class="hero-subtitle">${p.title || 'Bienvenue sur mon site'}</span>
           <h1 class="hero-title">${p.name}</h1>
-          <p class="hero-desc">${p.bio || 'Je conçois et développe des expériences web épurées.'}</p>
+          <p class="hero-desc">${p.bio || 'Je conÃ§ois et dÃ©veloppe des expÃ©riences web Ã©purÃ©es.'}</p>
           ${getPersonalSpecsHtml(p, 'minimalist')}
           <div class="hero-actions">
             <a href="#contact" class="btn btn-primary">Me contacter</a>
@@ -231,9 +231,9 @@ function getMinimalistTemplate(data, avatarPath, projects) {
     <!-- SKILLS SECTION -->
     <section class="skills">
       <div class="container">
-        <h2 class="section-title">Mes Compétences</h2>
+        <h2 class="section-title">Mes CompÃ©tences</h2>
         <div class="skills-grid">
-          ${skillsHtml || '<p>Aucune compétence saisie pour le moment.</p>'}
+          ${skillsHtml || '<p>Aucune compÃ©tence saisie pour le moment.</p>'}
         </div>
       </div>
     </section>
@@ -241,7 +241,7 @@ function getMinimalistTemplate(data, avatarPath, projects) {
     <!-- PROJECTS SECTION -->
     <section class="projects" id="projects">
       <div class="container">
-        <h2 class="section-title">Mes Projets Récents</h2>
+        <h2 class="section-title">Mes Projets RÃ©cents</h2>
         <div class="projects-grid">
           ${projectsHtml || '<p>Aucun projet saisi pour le moment.</p>'}
         </div>
@@ -253,7 +253,7 @@ function getMinimalistTemplate(data, avatarPath, projects) {
       <div class="container">
         <h2 class="section-title">Mon Parcours</h2>
         <div class="timeline">
-          ${timelineHtml || '<p>Aucune expérience saisie pour le moment.</p>'}
+          ${timelineHtml || '<p>Aucune expÃ©rience saisie pour le moment.</p>'}
         </div>
       </div>
     </section>
@@ -263,7 +263,7 @@ function getMinimalistTemplate(data, avatarPath, projects) {
       <div class="container contact-container">
         <div class="contact-card">
           <h2 class="contact-title">Discutons de votre projet</h2>
-          <p class="contact-desc">Je suis toujours ouvert à de nouvelles opportunités ou collaborations. Envoyez-moi un message !</p>
+          <p class="contact-desc">Je suis toujours ouvert Ã  de nouvelles opportunitÃ©s ou collaborations. Envoyez-moi un message !</p>
           ${p.email ? `<a href="mailto:${p.email}" class="btn btn-primary btn-large">${p.email}</a>` : ''}
           <div class="contact-socials">
             ${socialHtml}
@@ -275,7 +275,7 @@ function getMinimalistTemplate(data, avatarPath, projects) {
 
   <footer class="footer">
     <div class="container">
-      <p>&copy; ${new Date().getFullYear()} ${p.name}. Tous droits réservés.</p>
+      <p>&copy; ${new Date().getFullYear()} ${p.name}. Tous droits rÃ©servÃ©s.</p>
     </div>
   </footer>
 
@@ -984,7 +984,7 @@ function getCreativeTemplate(data, avatarPath, projects) {
     <div class="timeline-block reveal">
       <div class="timeline-dot"></div>
       <div class="timeline-card">
-        <span class="time-range">${t.startDate} - ${t.endDate || 'Présent'}</span>
+        <span class="time-range">${t.startDate} - ${t.endDate || 'PrÃ©sent'}</span>
         <h3>${t.role}</h3>
         <h4>${t.organization}</h4>
         <p>${t.description}</p>
@@ -1005,7 +1005,7 @@ function getCreativeTemplate(data, avatarPath, projects) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${p.name} | Portfolio Créatif</title>
+  <title>${p.name} | Portfolio CrÃ©atif</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1022,8 +1022,8 @@ function getCreativeTemplate(data, avatarPath, projects) {
     <div class="container header-wrap">
       <a href="#" class="brand-logo">${p.name || 'Studio'}</a>
       <nav class="nav-links">
-        <a href="#about">À Propos</a>
-        <a href="#competences">Compétences</a>
+        <a href="#about">Ã€ Propos</a>
+        <a href="#competences">CompÃ©tences</a>
         <a href="#travaux">Projets</a>
         <a href="#parcours">Parcours</a>
         <a href="#contact" class="nav-btn">Me Contacter</a>
@@ -1037,8 +1037,8 @@ function getCreativeTemplate(data, avatarPath, projects) {
       <div class="container hero-grid">
         <div class="hero-content">
           <div class="badge-accent">Disponible pour de nouveaux projets</div>
-          <h1 class="hero-heading">Je crée des <span class="gradient-text">expériences d'exception</span>.</h1>
-          <p class="hero-lead">${p.bio || 'Je suis ' + p.name + ', concepteur de produits numériques et ingénieur créatif.'}</p>
+          <h1 class="hero-heading">Je crÃ©e des <span class="gradient-text">expÃ©riences d'exception</span>.</h1>
+          <p class="hero-lead">${p.bio || 'Je suis ' + p.name + ', concepteur de produits numÃ©riques et ingÃ©nieur crÃ©atif.'}</p>
           ${getPersonalSpecsHtml(p, 'creative')}
           <div class="hero-cta-group">
             <a href="#travaux" class="btn btn-filled">Explorer mes projets</a>
@@ -1060,11 +1060,11 @@ function getCreativeTemplate(data, avatarPath, projects) {
     <section class="skills-section" id="competences">
       <div class="container">
         <div class="section-header">
-          <span class="section-tag">Compétences</span>
+          <span class="section-tag">CompÃ©tences</span>
           <h2>Mon Expertise Technique</h2>
         </div>
         <div class="skills-carousel">
-          ${skillsHtml || '<p>Aucune compétence.</p>'}
+          ${skillsHtml || '<p>Aucune compÃ©tence.</p>'}
         </div>
       </div>
     </section>
@@ -1073,8 +1073,8 @@ function getCreativeTemplate(data, avatarPath, projects) {
     <section class="projects-section" id="travaux">
       <div class="container">
         <div class="section-header">
-          <span class="section-tag">Créations</span>
-          <h2>Projets Sélectionnés</h2>
+          <span class="section-tag">CrÃ©ations</span>
+          <h2>Projets SÃ©lectionnÃ©s</h2>
         </div>
         <div class="projects-masonry">
           ${projectsHtml || '<p>Aucun projet disponible.</p>'}
@@ -1086,11 +1086,11 @@ function getCreativeTemplate(data, avatarPath, projects) {
     <section class="timeline-section" id="parcours">
       <div class="container">
         <div class="section-header">
-          <span class="section-tag">Expérience</span>
+          <span class="section-tag">ExpÃ©rience</span>
           <h2>Mon Parcours Professionnel</h2>
         </div>
         <div class="timeline-flow">
-          ${timelineHtml || '<p>Aucun événement.</p>'}
+          ${timelineHtml || '<p>Aucun Ã©vÃ©nement.</p>'}
         </div>
       </div>
     </section>
@@ -1099,7 +1099,7 @@ function getCreativeTemplate(data, avatarPath, projects) {
     <section class="contact-section" id="contact">
       <div class="container">
         <div class="glass-contact-card">
-          <h2>Prêt à donner vie à vos projets ?</h2>
+          <h2>PrÃªt Ã  donner vie Ã  vos projets ?</h2>
           <p>Discutons de vos besoins et concevons quelque chose d'incroyable ensemble.</p>
           ${p.email ? `<a href="mailto:${p.email}" class="btn-gradient-fill">Envoyer un Email <i class="fas fa-arrow-right"></i></a>` : ''}
           <div class="contact-social-icons">
@@ -1112,7 +1112,7 @@ function getCreativeTemplate(data, avatarPath, projects) {
 
   <footer class="footer">
     <div class="container">
-      <p>&copy; ${new Date().getFullYear()} ${p.name}. Conçu avec passion.</p>
+      <p>&copy; ${new Date().getFullYear()} ${p.name}. ConÃ§u avec passion.</p>
     </div>
   </footer>
 
@@ -2620,7 +2620,7 @@ function getBrutalistTemplate(data, avatarPath, projects) {
 
   const timelineHtml = data.timeline.map(t => `
     <div class="timeline-row-brutal reveal">
-      <div class="time-meta-brutal">${t.startDate} - ${t.endDate || 'PRÉSENT'}</div>
+      <div class="time-meta-brutal">${t.startDate} - ${t.endDate || 'PRÃ‰SENT'}</div>
       <div class="time-body-brutal">
         <h4>${t.role} <span>@ ${t.organization}</span></h4>
         <p>${t.description}</p>
@@ -2658,7 +2658,7 @@ function getBrutalistTemplate(data, avatarPath, projects) {
     <section class="hero-brutal reveal">
       <div class="hero-grid-brutal">
         <div class="hero-text-brutal">
-          <h1 class="hero-title-brutal">BONJOUR, JE CONÇOIS DES PROJETS.</h1>
+          <h1 class="hero-title-brutal">BONJOUR, JE CONÃ‡OIS DES PROJETS.</h1>
           <p class="hero-bio-brutal">"${p.bio || 'Bienvenue sur mon site brutaliste.'}"</p>
           ${getPersonalSpecsHtml(p, 'brutalist')}
           <div class="hero-links-brutal">
@@ -2672,14 +2672,14 @@ function getBrutalistTemplate(data, avatarPath, projects) {
     </section>
 
     <section class="section-brutal">
-      <h2 class="title-brutal">COMPÉTENCES</h2>
+      <h2 class="title-brutal">COMPÃ‰TENCES</h2>
       <div class="skills-wrap-brutal">
-        ${skillsHtml || '<p>Aucune compétence.</p>'}
+        ${skillsHtml || '<p>Aucune compÃ©tence.</p>'}
       </div>
     </section>
 
     <section class="section-brutal">
-      <h2 class="title-brutal">PROJETS SÉLECTIONNÉS</h2>
+      <h2 class="title-brutal">PROJETS SÃ‰LECTIONNÃ‰S</h2>
       <div class="projects-grid-brutal">
         ${projectsHtml || '<p>Aucun projet disponible.</p>'}
       </div>
@@ -2693,7 +2693,7 @@ function getBrutalistTemplate(data, avatarPath, projects) {
     </section>
 
     <footer class="footer-brutal">
-      <p>&copy; ${new Date().getFullYear()} ${p.name} - Tous droits réservés.</p>
+      <p>&copy; ${new Date().getFullYear()} ${p.name} - Tous droits rÃ©servÃ©s.</p>
     </footer>
   </div>
   <script src="script.js"></script>
@@ -3142,7 +3142,7 @@ function getEditorialTemplate(data, avatarPath, projects) {
         <p>${p.description}</p>
         <span class="tech-stack-edit">${p.technologies || ''}</span>
         <div class="project-links-edit">
-          ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank">Aperçu <i class="fas fa-arrow-right"></i></a>` : ''}
+          ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank">AperÃ§u <i class="fas fa-arrow-right"></i></a>` : ''}
           ${p.githubUrl ? `<a href="${p.githubUrl}" target="_blank">Code source</a>` : ''}
         </div>
       </div>
@@ -3151,7 +3151,7 @@ function getEditorialTemplate(data, avatarPath, projects) {
 
   const timelineHtml = data.timeline.map(t => `
     <div class="timeline-row-edit reveal">
-      <div class="time-period-edit">${t.startDate} — ${t.endDate || 'Aujourd\'hui'}</div>
+      <div class="time-period-edit">${t.startDate} â€” ${t.endDate || 'Aujourd\'hui'}</div>
       <div class="time-details-edit">
         <h3>${t.role}</h3>
         <h4>${t.organization}</h4>
@@ -3186,7 +3186,7 @@ function getEditorialTemplate(data, avatarPath, projects) {
       <div class="brand-log-edit">${p.name}</div>
       <nav class="nav-edit">
         <a href="#about">Journal</a>
-        <a href="#projects">Réalisations</a>
+        <a href="#projects">RÃ©alisations</a>
         <a href="#experience">Parcours</a>
       </nav>
     </header>
@@ -3196,7 +3196,7 @@ function getEditorialTemplate(data, avatarPath, projects) {
       <section class="hero-edit reveal" id="about">
         <div class="hero-wrap-edit">
           <div class="hero-intro-edit">
-            <span class="editorial-edition">Édition en Ligne</span>
+            <span class="editorial-edition">Ã‰dition en Ligne</span>
             <h1>Index de travaux et direction technique par ${p.name}.</h1>
             <p class="editorial-bio">"${p.bio || 'Architecte de solutions en ligne et concepteur.'}"</p>
             ${getPersonalSpecsHtml(p, 'editorial')}
@@ -3212,17 +3212,17 @@ function getEditorialTemplate(data, avatarPath, projects) {
 
       <!-- SKILLS / COMPETENCES -->
       <section class="section-edit" id="competences">
-        <h2 class="sec-title-edit">Disciplines & Compétences</h2>
+        <h2 class="sec-title-edit">Disciplines & CompÃ©tences</h2>
         <div class="skills-grid-edit">
-          ${skillsHtml || '<p>Aucune donnée.</p>'}
+          ${skillsHtml || '<p>Aucune donnÃ©e.</p>'}
         </div>
       </section>
 
       <!-- PROJECTS -->
       <section class="section-edit" id="projects">
-        <h2 class="sec-title-edit">Projets Sélectionnés</h2>
+        <h2 class="sec-title-edit">Projets SÃ©lectionnÃ©s</h2>
         <div class="projects-list-edit">
-          ${projectsHtml || '<p>Aucun projet référencé.</p>'}
+          ${projectsHtml || '<p>Aucun projet rÃ©fÃ©rencÃ©.</p>'}
         </div>
       </section>
 
@@ -3230,13 +3230,13 @@ function getEditorialTemplate(data, avatarPath, projects) {
       <section class="section-edit" id="experience">
         <h2 class="sec-title-edit">Chronologie</h2>
         <div class="timeline-list-edit">
-          ${timelineHtml || '<p>Aucun événement.</p>'}
+          ${timelineHtml || '<p>Aucun Ã©vÃ©nement.</p>'}
         </div>
       </section>
     </main>
 
     <footer class="editorial-footer">
-      <p>&copy; ${new Date().getFullYear()} — ${p.name}. Document assemblé avec soin.</p>
+      <p>&copy; ${new Date().getFullYear()} â€” ${p.name}. Document assemblÃ© avec soin.</p>
     </footer>
 
   </div>
@@ -3668,6 +3668,455 @@ document.addEventListener('DOMContentLoaded', () => {
 // -------------------------------------------------------------
 // CV (A4 PRINT) TEMPLATE GENERATOR & ROUTER
 // -------------------------------------------------------------
+
+function getCVAvatar(src, style) {
+  const defaultStyle = style || 'width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--cv-accent, #6366f1);';
+  if (src) {
+    return '<img src="' + src + '" alt="Photo" style="' + defaultStyle + '">';
+  }
+  return '<div style="' + defaultStyle + 'background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#94a3b8;flex-shrink:0;"><i class=\"fas fa-user\"></i></div>';
+}
+
+function getCVModern(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || data.design.accentColor || '#6366f1';
+  const avatar = getCVAvatar(p.avatar, 'width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid ' + accent + ';display:block;margin:0 auto 15px;');
+
+  const skillsHtml = data.skills.map(s => `
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:9.5pt;margin-bottom:2px;"><span>${s.name}</span><span>${s.level}%</span></div>
+      <div style="height:4px;background:#e2e8f0;border-radius:2px;"><div style="height:100%;width:${s.level}%;background:${accent};border-radius:2px;"></div></div>
+    </div>
+  `).join('');
+
+  const expHtml = (data.experience || data.timeline || []).map(t => `
+    <div style="margin-bottom:14px;border-left:2px solid ${accent};padding-left:12px;position:relative;">
+      <div style="position:absolute;left:-5px;top:4px;width:8px;height:8px;border-radius:50%;background:${accent};"></div>
+      <div style="font-weight:700;font-size:11pt;">${t.role}</div>
+      <div style="color:${accent};font-size:9.5pt;font-weight:600;">${t.organization}</div>
+      <div style="color:#94a3b8;font-size:8.5pt;margin-bottom:4px;">${t.startDate} â€” ${t.endDate || 'PrÃ©sent'}</div>
+      <p style="font-size:9.5pt;color:#475569;">${t.description}</p>
+    </div>
+  `).join('');
+
+  const eduHtml = (data.education || []).map(e => `
+    <div style="margin-bottom:10px;">
+      <div style="font-weight:700;font-size:10pt;">${e.degree}</div>
+      <div style="color:${accent};font-size:9pt;">${e.institution}</div>
+      <div style="color:#94a3b8;font-size:8.5pt;">${e.startDate}${e.endDate ? ' â€” ' + e.endDate : ''}</div>
+    </div>
+  `).join('');
+
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>CV - ${p.name}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { --cv-accent: ${accent}; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; background:#f1f5f9; font-size:10pt; line-height:1.5; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    .cv-page { width:210mm; min-height:297mm; background:#fff; margin:0 auto; display:flex; }
+    .cv-sidebar { width:65mm; background:#1e293b; color:#fff; padding:20mm 10mm; flex-shrink:0; }
+    .cv-main { flex:1; padding:20mm 15mm; }
+    h1 { font-size:26pt; font-weight:800; line-height:1.1; color:#0f172a; }
+    h2.cv-title { font-size:13pt; font-weight:400; color:var(--cv-accent); margin-bottom:15px; }
+    h3.sec { font-size:11pt; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin:20px 0 10px 0; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.2); color:#fff; }
+    h3.sec-main { font-size:13pt; font-weight:800; color:var(--cv-accent); text-transform:uppercase; letter-spacing:1px; margin:20px 0 12px 0; }
+    .contact-line { font-size:8.5pt; opacity:.8; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+    @media print { body { background:transparent; } .cv-page { margin:0; } @page { size:A4; margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="cv-sidebar">
+      ${avatar}
+      <h3 class="sec">Contact</h3>
+      <div class="contact-line"><i class="fas fa-envelope" style="width:12px;"></i> ${p.email}</div>
+      <div class="contact-line"><i class="fas fa-phone" style="width:12px;"></i> ${p.phone}</div>
+      <div class="contact-line"><i class="fas fa-map-marker-alt" style="width:12px;"></i> ${p.location}</div>
+      ${p.linkedin ? `<div class="contact-line"><i class="fab fa-linkedin" style="width:12px;"></i> ${p.linkedin.replace('https://','')}</div>` : ''}
+      ${p.github ? `<div class="contact-line"><i class="fab fa-github" style="width:12px;"></i> ${p.github.replace('https://','')}</div>` : ''}
+      ${data.skills.length > 0 ? `<h3 class="sec">CompÃ©tences</h3>${skillsHtml}` : ''}
+      ${data.education.length > 0 ? `<h3 class="sec">Formation</h3>${eduHtml}` : ''}
+      ${p.languages ? `<h3 class="sec">Langues</h3><p style="font-size:9pt;opacity:.9;">${p.languages}</p>` : ''}
+    </div>
+    <div class="cv-main">
+      <h1>${p.name || 'Nom PrÃ©nom'}</h1>
+      <h2 class="cv-title">${p.title}</h2>
+      ${p.bio ? `<p style="font-size:10pt;color:#475569;line-height:1.6;margin-bottom:20px;">${p.bio}</p>` : ''}
+      ${expHtml.length > 0 ? `<h3 class="sec-main">ExpÃ©riences</h3>${expHtml}` : ''}
+    </div>
+  </div></body></html>`;
+}
+
+function getCVClassic(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || '#1a1a2e';
+  const avatar = getCVAvatar(p.avatar, 'width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid ' + accent + ';float:right;margin-left:15px;');
+
+  const expHtml = (data.experience || data.timeline || []).map(t => `
+    <div style="margin-bottom:12px;display:flex;">
+      <div style="width:42mm;flex-shrink:0;font-size:9pt;color:#555;">
+        <strong style="display:block;">${t.startDate} â€” ${t.endDate || 'PrÃ©sent'}</strong>
+        <em>${t.organization}</em>
+      </div>
+      <div style="flex:1;">
+        <strong>${t.role}</strong>
+        <p style="font-size:9.5pt;margin-top:3px;">${t.description}</p>
+      </div>
+    </div>
+  `).join('');
+
+  const eduHtml = (data.education || []).map(e => `
+    <div style="margin-bottom:10px;display:flex;">
+      <div style="width:42mm;flex-shrink:0;font-size:9pt;color:#555;"><strong>${e.endDate || e.startDate}</strong></div>
+      <div><strong>${e.degree}</strong><br><em style="font-size:9pt;">${e.institution}</em></div>
+    </div>
+  `).join('');
+
+  const skillsHtml = data.skills.map(s => s.name).join(' â€¢ ');
+
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>CV - ${p.name}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Open Sans',sans-serif; color:#222; font-size:10pt; line-height:1.6; background:#f4f4f4; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    .cv-page { width:210mm; min-height:297mm; background:#fff; margin:0 auto; padding:20mm; }
+    .cv-header { border-bottom:2px solid ${accent}; padding-bottom:12mm; margin-bottom:8mm; overflow:hidden; }
+    h1 { font-family:'Lora',serif; font-size:26pt; color:${accent}; }
+    h2.sub { font-size:13pt; color:#555; font-weight:400; margin-bottom:8px; }
+    .contact { font-size:9pt; color:#444; line-height:1.8; }
+    h3 { font-family:'Lora',serif; font-size:13pt; color:${accent}; border-bottom:1px solid #ccc; margin:14px 0 10px; padding-bottom:4px; text-transform:uppercase; }
+    @media print { body { background:transparent; } .cv-page { margin:0; } @page { size:A4; margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="cv-header">
+      ${avatar}
+      <h1>${p.name}</h1>
+      <h2 class="sub">${p.title}</h2>
+      <div class="contact">${[p.email,p.phone,p.location,p.linkedin&&p.linkedin.replace('https://','')].filter(Boolean).join(' | ')}</div>
+    </div>
+    ${p.bio ? `<h3>Profil</h3><p>${p.bio}</p>` : ''}
+    ${expHtml ? `<h3>ExpÃ©riences</h3>${expHtml}` : ''}
+    ${eduHtml ? `<h3>Formation</h3>${eduHtml}` : ''}
+    ${skillsHtml ? `<h3>CompÃ©tences</h3><p style="line-height:1.8;">${skillsHtml}</p>` : ''}
+  </div></body></html>`;
+}
+
+function getCVMinimalist(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || '#0f172a';
+  const avatar = getCVAvatar(p.avatar, 'width:80px;height:80px;border-radius:12px;object-fit:cover;');
+
+  const expHtml = (data.experience || data.timeline || []).map(t => `
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <strong style="font-size:11pt;">${t.role}</strong>
+        <span style="font-size:8.5pt;color:${accent};font-weight:700;">${t.startDate} â€” ${t.endDate||'PrÃ©sent'}</span>
+      </div>
+      <div style="color:#64748b;font-size:9.5pt;margin-bottom:3px;">${t.organization}</div>
+      <p style="font-size:9.5pt;color:#334155;">${t.description}</p>
+    </div>
+  `).join('');
+
+  const eduHtml = (data.education || []).map(e => `
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <strong style="font-size:10.5pt;">${e.degree}</strong>
+        <span style="font-size:8.5pt;color:${accent};">${e.endDate || e.startDate}</span>
+      </div>
+      <div style="color:#64748b;font-size:9pt;">${e.institution}</div>
+    </div>
+  `).join('');
+
+  const skillTags = data.skills.map(s => `<span style="display:inline-block;padding:3px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:50px;font-size:9pt;margin:0 5px 6px 0;color:#475569;">${s.name}</span>`).join('');
+
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>CV - ${p.name}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Outfit',sans-serif; color:#0f172a; font-size:10pt; background:#f1f5f9; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    .cv-page { width:210mm; min-height:297mm; background:#fff; margin:0 auto; padding:20mm; }
+    .header { display:flex; align-items:center; gap:15mm; margin-bottom:12mm; padding-bottom:10mm; border-bottom:2px solid #e2e8f0; }
+    .header-text h1 { font-size:30pt; font-weight:800; letter-spacing:-1px; color:${accent}; }
+    .header-text h2 { font-size:14pt; font-weight:300; color:#64748b; }
+    .header-text .contact { font-size:9pt; color:#94a3b8; margin-top:5px; }
+    h3 { font-size:11pt; font-weight:800; text-transform:uppercase; letter-spacing:2px; color:#94a3b8; margin:16px 0 10px; }
+    @media print { body { background:transparent; } .cv-page { margin:0; } @page { size:A4; margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="header">
+      ${avatar}
+      <div class="header-text">
+        <h1>${p.name}</h1>
+        <h2>${p.title}</h2>
+        <div class="contact">${[p.email,p.phone,p.location].filter(Boolean).join(' Â· ')}</div>
+      </div>
+    </div>
+    ${p.bio ? `<p style="font-size:10pt;color:#475569;margin-bottom:15mm;">${p.bio}</p>` : ''}
+    ${expHtml ? `<h3>ExpÃ©riences</h3>${expHtml}` : ''}
+    ${eduHtml ? `<h3>Formation</h3>${eduHtml}` : ''}
+    ${skillTags ? `<h3>CompÃ©tences</h3><div>${skillTags}</div>` : ''}
+  </div></body></html>`;
+}
+
+function getCVTerminal(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || '#22c55e';
+  const skills = data.skills.map(s => `> ${s.name} [${s.level}%]`).join('<br>');
+  const timeline = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:10px;">> [ ${t.startDate} - ${t.endDate||'NOW'} ] ${t.role} @ ${t.organization}<br>&nbsp;&nbsp;${t.description}</div>`).join('');
+  const edu = (data.education || []).map(e => `<div>> ${e.degree} @ ${e.institution} (${e.endDate||e.startDate})</div>`).join('');
+  const avatarHtml = p.avatar ? `<img src="${p.avatar}" style="width:80px;height:80px;border-radius:4px;object-fit:cover;border:2px solid ${accent};float:right;">` : '';
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Terminal</title>
+  <style>
+    * { box-sizing:border-box;margin:0;padding:0; }
+    body { background:#0f172a;color:#cbd5e1;font-family:'Courier New',monospace;font-size:10pt;line-height:1.5;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important; }
+    .cv-page { width:210mm;min-height:297mm;background:#0f172a;margin:0 auto;padding:20mm; }
+    .hdr { border-bottom:1px dashed #475569;padding-bottom:10px;margin-bottom:15px;overflow:hidden; }
+    .title { color:${accent};font-size:22pt;font-weight:bold; }
+    h3 { color:${accent};margin:15px 0 5px;font-size:11pt;border-bottom:1px solid #334155;display:inline-block; }
+    @media print { body { background:#0f172a; } .cv-page { margin:0; } @page { size:A4;margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="hdr">${avatarHtml}
+      <div class="title">${p.name||'USER'}@system:~#</div>
+      <div style="color:#94a3b8;margin-top:5px;">ROLE: ${p.title||''}<br>CONTACT: ${p.email} | ${p.phone} | ${p.location}</div>
+    </div>
+    <h3>> whoami</h3><div style="margin-bottom:15px;">${p.bio||''}</div>
+    <h3>> cat skills.txt</h3><div style="margin-bottom:15px;">${skills}</div>
+    <h3>> tail -f experience.log</h3><div>${timeline}</div>
+    ${edu ? `<h3>> cat education.txt</h3><div>${edu}</div>` : ''}
+    <br><div style="color:${accent};">> <span style="animation:blinker 1s step-start infinite;">â–ˆ</span></div>
+  </div></body></html>`;
+}
+
+function getCVSplit(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || '#3b82f6';
+  const avatarStyle = 'width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:15px;border:3px solid rgba(255,255,255,0.5);display:block;';
+  const avatar = getCVAvatar(p.avatar, avatarStyle);
+  const skills = data.skills.map(s => `<span style="display:inline-block;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:12px;margin:2px 4px 2px 0;font-size:8pt;">${s.name}</span>`).join('');
+  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:14px;"><div style="font-weight:bold;color:${accent};">${t.role}</div><div style="font-size:9pt;color:#666;">${t.organization} | ${t.startDate}â€“${t.endDate||'PrÃ©sent'}</div><p style="font-size:9pt;margin-top:3px;">${t.description}</p></div>`).join('');
+  const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:10px;"><div style="font-weight:bold;font-size:10pt;">${e.degree}</div><div style="font-size:9pt;color:#666;">${e.institution} | ${e.endDate||e.startDate}</div></div>`).join('');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Split - ${p.name}</title>
+  <style>
+    * { box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+    body { background:#eee;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important; }
+    .cv-page { width:210mm;min-height:297mm;background:#fff;margin:0 auto;display:flex; }
+    .left { width:35%;background:${accent};color:#fff;padding:20mm 12mm; }
+    .right { width:65%;padding:20mm 15mm; }
+    h1 { font-size:24pt;line-height:1;margin-bottom:5px; }
+    h2.sub { font-size:11pt;font-weight:400;opacity:.9;margin-bottom:15px; }
+    h3 { font-size:13pt;border-bottom:2px solid ${accent};display:inline-block;margin:18px 0 10px;color:#222; }
+    .left h3 { color:#fff;border-bottom-color:rgba(255,255,255,0.3); }
+    .contact { font-size:9pt;line-height:1.7;margin-bottom:18px; }
+    @media print { .cv-page { margin:0; } @page { size:A4;margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="left">
+      ${avatar}
+      <h1>${p.name}</h1>
+      <h2 class="sub">${p.title}</h2>
+      <div class="contact">${p.email}<br>${p.phone}<br>${p.location}</div>
+      ${p.bio ? `<h3>Bio</h3><p style="font-size:9pt;opacity:.9;">${p.bio}</p>` : ''}
+      ${skills ? `<h3>CompÃ©tences</h3><div>${skills}</div>` : ''}
+    </div>
+    <div class="right">
+      ${expHtml ? `<h3>ExpÃ©riences</h3>${expHtml}` : ''}
+      ${eduHtml ? `<h3>Formation</h3>${eduHtml}` : ''}
+    </div>
+  </div></body></html>`;
+}
+
+function getCVAcademic(data) {
+  const p = data.profile;
+  const avatar = getCVAvatar(p.avatar, 'width:90px;height:90px;border-radius:4px;object-fit:cover;float:right;margin-left:15px;border:1px solid #000;');
+  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:10px;"><strong>${t.role}</strong>, <em>${t.organization}</em> (${t.startDate}â€“${t.endDate||'PrÃ©sent'})<br>${t.description}</div>`).join('');
+  const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:8px;"><strong>${e.degree}</strong>, <em>${e.institution}</em>${e.endDate?' â€” '+e.endDate:''}</div>`).join('');
+  const skills = data.skills.map(s => s.name).join(', ');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV AcadÃ©mique - ${p.name}</title>
+  <style>
+    * { margin:0;padding:0;box-sizing:border-box;font-family:'Times New Roman',Times,serif; }
+    body { background:#fff;color:#000;font-size:11pt;line-height:1.4;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important; }
+    .cv-page { width:210mm;min-height:297mm;padding:25mm 20mm;margin:0 auto; }
+    h1 { text-align:center;font-size:20pt;text-transform:uppercase;margin-bottom:5px; }
+    .contact { text-align:center;font-size:10pt;margin-bottom:18px;border-bottom:2px solid #000;padding-bottom:10px;overflow:hidden; }
+    h2 { font-size:12pt;text-transform:uppercase;border-bottom:1px solid #000;margin:14px 0 8px; }
+    @media print { @page { size:A4;margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="contact">${avatar}<h1>${p.name}</h1>${[p.email,p.phone,p.location].filter(Boolean).join(' | ')}</div>
+    ${p.bio ? `<h2>RÃ©sumÃ©</h2><p>${p.bio}</p>` : ''}
+    ${expHtml ? `<h2>ExpÃ©riences Professionnelles</h2>${expHtml}` : ''}
+    ${eduHtml ? `<h2>Formation & DiplÃ´mes</h2>${eduHtml}` : ''}
+    ${skills ? `<h2>CompÃ©tences</h2><p>${skills}</p>` : ''}
+  </div></body></html>`;
+}
+
+function getCVExecutive(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || '#334155';
+  const avatar = getCVAvatar(p.avatar, 'width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid ' + accent + ';margin:0 auto 15px;display:block;');
+  const expHtml = (data.experience || data.timeline || []).map(t => `
+    <div style="margin-bottom:15px;display:flex;">
+      <div style="width:110px;font-weight:bold;color:${accent};font-size:9.5pt;flex-shrink:0;">${t.startDate}<br>${t.endDate||'PrÃ©sent'}</div>
+      <div style="flex:1;border-left:2px solid ${accent};padding-left:12px;">
+        <div style="font-weight:bold;font-size:12pt;">${t.role}</div>
+        <div style="color:#555;font-size:10pt;margin-bottom:5px;">${t.organization}</div>
+        <p style="font-size:10pt;line-height:1.5;">${t.description}</p>
+      </div>
+    </div>`).join('');
+  const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:10px;"><strong style="font-size:11pt;">${e.degree}</strong><div style="color:#666;font-size:9.5pt;">${e.institution} Â· ${e.endDate||e.startDate}</div></div>`).join('');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Executive - ${p.name}</title>
+  <style>
+    * { font-family:'Helvetica Neue',Arial,sans-serif;box-sizing:border-box;margin:0;padding:0; }
+    body { background:#fff;color:#333;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important; }
+    .cv-page { width:210mm;min-height:297mm;padding:20mm;margin:0 auto; }
+    .header { text-align:center;margin-bottom:20px; }
+    h1 { font-size:30pt;font-weight:300;letter-spacing:2px;color:${accent}; }
+    .job-title { font-size:14pt;font-weight:bold;text-transform:uppercase;color:#666;margin-top:5px; }
+    .contact { margin-top:10px;font-size:10pt;color:#444;border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:10px 0; }
+    h2 { font-size:16pt;color:${accent};border-bottom:2px solid ${accent};margin:22px 0 14px;padding-bottom:5px; }
+    @media print { @page { size:A4;margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="header">
+      ${avatar}
+      <h1>${p.name}</h1>
+      <div class="job-title">${p.title}</div>
+      <div class="contact">${[p.email,p.phone,p.location,p.linkedin&&p.linkedin.replace('https://','')].filter(Boolean).join(' &nbsp;â€¢&nbsp; ')}</div>
+    </div>
+    ${p.bio ? `<h2>Profil ExÃ©cutif</h2><p style="font-size:11pt;line-height:1.6;">${p.bio}</p>` : ''}
+    ${expHtml ? `<h2>ExpÃ©riences</h2>${expHtml}` : ''}
+    ${eduHtml ? `<h2>Formation</h2>${eduHtml}` : ''}
+  </div></body></html>`;
+}
+
+function getCVStartup(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || '#10b981';
+  const avatar = getCVAvatar(p.avatar, 'width:90px;height:90px;border-radius:20px;object-fit:cover;box-shadow:4px 4px 0 ' + accent + ';flex-shrink:0;');
+  const skills = data.skills.map(s => `<span style="background:${accent}22;color:${accent};padding:4px 10px;border-radius:20px;font-size:9pt;font-weight:bold;margin:0 5px 6px 0;display:inline-block;">${s.name}</span>`).join('');
+  const expHtml = (data.experience || data.timeline || []).map(t => `
+    <div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <strong style="font-size:11pt;">${t.role}</strong>
+        <span style="color:#64748b;font-size:9pt;background:#e2e8f0;padding:2px 8px;border-radius:10px;">${t.startDate}â€“${t.endDate||'PrÃ©sent'}</span>
+      </div>
+      <div style="color:${accent};font-weight:600;font-size:9.5pt;margin-bottom:6px;">${t.organization}</div>
+      <p style="font-size:9.5pt;color:#475569;">${t.description}</p>
+    </div>`).join('');
+  const eduHtml = (data.education || []).map(e => `<div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:10px;"><strong>${e.degree}</strong><div style="color:${accent};font-size:9.5pt;">${e.institution}</div><div style="color:#94a3b8;font-size:9pt;">${e.endDate||e.startDate}</div></div>`).join('');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Startup - ${p.name}</title>
+  <style>
+    * { font-family:'Segoe UI',system-ui,sans-serif;box-sizing:border-box;margin:0;padding:0; }
+    body { background:#fff;color:#1e293b;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important; }
+    .cv-page { width:210mm;min-height:297mm;padding:18mm;margin:0 auto; }
+    .header { display:flex;align-items:center;gap:18px;margin-bottom:20px; }
+    h1 { font-size:26pt;font-weight:800;color:#0f172a;line-height:1; }
+    .title { font-size:13pt;color:${accent};font-weight:600; }
+    .contact { font-size:9pt;color:#64748b;margin-top:6px; }
+    h2 { font-size:13pt;margin:18px 0 12px;display:flex;align-items:center;gap:10px; }
+    h2::after { content:'';flex:1;height:2px;background:#f1f5f9;border-radius:2px; }
+    @media print { @page { size:A4;margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="header">
+      ${avatar}
+      <div>
+        <h1>${p.name}</h1>
+        <div class="title">${p.title}</div>
+        <div class="contact">${[p.email,p.phone,p.location].filter(Boolean).join(' | ')}</div>
+      </div>
+    </div>
+    ${p.bio ? `<h2>Ã€ Propos</h2><p style="font-size:10pt;color:#475569;line-height:1.6;">${p.bio}</p>` : ''}
+    ${skills ? `<h2>Expertise</h2><div>${skills}</div>` : ''}
+    ${expHtml ? `<h2>ExpÃ©riences</h2>${expHtml}` : ''}
+    ${eduHtml ? `<h2>Formation</h2>${eduHtml}` : ''}
+  </div></body></html>`;
+}
+
+function getCVTwoTone(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || '#1e293b';
+  const avatar = getCVAvatar(p.avatar, 'width:100%;border-radius:50%;margin-bottom:15px;border:4px solid rgba(255,255,255,0.15);object-fit:cover;display:block;');
+  const skills = data.skills.map(s => `<div style="margin-bottom:8px;"><div style="font-size:9pt;margin-bottom:2px;">${s.name}</div><div style="height:4px;background:rgba(255,255,255,0.2);border-radius:2px;"><div style="height:100%;background:#fff;width:${s.level}%;border-radius:2px;"></div></div></div>`).join('');
+  const expHtml = (data.experience || data.timeline || []).map(t => `
+    <div style="margin-bottom:18px;border-left:2px solid ${accent};padding-left:14px;position:relative;">
+      <div style="position:absolute;left:-5px;top:3px;width:8px;height:8px;border-radius:50%;background:${accent};"></div>
+      <div style="font-weight:bold;font-size:12pt;">${t.role}</div>
+      <div style="font-size:9.5pt;color:#666;margin-bottom:4px;">${t.organization} | ${t.startDate}â€“${t.endDate||'PrÃ©sent'}</div>
+      <p style="font-size:10pt;line-height:1.5;color:#333;">${t.description}</p>
+    </div>`).join('');
+  const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:10px;"><strong style="font-size:10pt;">${e.degree}</strong><div style="color:#94a3b8;font-size:9pt;">${e.institution} Â· ${e.endDate||e.startDate}</div></div>`).join('');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Two-Tone - ${p.name}</title>
+  <style>
+    * { font-family:Helvetica,sans-serif;box-sizing:border-box;margin:0;padding:0; }
+    body { -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important; }
+    .cv-page { width:210mm;min-height:297mm;display:flex;margin:0 auto;background:#fff; }
+    .sidebar { width:62mm;background:${accent};color:#fff;padding:18mm 10mm;flex-shrink:0; }
+    .main { flex:1;padding:20mm 15mm; }
+    h1 { font-size:24pt;margin-bottom:4px;color:#0f172a; }
+    h2.job { font-size:13pt;color:${accent};margin-bottom:18px;font-weight:400; }
+    h3.side { font-size:11pt;text-transform:uppercase;letter-spacing:1px;margin:22px 0 12px;border-bottom:1px solid rgba(255,255,255,0.25);padding-bottom:5px; }
+    h3.main-sec { font-size:14pt;color:${accent};text-transform:uppercase;margin:22px 0 16px;letter-spacing:1px; }
+    @media print { @page { size:A4;margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="sidebar">
+      ${avatar}
+      <h3 class="side">Contact</h3>
+      <div style="font-size:8.5pt;line-height:1.9;">${p.phone}<br>${p.email}<br>${p.location}</div>
+      ${eduHtml ? `<h3 class="side">Formation</h3><div style="font-size:8.5pt;">${eduHtml}</div>` : ''}
+      ${skills ? `<h3 class="side">CompÃ©tences</h3>${skills}` : ''}
+    </div>
+    <div class="main">
+      <h1>${p.name}</h1>
+      <h2 class="job">${p.title}</h2>
+      ${p.bio ? `<p style="font-size:10.5pt;line-height:1.6;color:#444;margin-bottom:18px;">${p.bio}</p>` : ''}
+      ${expHtml ? `<h3 class="main-sec">ExpÃ©riences</h3>${expHtml}` : ''}
+    </div>
+  </div></body></html>`;
+}
+
+function getCVArtistic(data) {
+  const p = data.profile;
+  const accent = data.design.cvAccent || '#d946ef';
+  const avatar = getCVAvatar(p.avatar, 'width:100%;border-radius:8px;object-fit:cover;box-shadow: 4px 4px 0 ' + accent + ';display:block;margin-bottom:15px;');
+  const skills = data.skills.map(s => `<span style="color:${accent};border:1px solid ${accent};padding:3px 8px;border-radius:4px;font-size:8pt;margin:0 5px 5px 0;display:inline-block;">${s.name}</span>`).join('');
+  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:18px;"><div style="font-size:14pt;font-weight:bold;color:#111;">${t.role}</div><div style="color:${accent};font-weight:bold;font-size:10pt;margin-bottom:5px;">${t.organization} // ${t.startDate}â€“${t.endDate||'PrÃ©sent'}</div><p style="font-size:10pt;color:#555;line-height:1.6;">${t.description}</p></div>`).join('');
+  const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:12px;"><div style="font-style:italic;font-size:13pt;">${e.degree}</div><div style="color:${accent};font-family:sans-serif;font-size:9pt;">${e.institution} Â· ${e.endDate||e.startDate}</div></div>`).join('');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Artiste - ${p.name}</title>
+  <style>
+    * { font-family:'Georgia',serif;box-sizing:border-box;margin:0;padding:0; }
+    body { -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important; }
+    .cv-page { width:210mm;min-height:297mm;padding:20mm;margin:0 auto;background:linear-gradient(135deg,#fff 0%,#fdf4ff 100%); }
+    .header { text-align:right;margin-bottom:20mm;position:relative;overflow:hidden; }
+    .header::after { content:'';position:absolute;right:0;bottom:-8px;width:50mm;height:4px;background:${accent}; }
+    h1 { font-size:38pt;font-weight:normal;letter-spacing:-2px;color:#111;line-height:1; }
+    .job-title { font-family:sans-serif;font-size:12pt;text-transform:uppercase;letter-spacing:3px;color:${accent};margin-top:8px; }
+    .grid { display:grid;grid-template-columns:1fr 2fr;gap:12mm; }
+    h2 { font-size:16pt;font-style:italic;margin-bottom:12px;color:#222; }
+    @media print { @page { size:A4;margin:0; } }
+  </style></head>
+  <body><div class="cv-page">
+    <div class="header">
+      <h1>${p.name}</h1>
+      <div class="job-title">${p.title}</div>
+    </div>
+    <div class="grid">
+      <div>
+        ${avatar}
+        <h2>Contact</h2>
+        <div style="font-family:sans-serif;font-size:9pt;line-height:2;color:#444;margin-bottom:15mm;">${p.email}<br>${p.phone}<br>${p.location}</div>
+        ${skills ? `<h2>Savoir-faire</h2><div style="font-family:sans-serif;margin-bottom:15mm;">${skills}</div>` : ''}
+        ${eduHtml ? `<h2>Formation</h2><div>${eduHtml}</div>` : ''}
+      </div>
+      <div>
+        ${p.bio ? `<h2>Biographie</h2><p style="font-family:sans-serif;font-size:10pt;color:#444;line-height:1.6;margin-bottom:15mm;">${p.bio}</p>` : ''}
+        ${expHtml ? `<h2>Parcours</h2><div style="font-family:sans-serif;">${expHtml}</div>` : ''}
+      </div>
+    </div>
+  </div></body></html>`;
+}
+
 function generateCVTemplate(data) {
   const tpl = data.design.cvTemplate || 'modern';
   if (tpl === 'classic') return getCVClassic(data);
@@ -3680,1039 +4129,4 @@ function generateCVTemplate(data) {
   if (tpl === 'twotone') return getCVTwoTone(data);
   if (tpl === 'artistic') return getCVArtistic(data);
   return getCVModern(data);
-}
-
-function getCVModern(data) {
-  const p = data.profile;
-  const accentColor = data.design.cvAccent || data.design.accentColor || '#6366f1';
-  
-  // Format avatar
-  let avatarPath = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
-  if (p.avatar) {
-    avatarPath = p.avatar;
-  }
-
-  const skillsHtml = data.skills.map(s => `
-    <div class="cv-skill">
-      <span class="cv-skill-name">${s.name}</span>
-      <div class="cv-skill-bar-bg">
-        <div class="cv-skill-bar" style="width: ${s.level}%"></div>
-      </div>
-    </div>
-  `).join('');
-
-  const timelineHtml = data.timeline.map(t => `
-    <div class="cv-timeline-item">
-      <div class="cv-timeline-date">${t.startDate} - ${t.endDate || 'Présent'}</div>
-      <div class="cv-timeline-content">
-        <h4>${t.role}</h4>
-        <h5>${t.organization}</h5>
-        <p>${t.description}</p>
-      </div>
-    </div>
-  `).join('');
-
-  const projectsHtml = data.projects.map(proj => `
-    <div class="cv-project-item">
-      <h4>${proj.title} <span>| ${proj.category}</span></h4>
-      <p>${proj.description}</p>
-      ${proj.technologies ? `<p class="cv-tech"><strong>Technologies:</strong> ${proj.technologies}</p>` : ''}
-    </div>
-  `).join('');
-
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CV - ${p.name}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --cv-accent: ${accentColor};
-      --cv-text: #333333;
-      --cv-light: #666666;
-      --cv-bg: #ffffff;
-      --cv-sidebar: #f8f9fa;
-      --cv-border: #e9ecef;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Inter', sans-serif;
-      color: var(--cv-text);
-      background: #e5e7eb;
-      font-size: 11pt;
-      line-height: 1.5;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    
-    .cv-page {
-      width: 210mm;
-      min-height: 297mm;
-      background: var(--cv-bg);
-      margin: 2rem auto;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: row;
-      overflow: hidden;
-      position: relative;
-    }
-    
-    /* LEFT SIDEBAR */
-    .cv-sidebar {
-      width: 32%;
-      background-color: var(--cv-sidebar);
-      padding: 2.5rem 1.5rem;
-      border-right: 1px solid var(--cv-border);
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .cv-avatar {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid white;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      margin: 0 auto 1.5rem auto;
-      display: block;
-    }
-    
-    .cv-contact-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-      color: var(--cv-text);
-      word-break: break-word;
-    }
-    
-    .cv-contact-item i {
-      color: var(--cv-accent);
-      width: 16px;
-      text-align: center;
-    }
-    
-    .cv-section-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--cv-text);
-      border-bottom: 2px solid var(--cv-accent);
-      padding-bottom: 0.25rem;
-      margin: 2rem 0 1rem 0;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    
-    .cv-section-title-alt {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--cv-accent);
-      margin: 2rem 0 1rem 0;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    
-    .cv-skill {
-      margin-bottom: 0.75rem;
-    }
-    .cv-skill-name {
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-    .cv-skill-bar-bg {
-      height: 4px;
-      background-color: #dee2e6;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .cv-skill-bar {
-      height: 100%;
-      background-color: var(--cv-accent);
-    }
-    
-    .cv-info-list {
-      list-style: none;
-      font-size: 0.85rem;
-      color: var(--cv-text);
-    }
-    .cv-info-list li {
-      margin-bottom: 0.5rem;
-    }
-    .cv-info-list strong {
-      display: block;
-      color: var(--cv-accent);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-    }
-    
-    /* RIGHT MAIN CONTENT */
-    .cv-main {
-      width: 68%;
-      padding: 3rem 2.5rem;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .cv-header-name {
-      font-size: 2.8rem;
-      font-weight: 800;
-      line-height: 1.1;
-      color: var(--cv-text);
-      margin-bottom: 0.25rem;
-      letter-spacing: -1px;
-    }
-    
-    .cv-header-title {
-      font-size: 1.25rem;
-      font-weight: 500;
-      color: var(--cv-accent);
-      margin-bottom: 1.5rem;
-    }
-    
-    .cv-bio {
-      font-size: 0.95rem;
-      color: var(--cv-light);
-      margin-bottom: 2rem;
-      line-height: 1.6;
-    }
-    
-    /* Timeline */
-    .cv-timeline-item {
-      display: flex;
-      margin-bottom: 1.5rem;
-      page-break-inside: avoid;
-    }
-    .cv-timeline-date {
-      width: 120px;
-      flex-shrink: 0;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--cv-accent);
-      padding-right: 1rem;
-    }
-    .cv-timeline-content {
-      border-left: 2px solid var(--cv-border);
-      padding-left: 1rem;
-      position: relative;
-    }
-    .cv-timeline-content::before {
-      content: '';
-      position: absolute;
-      left: -5px;
-      top: 5px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: var(--cv-accent);
-    }
-    .cv-timeline-content h4 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 0.15rem;
-    }
-    .cv-timeline-content h5 {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--cv-light);
-      margin-bottom: 0.5rem;
-    }
-    .cv-timeline-content p {
-      font-size: 0.9rem;
-      color: var(--cv-text);
-    }
-    
-    /* Projects */
-    .cv-project-item {
-      margin-bottom: 1.25rem;
-      page-break-inside: avoid;
-    }
-    .cv-project-item h4 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-    .cv-project-item h4 span {
-      font-weight: 400;
-      color: var(--cv-light);
-      font-size: 0.9rem;
-    }
-    .cv-project-item p {
-      font-size: 0.9rem;
-      color: var(--cv-text);
-    }
-    .cv-tech {
-      margin-top: 0.25rem;
-      font-size: 0.8rem !important;
-      color: var(--cv-light) !important;
-    }
-    
-    @media print {
-      body {
-        background: transparent;
-        margin: 0;
-        padding: 0;
-      }
-      .cv-page {
-        margin: 0;
-        box-shadow: none;
-        width: 100%;
-        min-height: 100%;
-      }
-      @page {
-        size: A4;
-        margin: 0;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <aside class="cv-sidebar">
-      ${avatarPath ? `<img src="${avatarPath}" alt="Avatar" class="cv-avatar">` : ''}
-      
-      <div style="margin-bottom: 2rem;">
-        ${p.email ? `<div class="cv-contact-item"><i class="fas fa-envelope"></i> ${p.email}</div>` : ''}
-        ${p.phone ? `<div class="cv-contact-item"><i class="fas fa-phone"></i> ${p.phone}</div>` : ''}
-        ${p.address ? `<div class="cv-contact-item"><i class="fas fa-map-marker-alt"></i> ${p.address}</div>` : ''}
-        ${p.linkedin ? `<div class="cv-contact-item"><i class="fab fa-linkedin"></i> ${p.linkedin.replace('https://','')}</div>` : ''}
-        ${p.github ? `<div class="cv-contact-item"><i class="fab fa-github"></i> ${p.github.replace('https://','')}</div>` : ''}
-      </div>
-      
-      ${data.skills.length > 0 ? `
-      <h3 class="cv-section-title">Compétences</h3>
-      <div>${skillsHtml}</div>
-      ` : ''}
-      
-      <h3 class="cv-section-title">Informations</h3>
-      <ul class="cv-info-list">
-        ${p.languages ? `<li><strong>Langues</strong> ${p.languages}</li>` : ''}
-        ${p.availability ? `<li><strong>Disponibilité</strong> ${p.availability}</li>` : ''}
-        ${p.contract ? `<li><strong>Contrat recherché</strong> ${p.contract}</li>` : ''}
-        ${p.hobbies ? `<li><strong>Loisirs</strong> ${p.hobbies}</li>` : ''}
-      </ul>
-    </aside>
-    
-    <main class="cv-main">
-      <h1 class="cv-header-name">${p.name || 'Nom Prénom'}</h1>
-      <h2 class="cv-header-title">${p.title || 'Votre Titre Professionnel'}</h2>
-      
-      ${p.bio ? `<p class="cv-bio">${p.bio}</p>` : ''}
-      
-      ${data.timeline.length > 0 ? `
-      <h3 class="cv-section-title-alt">Expérience & Formation</h3>
-      <div class="cv-timeline">
-        ${timelineHtml}
-      </div>
-      ` : ''}
-      
-      ${data.projects.length > 0 ? `
-      <h3 class="cv-section-title-alt">Projets Récents</h3>
-      <div class="cv-projects">
-        ${projectsHtml}
-      </div>
-      ` : ''}
-      
-    </main>
-  </div>
-</body>
-</html>`;
-}
-function getCVClassic(data) {
-  const p = data.profile;
-  const accentColor = data.design.cvAccent || data.design.accentColor || '#333333';
-  
-  const skillsHtml = data.skills.map(s => s.name).join(' &bull; ');
-
-  const timelineHtml = data.timeline.map(t => `
-    <div class="cv-timeline-item">
-      <div class="cv-timeline-meta">
-        <span class="cv-date">${t.startDate} - ${t.endDate || 'Présent'}</span>
-        <span class="cv-org">${t.organization}</span>
-      </div>
-      <div class="cv-timeline-content">
-        <h4>${t.role}</h4>
-        <p>${t.description}</p>
-      </div>
-    </div>
-  `).join('');
-
-  const projectsHtml = data.projects.map(proj => `
-    <div class="cv-project-item">
-      <h4>${proj.title} <span style="font-weight: normal; font-size: 0.9em; color: #555;">| ${proj.category}</span></h4>
-      <p>${proj.description}</p>
-      ${proj.technologies ? `<p class="cv-tech"><strong>Tech:</strong> ${proj.technologies}</p>` : ''}
-    </div>
-  `).join('');
-
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>CV - ${p.name}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --cv-accent: ${accentColor};
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #e5e7eb;
-      font-family: 'Open Sans', sans-serif;
-      color: #222;
-      font-size: 10pt;
-      line-height: 1.6;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    .cv-page {
-      width: 210mm;
-      min-height: 297mm;
-      background: #fff;
-      margin: 2rem auto;
-      padding: 20mm 20mm;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .cv-header {
-      text-align: center;
-      border-bottom: 2px solid var(--cv-accent);
-      padding-bottom: 15mm;
-      margin-bottom: 10mm;
-    }
-    .cv-name {
-      font-family: 'Lora', serif;
-      font-size: 28pt;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 5px;
-      color: var(--cv-accent);
-    }
-    .cv-title {
-      font-size: 14pt;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #555;
-      margin-bottom: 15px;
-    }
-    .cv-contact {
-      font-size: 9pt;
-      color: #444;
-    }
-    .cv-section {
-      margin-bottom: 10mm;
-    }
-    .cv-section-title {
-      font-family: 'Lora', serif;
-      font-size: 14pt;
-      color: var(--cv-accent);
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
-      margin-bottom: 15px;
-      text-transform: uppercase;
-    }
-    .cv-timeline-item {
-      display: flex;
-      margin-bottom: 15px;
-    }
-    .cv-timeline-meta {
-      width: 45mm;
-      flex-shrink: 0;
-      padding-right: 5mm;
-    }
-    .cv-date {
-      display: block;
-      font-weight: 600;
-      font-size: 9.5pt;
-    }
-    .cv-org {
-      display: block;
-      color: #666;
-      font-style: italic;
-      font-size: 9pt;
-    }
-    .cv-timeline-content h4 {
-      font-size: 11pt;
-      margin-bottom: 3px;
-    }
-    .cv-project-item {
-      margin-bottom: 15px;
-    }
-    .cv-project-item h4 {
-      font-size: 11pt;
-      margin-bottom: 3px;
-    }
-    .cv-tech {
-      font-size: 8.5pt;
-      color: #666;
-      margin-top: 3px;
-    }
-    @media print {
-      body { background: transparent; margin: 0; }
-      .cv-page { margin: 0; box-shadow: none; }
-      @page { size: A4; margin: 0; }
-    }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <div class="cv-header">
-      <h1 class="cv-name">${p.name || 'Nom Prénom'}</h1>
-      <h2 class="cv-title">${p.title || 'Profession'}</h2>
-      <div class="cv-contact">
-        ${[p.email, p.phone, p.location].filter(Boolean).join(' | ')}<br>
-        ${[p.linkedin, p.github].filter(Boolean).map(l => l.replace('https://', '')).join(' | ')}
-      </div>
-    </div>
-    
-    ${p.bio ? `
-    <div class="cv-section">
-      <h3 class="cv-section-title">Profil</h3>
-      <p>${p.bio}</p>
-    </div>
-    ` : ''}
-    
-    ${data.timeline.length > 0 ? `
-    <div class="cv-section">
-      <h3 class="cv-section-title">Expérience & Formation</h3>
-      ${timelineHtml}
-    </div>
-    ` : ''}
-    
-    ${data.skills.length > 0 ? `
-    <div class="cv-section">
-      <h3 class="cv-section-title">Compétences</h3>
-      <p style="line-height: 1.8;">${skillsHtml}</p>
-    </div>
-    ` : ''}
-    
-    ${data.projects.length > 0 ? `
-    <div class="cv-section">
-      <h3 class="cv-section-title">Projets Sélectionnés</h3>
-      ${projectsHtml}
-    </div>
-    ` : ''}
-  </div>
-</body>
-</html>`;
-}
-
-function getCVMinimalist(data) {
-  const p = data.profile;
-  const accentColor = data.design.cvAccent || data.design.accentColor || '#000000';
-  
-  const skillsHtml = data.skills.map(s => `<span class="cv-tag">${s.name}</span>`).join('');
-
-  const timelineHtml = data.timeline.map(t => `
-    <div class="cv-item">
-      <div class="cv-item-header">
-        <h4>${t.role}</h4>
-        <span class="cv-date">${t.startDate} &mdash; ${t.endDate || 'Présent'}</span>
-      </div>
-      <div class="cv-org">${t.organization}</div>
-      <p>${t.description}</p>
-    </div>
-  `).join('');
-
-  const projectsHtml = data.projects.map(proj => `
-    <div class="cv-item">
-      <div class="cv-item-header">
-        <h4>${proj.title}</h4>
-      </div>
-      <div class="cv-org">${proj.category}</div>
-      <p>${proj.description}</p>
-    </div>
-  `).join('');
-
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>CV - ${p.name}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --cv-accent: ${accentColor};
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #f1f5f9;
-      font-family: 'Outfit', sans-serif;
-      color: #0f172a;
-      font-size: 10pt;
-      line-height: 1.5;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    .cv-page {
-      width: 210mm;
-      min-height: 297mm;
-      background: #fff;
-      margin: 2rem auto;
-      padding: 25mm;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 15mm;
-    }
-    .cv-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 10mm;
-    }
-    .cv-name {
-      font-size: 36pt;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -1px;
-      color: var(--cv-accent);
-    }
-    .cv-title {
-      font-size: 16pt;
-      font-weight: 300;
-      color: #64748b;
-      margin-top: 5px;
-    }
-    .cv-contact {
-      text-align: right;
-      font-size: 9pt;
-      color: #475569;
-    }
-    .cv-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 15mm;
-    }
-    .cv-section-title {
-      font-size: 12pt;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #94a3b8;
-      margin-bottom: 10mm;
-    }
-    .cv-item {
-      margin-bottom: 8mm;
-    }
-    .cv-item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 2px;
-    }
-    .cv-item-header h4 {
-      font-size: 12pt;
-      font-weight: 600;
-    }
-    .cv-date {
-      font-size: 9pt;
-      color: var(--cv-accent);
-      font-weight: 600;
-    }
-    .cv-org {
-      font-size: 10pt;
-      color: #64748b;
-      margin-bottom: 5px;
-    }
-    .cv-item p {
-      font-size: 9.5pt;
-      color: #334155;
-    }
-    .cv-tag {
-      display: inline-block;
-      padding: 3px 10px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 50px;
-      font-size: 9pt;
-      margin: 0 5px 8px 0;
-      color: #475569;
-    }
-    @media print {
-      body { background: transparent; margin: 0; }
-      .cv-page { margin: 0; box-shadow: none; }
-      @page { size: A4; margin: 0; }
-    }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <div class="cv-header">
-      <div>
-        <h1 class="cv-name">${p.name || 'Nom Prénom'}</h1>
-        <h2 class="cv-title">${p.title || 'Profession'}</h2>
-      </div>
-      <div class="cv-contact">
-        ${p.email}<br>
-        ${p.phone}<br>
-        ${p.location}
-      </div>
-    </div>
-    
-    <div class="cv-grid">
-      <div class="cv-main-col">
-        ${data.timeline.length > 0 ? `
-        <div class="cv-section">
-          <h3 class="cv-section-title">Parcours</h3>
-          ${timelineHtml}
-        </div>
-        ` : ''}
-        
-        ${data.projects.length > 0 ? `
-        <div class="cv-section">
-          <h3 class="cv-section-title" style="margin-top: 15mm;">Projets</h3>
-          ${projectsHtml}
-        </div>
-        ` : ''}
-      </div>
-      
-      <div class="cv-side-col">
-        ${p.bio ? `
-        <div class="cv-section">
-          <h3 class="cv-section-title">Bio</h3>
-          <p style="font-size: 9.5pt; color: #334155;">${p.bio}</p>
-        </div>
-        ` : ''}
-        
-        ${data.skills.length > 0 ? `
-        <div class="cv-section" style="margin-top: 15mm;">
-          <h3 class="cv-section-title">Compétences</h3>
-          <div>${skillsHtml}</div>
-        </div>
-        ` : ''}
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
-}
-
-function getCVTerminal(data) {
-  const p = data.profile;
-  const accent = data.design.cvAccent || '#22c55e';
-  
-  const skills = data.skills.map(s => `> ${s.name} [${s.level}%]`).join('<br>');
-  const timeline = data.timeline.map(t => `<div style="margin-bottom:10px;">> [ ${t.startDate} - ${t.endDate || 'NOW'} ] ${t.role} @ ${t.organization}<br>  ${t.description}</div>`).join('');
-  const projects = data.projects.map(p => `<div style="margin-bottom:10px;">> ./run ${p.title.replace(/\s+/g, '_')}<br>  [${p.category}] ${p.description}</div>`).join('');
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>CV Terminal</title>
-  <style>
-    :root { --accent: ${accent}; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0f172a; color: #cbd5e1; font-family: 'Courier New', Courier, monospace; font-size: 10pt; line-height: 1.4; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .cv-page { width: 210mm; min-height: 297mm; background: #0f172a; margin: 0 auto; padding: 20mm; overflow: hidden; }
-    .hdr { border-bottom: 1px dashed #475569; padding-bottom: 10px; margin-bottom: 15px; }
-    .title { color: var(--accent); font-size: 24pt; font-weight: bold; }
-    h3 { color: var(--accent); margin: 15px 0 5px 0; font-size: 12pt; border-bottom: 1px solid #334155; display: inline-block;}
-    .blink { animation: blinker 1s linear infinite; }
-    @keyframes blinker { 50% { opacity: 0; } }
-    @media print { body { background: #0f172a; } .cv-page { margin: 0; } @page { size: A4; margin: 0; } }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <div class="hdr">
-      <div class="title">${p.name || 'USER'}@system:~#</div>
-      <div style="color:#94a3b8; margin-top:5px;">ROLE: ${p.title || 'Developer'}<br>CONTACT: ${p.email} | ${p.phone} | ${p.location}</div>
-    </div>
-    
-    <h3>> whoami</h3>
-    <div style="margin-bottom:15px;">${p.bio || 'Loading bio...'}</div>
-    
-    <h3>> cat skills.txt</h3>
-    <div style="margin-bottom:15px;">${skills}</div>
-    
-    <h3>> tail -f timeline.log</h3>
-    <div>${timeline}</div>
-    
-    <h3>> ls -la projects/</h3>
-    <div>${projects}</div>
-    <br>
-    <div style="color: var(--accent);">> <span class="blink">&#9608;</span></div>
-  </div>
-</body>
-</html>`;
-}
-
-function getCVSplit(data) {
-  const p = data.profile;
-  const accent = data.design.cvAccent || '#3b82f6';
-  
-  const skills = data.skills.map(s => `<span style="display:inline-block; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:12px; margin:2px 4px 2px 0; font-size:8pt;">${s.name}</span>`).join('');
-  const timeline = data.timeline.map(t => `<div style="margin-bottom:15px;"><div style="font-weight:bold; color:${accent};">${t.role}</div><div style="font-size:9pt; color:#666;">${t.organization} | ${t.startDate} - ${t.endDate||'Présent'}</div><p style="font-size:9pt; margin-top:3px;">${t.description}</p></div>`).join('');
-  const projects = data.projects.map(p => `<div style="margin-bottom:15px;"><div style="font-weight:bold;">${p.title}</div><p style="font-size:9pt; color:#444;">${p.description}</p></div>`).join('');
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background: #eee; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .cv-page { width: 210mm; min-height: 297mm; background: #fff; margin: 0 auto; display: flex; }
-    .left { width: 35%; background: ${accent}; color: #fff; padding: 20mm 15mm; }
-    .right { width: 65%; padding: 20mm 15mm; }
-    h1 { font-size: 28pt; line-height: 1; margin-bottom: 5px; }
-    h2 { font-size: 12pt; font-weight: normal; opacity: 0.9; margin-bottom: 20px; }
-    h3 { font-size: 14pt; border-bottom: 2px solid ${accent}; display: inline-block; margin: 20px 0 10px 0; color: #222; }
-    .left h3 { color: #fff; border-bottom-color: rgba(255,255,255,0.3); }
-    @media print { .cv-page { margin: 0; } @page { size: A4; margin: 0; } }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <div class="left">
-      ${p.avatar ? `<img src="${p.avatar}" style="width:100px; height:100px; border-radius:50%; margin-bottom:15px; border:3px solid rgba(255,255,255,0.5);">` : ''}
-      <h1>${p.name}</h1>
-      <h2>${p.title}</h2>
-      <div style="font-size:9pt; line-height:1.6; margin-bottom:20px;">${p.email}<br>${p.phone}<br>${p.location}</div>
-      <h3>Bio</h3>
-      <p style="font-size:9pt; opacity:0.9;">${p.bio}</p>
-      <h3>Compétences</h3>
-      <div>${skills}</div>
-    </div>
-    <div class="right">
-      <h3>Parcours</h3>
-      ${timeline}
-      <h3>Projets</h3>
-      ${projects}
-    </div>
-  </div>
-</body>
-</html>`;
-}
-
-function getCVAcademic(data) {
-  const p = data.profile;
-  const timeline = data.timeline.map(t => `<div style="margin-bottom:10px;"><strong>${t.role}</strong>, <em>${t.organization}</em> (${t.startDate} - ${t.endDate||'Présent'})<br>${t.description}</div>`).join('');
-  const skills = data.skills.map(s => s.name).join(', ');
-  
-  return `<html>
-<head>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Times New Roman', Times, serif; }
-    body { background: #fff; color: #000; font-size: 11pt; line-height: 1.3; }
-    .cv-page { width: 210mm; min-height: 297mm; padding: 25mm 20mm; margin: 0 auto; }
-    h1 { text-align: center; font-size: 20pt; text-transform: uppercase; margin-bottom: 5px; }
-    .contact { text-align: center; font-size: 10pt; margin-bottom: 20px; border-bottom: 1px solid #000; padding-bottom: 10px; }
-    h2 { font-size: 12pt; text-transform: uppercase; border-bottom: 1px solid #000; margin: 15px 0 10px 0; }
-    @media print { @page { size: A4; margin: 0; } }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <h1>${p.name}</h1>
-    <div class="contact">${p.address} | ${p.email} | ${p.phone}</div>
-    ${p.bio ? `<h2>Résumé</h2><p>${p.bio}</p>` : ''}
-    <h2>Expérience et Formation</h2>${timeline}
-    <h2>Compétences</h2><p>${skills}</p>
-  </div>
-</body>
-</html>`;
-}
-
-function getCVExecutive(data) {
-  const p = data.profile;
-  const accent = data.design.cvAccent || '#334155';
-  const timeline = data.timeline.map(t => `
-    <div style="margin-bottom:15px; display:flex;">
-      <div style="width:120px; font-weight:bold; color:${accent}; font-size:10pt;">${t.startDate} - ${t.endDate||'Présent'}</div>
-      <div style="flex:1;">
-        <div style="font-weight:bold; font-size:12pt; margin-bottom:2px;">${t.role}</div>
-        <div style="color:#555; margin-bottom:5px; font-size:10pt;">${t.organization}</div>
-        <div style="font-size:10pt; line-height:1.5;">${t.description}</div>
-      </div>
-    </div>`).join('');
-    
-  return `<html>
-<head>
-  <style>
-    * { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing:border-box; margin:0; padding:0; }
-    body { background:#fff; color:#333; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
-    .cv-page { width: 210mm; min-height: 297mm; padding: 20mm; margin: 0 auto; }
-    .header { text-align: center; margin-bottom: 25px; }
-    h1 { font-size: 32pt; font-weight: 300; letter-spacing: 2px; color:${accent}; }
-    .title { font-size: 14pt; font-weight: bold; margin-top: 5px; text-transform: uppercase; color:#666; }
-    .contact { margin-top: 10px; font-size: 10pt; color: #444; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 10px 0; }
-    h2 { font-size: 16pt; color: ${accent}; border-bottom: 2px solid ${accent}; margin: 25px 0 15px 0; padding-bottom: 5px; }
-    @media print { @page { size: A4; margin: 0; } }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <div class="header">
-      <h1>${p.name}</h1>
-      <div class="title">${p.title}</div>
-      <div class="contact">${[p.email, p.phone, p.location, p.linkedin].filter(Boolean).join(' &nbsp;&bull;&nbsp; ')}</div>
-    </div>
-    ${p.bio ? `<h2>Profil Executif</h2><p style="font-size:11pt; line-height:1.6;">${p.bio}</p>` : ''}
-    <h2>Expérience Professionnelle</h2>${timeline}
-  </div>
-</body>
-</html>`;
-}
-
-function getCVStartup(data) {
-  const p = data.profile;
-  const accent = data.design.cvAccent || '#10b981';
-  const skills = data.skills.map(s => `<span style="background:${accent}22; color:${accent}; padding:4px 10px; border-radius:20px; font-size:9pt; font-weight:bold; margin:0 5px 5px 0; display:inline-block;">${s.name}</span>`).join('');
-  const timeline = data.timeline.map(t => `
-    <div style="background:#f8fafc; border-radius:10px; padding:15px; margin-bottom:15px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-        <strong style="font-size:11pt;">${t.role}</strong>
-        <span style="color:#64748b; font-size:9pt; background:#e2e8f0; padding:2px 8px; border-radius:10px;">${t.startDate} - ${t.endDate||'Présent'}</span>
-      </div>
-      <div style="color:${accent}; font-weight:600; font-size:9.5pt; margin-bottom:8px;">${t.organization}</div>
-      <p style="font-size:9.5pt; color:#475569;">${t.description}</p>
-    </div>`).join('');
-
-  return `<html>
-<head>
-  <style>
-    * { font-family: 'Segoe UI', system-ui, sans-serif; box-sizing:border-box; margin:0; padding:0; }
-    body { background:#fff; color:#1e293b; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
-    .cv-page { width: 210mm; min-height: 297mm; padding: 20mm; margin: 0 auto; }
-    .header { display:flex; align-items:center; gap:20px; margin-bottom:30px; }
-    .avatar { width:100px; height:100px; border-radius:30px; object-fit:cover; box-shadow: 4px 4px 0 ${accent}; }
-    h1 { font-size: 28pt; font-weight: 800; color:#0f172a; line-height:1; margin-bottom:5px;}
-    .title { font-size: 14pt; color:${accent}; font-weight:600;}
-    .contact { font-size: 9pt; color:#64748b; margin-top:10px; }
-    h2 { font-size: 14pt; margin: 20px 0 15px 0; display:flex; align-items:center; gap:10px; }
-    h2::after { content:''; flex:1; height:2px; background:#f1f5f9; border-radius:2px; }
-    @media print { @page { size: A4; margin: 0; } }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <div class="header">
-      ${p.avatar ? `<img src="${p.avatar}" class="avatar">` : ''}
-      <div>
-        <h1>${p.name}</h1>
-        <div class="title">${p.title}</div>
-        <div class="contact">${[p.email, p.phone, p.location].filter(Boolean).join(' | ')}</div>
-      </div>
-    </div>
-    <h2>À Propos</h2>
-    <p style="font-size:10pt; color:#475569; line-height:1.6;">${p.bio}</p>
-    <h2>Expertise</h2>
-    <div>${skills}</div>
-    <h2>Parcours</h2>
-    ${timeline}
-  </div>
-</body>
-</html>`;
-}
-
-function getCVTwoTone(data) {
-  const p = data.profile;
-  const accent = data.design.cvAccent || '#1e293b';
-  const timeline = data.timeline.map(t => `
-    <div style="margin-bottom:20px; border-left:2px solid ${accent}; padding-left:15px; position:relative;">
-      <div style="position:absolute; left:-6px; top:0; width:10px; height:10px; border-radius:50%; background:${accent};"></div>
-      <div style="font-weight:bold; font-size:12pt; color:#111;">${t.role}</div>
-      <div style="font-size:10pt; color:#666; margin-bottom:5px;">${t.organization} | ${t.startDate} - ${t.endDate||'Présent'}</div>
-      <p style="font-size:10pt; line-height:1.5; color:#333;">${t.description}</p>
-    </div>`).join('');
-  const skills = data.skills.map(s => `<div style="margin-bottom:8px;"><div style="font-size:9pt; margin-bottom:2px;">${s.name}</div><div style="height:4px; background:rgba(255,255,255,0.2);"><div style="height:100%; background:#fff; width:${s.level}%;"></div></div></div>`).join('');
-
-  return `<html>
-<head>
-  <style>
-    * { font-family: 'Helvetica', sans-serif; box-sizing:border-box; margin:0; padding:0; }
-    body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
-    .cv-page { width: 210mm; min-height: 297mm; display:flex; margin: 0 auto; background:#fff;}
-    .sidebar { width: 65mm; background: ${accent}; color: #fff; padding: 20mm 10mm; min-height: 297mm; }
-    .main { flex: 1; padding: 20mm 15mm; }
-    h1 { font-size: 26pt; margin-bottom:5px; color:#111; }
-    h2.job { font-size: 14pt; color: ${accent}; margin-bottom:20px; font-weight:normal; }
-    h3.side { font-size:12pt; text-transform:uppercase; letter-spacing:1px; margin:25px 0 15px 0; border-bottom:1px solid rgba(255,255,255,0.3); padding-bottom:5px; }
-    h3.main-tit { font-size:16pt; color:${accent}; text-transform:uppercase; margin:25px 0 20px 0; letter-spacing:1px; }
-    @media print { @page { size: A4; margin: 0; } }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <div class="sidebar">
-      ${p.avatar ? `<img src="${p.avatar}" style="width:100%; border-radius:50%; margin-bottom:20px; border:4px solid rgba(255,255,255,0.1);">` : ''}
-      <h3 class="side">Contact</h3>
-      <div style="font-size:9pt; line-height:1.8;">${p.phone}<br>${p.email}<br>${p.location}</div>
-      <h3 class="side">Compétences</h3>
-      ${skills}
-    </div>
-    <div class="main">
-      <h1>${p.name}</h1>
-      <h2 class="job">${p.title}</h2>
-      <p style="font-size:10.5pt; line-height:1.6; color:#444;">${p.bio}</p>
-      <h3 class="main-tit">Expérience</h3>
-      ${timeline}
-    </div>
-  </div>
-</body>
-</html>`;
-}
-
-function getCVArtistic(data) {
-  const p = data.profile;
-  const accent = data.design.cvAccent || '#d946ef';
-  const skills = data.skills.map(s => `<span style="color:${accent}; border:1px solid ${accent}; padding:3px 8px; border-radius:4px; font-size:8pt; margin:0 5px 5px 0; display:inline-block;">${s.name}</span>`).join('');
-  const timeline = data.timeline.map(t => `<div style="margin-bottom:20px;"><div style="font-size:14pt; font-weight:bold; color:#111;">${t.role}</div><div style="color:${accent}; font-weight:bold; font-size:10pt; margin-bottom:5px;">${t.organization} // ${t.startDate} - ${t.endDate||'Présent'}</div><p style="font-size:10pt; color:#555; line-height:1.6;">${t.description}</p></div>`).join('');
-
-  return `<html>
-<head>
-  <style>
-    * { font-family: 'Georgia', serif; box-sizing:border-box; margin:0; padding:0; }
-    body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
-    .cv-page { width: 210mm; min-height: 297mm; padding: 20mm; margin: 0 auto; background: linear-gradient(135deg, #fff 0%, #fdf4ff 100%); }
-    .header { text-align:right; margin-bottom:30px; position:relative; }
-    .header::before { content:''; position:absolute; right:0; bottom:-10px; width:50mm; height:4px; background:${accent}; }
-    h1 { font-size: 40pt; font-weight:normal; letter-spacing: -2px; color:#111; line-height:1;}
-    .title { font-family:sans-serif; font-size: 12pt; text-transform:uppercase; letter-spacing:3px; color:${accent}; margin-top:10px; }
-    .grid { display:grid; grid-template-columns: 1fr 2fr; gap: 15mm; }
-    h2 { font-size: 18pt; font-style:italic; margin-bottom:15px; color:#222; }
-    @media print { @page { size: A4; margin: 0; } }
-  </style>
-</head>
-<body>
-  <div class="cv-page">
-    <div class="header">
-      <h1>${p.name}</h1>
-      <div class="title">${p.title}</div>
-    </div>
-    <div class="grid">
-      <div>
-        <h2>Contact</h2>
-        <div style="font-family:sans-serif; font-size:9pt; line-height:2; color:#444; margin-bottom:30px;">
-          ${p.email}<br>${p.phone}<br>${p.location}
-        </div>
-        <h2>Savoir-faire</h2>
-        <div style="font-family:sans-serif;">${skills}</div>
-      </div>
-      <div>
-        <h2>Biographie</h2>
-        <p style="font-family:sans-serif; font-size:10pt; color:#444; line-height:1.6; margin-bottom:30px;">${p.bio}</p>
-        <h2>Parcours</h2>
-        <div style="font-family:sans-serif;">${timeline}</div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
 }
