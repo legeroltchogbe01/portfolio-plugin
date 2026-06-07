@@ -3666,9 +3666,16 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 // -------------------------------------------------------------
-// CV (A4 PRINT) TEMPLATE GENERATOR
+// CV (A4 PRINT) TEMPLATE GENERATOR & ROUTER
 // -------------------------------------------------------------
 function generateCVTemplate(data) {
+  const tpl = data.design.cvTemplate || 'modern';
+  if (tpl === 'classic') return getCVClassic(data);
+  if (tpl === 'minimalist') return getCVMinimalist(data);
+  return getCVModern(data);
+}
+
+function getCVModern(data) {
   const p = data.profile;
   const accentColor = data.design.cvAccent || data.design.accentColor || '#6366f1';
   

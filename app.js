@@ -9,6 +9,7 @@ const imageAssets = {
 };
 
 let currentTheme = 'minimalist';
+let currentCVTemplate = 'modern';
 
 // Default Demo Data
 const defaultData = {
@@ -406,6 +407,20 @@ function applyPreset(accentColor, secondaryColor, presetName) {
   triggerUpdate();
 }
 
+function selectCVTemplate(templateId) {
+  currentCVTemplate = templateId;
+  
+  const cvCards = document.querySelectorAll('#sec-cv .theme-card');
+  cvCards.forEach(card => card.classList.remove('selected'));
+  
+  const selectedCard = document.getElementById(`cv-tpl-${templateId}`);
+  if (selectedCard) {
+    selectedCard.classList.add('selected');
+  }
+  
+  triggerUpdate();
+}
+
 // -------------------------------------------------------------
 // IMAGE FILE READING (BASE64)
 // -------------------------------------------------------------
@@ -493,7 +508,8 @@ function getFormData() {
     design: {
       accentColor: accentVal,
       secondaryColor: secondaryVal,
-      cvAccent: document.getElementById('cv-design-accent') ? document.getElementById('cv-design-accent').value : '#3b82f6'
+      cvAccent: document.getElementById('cv-design-accent') ? document.getElementById('cv-design-accent').value : '#3b82f6',
+      cvTemplate: currentCVTemplate
     }
   };
 
