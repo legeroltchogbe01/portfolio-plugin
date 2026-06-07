@@ -10,6 +10,7 @@ const imageAssets = {
 
 let currentTheme = 'minimalist';
 let currentCVTemplate = 'modern';
+let previewMode = 'portfolio';
 
 // Default Demo Data
 const defaultData = {
@@ -380,8 +381,8 @@ function removeRepeaterItem(cardId) {
 function selectTheme(themeId) {
   currentTheme = themeId;
   
-  // Update selection UI
-  const themeCards = document.querySelectorAll('.theme-card');
+  // Update selection UI for portfolio themes only
+  const themeCards = document.querySelectorAll('#sec-design .theme-card');
   themeCards.forEach(card => card.classList.remove('selected'));
   
   document.getElementById(`theme-${themeId}`).classList.add('selected');
@@ -393,6 +394,11 @@ function selectTheme(themeId) {
     editorial: 'Chic Éditorial'
   };
   showToast(`Thème activé : ${themeNames[themeId] || themeId}.`, 'success');
+  
+  previewMode = 'portfolio';
+  const sel = document.getElementById('preview-mode-select');
+  if(sel) sel.value = 'portfolio';
+  
   triggerUpdate();
 }
 
@@ -417,6 +423,10 @@ function selectCVTemplate(templateId) {
   if (selectedCard) {
     selectedCard.classList.add('selected');
   }
+  
+  previewMode = 'cv';
+  const sel = document.getElementById('preview-mode-select');
+  if(sel) sel.value = 'cv';
   
   triggerUpdate();
 }
@@ -581,12 +591,16 @@ function triggerUpdate() {
 
 function updatePreview() {
   const data = getFormData();
-  const compiled = generatePortfolio(data, currentTheme);
+  let htmlContent = '';
   
-  // Combine CSS & JS directly for iframe rendering in runtime
-  let htmlContent = compiled.html;
-  htmlContent = htmlContent.replace('<link rel="stylesheet" href="styles.css">', `<style>${compiled.css}</style>`);
-  htmlContent = htmlContent.replace('<script src="script.js"></script>', `<script>${compiled.js}</script>`);
+  if (previewMode === 'portfolio') {
+    const compiled = generatePortfolio(data, currentTheme);
+    htmlContent = compiled.html;
+    htmlContent = htmlContent.replace('<link rel="stylesheet" href="styles.css">', `<style>${compiled.css}</style>`);
+    htmlContent = htmlContent.replace('<script src="script.js"></script>', `<script>${compiled.js}</script>`);
+  } else {
+    htmlContent = generateCVTemplate(data);
+  }
 
   const iframe = document.getElementById('preview-frame');
   if (iframe) {
