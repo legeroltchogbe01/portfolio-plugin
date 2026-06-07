@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Portfolio Builder Studio - Application Logic
  */
 
@@ -16,18 +16,18 @@ let previewMode = 'portfolio';
 const defaultData = {
   profile: {
     name: 'Alexandre Martin',
-    title: 'Développeur Web & Mobile',
-    bio: 'Passionné par l\'architecture logicielle et les interfaces interactives. J\'aide les entreprises à transformer leurs idées en produits numériques d\'exception.',
+    title: 'DÃ©veloppeur Web & Mobile',
+    bio: 'PassionnÃ© par l\'architecture logicielle et les interfaces interactives. J\'aide les entreprises Ã  transformer leurs idÃ©es en produits numÃ©riques d\'exception.',
     email: 'alexandre.martin@example.com',
     phone: '+33 6 12 34 56 78',
     age: '28',
     experience: '6',
     location: 'Paris, France',
     address: '12 Rue de la Paix, 75002 Paris',
-    availability: 'Immédiate',
+    availability: 'ImmÃ©diate',
     contract: 'Freelance / CDI / Alternance',
-    languages: 'Français (Natif), Anglais (C1, Technique)',
-    hobbies: 'Voyages, Photographie, Boxe, Échecs',
+    languages: 'FranÃ§ais (Natif), Anglais (C1, Technique)',
+    hobbies: 'Voyages, Photographie, Boxe, Ã‰checs',
     github: 'https://github.com/alexandremartin',
     linkedin: 'https://linkedin.com/in/alexandremartin',
     twitter: 'https://twitter.com/alexandre',
@@ -42,8 +42,8 @@ const defaultData = {
   projects: [
     {
       title: 'SaaS Dashboard Financier',
-      description: 'Une plateforme d\'analyse financière en temps réel avec des graphiques interactifs et un mode sombre complet.',
-      category: 'Développement Web',
+      description: 'Une plateforme d\'analyse financiÃ¨re en temps rÃ©el avec des graphiques interactifs et un mode sombre complet.',
+      category: 'DÃ©veloppement Web',
       technologies: 'React, Chart.js, HSL CSS',
       liveUrl: 'https://example.com/demo',
       githubUrl: 'https://github.com/alexandremartin/dashboard',
@@ -51,7 +51,7 @@ const defaultData = {
     },
     {
       title: 'Application E-Commerce',
-      description: 'Application d\'achat de vêtements en ligne avec intégration de Stripe, gestion du panier et catalogue dynamique.',
+      description: 'Application d\'achat de vÃªtements en ligne avec intÃ©gration de Stripe, gestion du panier et catalogue dynamique.',
       category: 'Mobile / PWA',
       technologies: 'React, Service Workers, Stripe API',
       liveUrl: 'https://example.com/shop',
@@ -61,18 +61,18 @@ const defaultData = {
   ],
   timeline: [
     {
-      role: 'Développeur Fullstack Lead',
+      role: 'DÃ©veloppeur Fullstack Lead',
       organization: 'TechAgency Paris',
       startDate: '2024',
-      endDate: 'Présent',
-      description: 'Conception d\'architectures frontend modernes et encadrement d\'une équipe de développeurs.'
+      endDate: 'PrÃ©sent',
+      description: 'Conception d\'architectures frontend modernes et encadrement d\'une Ã©quipe de dÃ©veloppeurs.'
     },
     {
-      role: 'Développeur Front-End',
+      role: 'DÃ©veloppeur Front-End',
       organization: 'WebStudio Lyon',
       startDate: '2022',
       endDate: '2024',
-      description: 'Développement de composants UI complexes et intégration pixel-perfect de designs Figma.'
+      description: 'DÃ©veloppement de composants UI complexes et intÃ©gration pixel-perfect de designs Figma.'
     }
   ],
   design: {
@@ -114,7 +114,7 @@ function handleLogin(event) {
   if (user === 'admin' && pass === 'admin') {
     sessionStorage.setItem('studio_logged', 'true');
     document.getElementById('login-overlay').classList.add('hidden');
-    showToast('Connexion réussie ! Bienvenue dans le studio.', 'success');
+    showToast('Connexion rÃ©ussie ! Bienvenue dans le studio.', 'success');
   } else {
     showToast('Identifiant ou mot de passe incorrect.', 'error');
   }
@@ -123,7 +123,7 @@ function handleLogin(event) {
 function handleLogout() {
   sessionStorage.removeItem('studio_logged');
   document.getElementById('login-overlay').classList.remove('hidden');
-  showToast('Déconnecté avec succès.', 'success');
+  showToast('DÃ©connectÃ© avec succÃ¨s.', 'success');
 }
 
 // -------------------------------------------------------------
@@ -144,7 +144,8 @@ function switchTab(tabName) {
     education: 'sec-education',
     design: 'sec-design',
     cv: 'sec-cv',
-    export: 'sec-export'
+    export: 'sec-export',
+    extras: 'sec-extras'
   };
 
   const targetId = sectionMap[tabName];
@@ -185,8 +186,8 @@ function loadDefaultData() {
   document.getElementById('profile-address').value = defaultData.profile.address;
   document.getElementById('profile-availability').value = defaultData.profile.availability;
   document.getElementById('profile-contract').value = defaultData.profile.contract;
-  document.getElementById('profile-languages').value = defaultData.profile.languages;
-  document.getElementById('profile-hobbies').value = defaultData.profile.hobbies;
+  
+  
   document.getElementById('profile-github').value = defaultData.profile.github;
   document.getElementById('profile-linkedin').value = defaultData.profile.linkedin;
   document.getElementById('profile-twitter').value = defaultData.profile.twitter;
@@ -196,6 +197,15 @@ function loadDefaultData() {
   const skillsContainer = document.getElementById('skills-repeater');
   skillsContainer.innerHTML = '';
   defaultData.skills.forEach(skill => addSkillItem(skill.name, skill.level));
+    
+  // Default extra fields
+  addSoftSkillItem('Leadership');
+  addSoftSkillItem('Esprit d\'Ã©quipe');
+  addLanguageItem('FranÃ§ais', 'Langue maternelle');
+  addLanguageItem('Anglais', 'Courant (C1)');
+  addHobbyItem('Photographie');
+  addHobbyItem('Voyages');
+  addReferenceItem('', '', '');
 
   // Projects
   const projectsContainer = document.getElementById('projects-repeater');
@@ -236,18 +246,18 @@ function addSkillItem(name = '', level = 50) {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-cog"></i> Compétence</span>
+      <span class="repeater-card-title"><i class="fas fa-cog"></i> CompÃ©tence</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
         <i class="fas fa-trash"></i>
       </button>
     </div>
     <div class="form-grid">
       <div class="form-group">
-        <label>Nom de la compétence</label>
+        <label>Nom de la compÃ©tence</label>
         <input type="text" class="form-control skill-input-name" placeholder="ex: JavaScript" value="${name}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Niveau de maîtrise (${level}%)</label>
+        <label>Niveau de maÃ®trise (${level}%)</label>
         <div style="display: flex; align-items: center; gap: 1rem;">
           <input type="range" class="form-control skill-input-level" min="10" max="100" step="5" value="${level}" 
             oninput="this.parentElement.querySelector('.level-val').innerText = this.value + '%'; triggerUpdate()">
@@ -293,7 +303,7 @@ function addProjectItem(project = {}) {
             <label for="${cardId}-upload" class="upload-btn-label">Importer l'image</label>
             <input type="file" id="${cardId}-upload" class="file-input project-image-input" accept="image/*" 
               onchange="previewProjectImage(this, '${cardId}-preview', '${cardId}')">
-            <span class="upload-hint">Format PNG/JPG conseillé (max 2Mo)</span>
+            <span class="upload-hint">Format PNG/JPG conseillÃ© (max 2Mo)</span>
           </div>
         </div>
       </div>
@@ -302,15 +312,15 @@ function addProjectItem(project = {}) {
         <input type="text" class="form-control proj-input-title" placeholder="ex: Site E-commerce" value="${title}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Catégorie</label>
+        <label>CatÃ©gorie</label>
         <input type="text" class="form-control proj-input-category" placeholder="ex: Web Design / Mobile" value="${cat}" oninput="triggerUpdate()">
       </div>
       <div class="form-group form-group-full">
         <label>Description du projet</label>
-        <textarea class="form-control proj-input-desc" rows="3" placeholder="Décrivez en quelques lignes ce que fait le projet et vos accomplissements..." oninput="triggerUpdate()">${desc}</textarea>
+        <textarea class="form-control proj-input-desc" rows="3" placeholder="DÃ©crivez en quelques lignes ce que fait le projet et vos accomplissements..." oninput="triggerUpdate()">${desc}</textarea>
       </div>
       <div class="form-group form-group-full">
-        <label>Technologies utilisées (séparées par virgules)</label>
+        <label>Technologies utilisÃ©es (sÃ©parÃ©es par virgules)</label>
         <input type="text" class="form-control proj-input-tech" placeholder="ex: React, Tailwind, Node.js" value="${tech}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
@@ -345,31 +355,31 @@ function addTimelineItem(item = {}) {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-briefcase"></i> Expérience Professionnelle</span>
+      <span class="repeater-card-title"><i class="fas fa-briefcase"></i> ExpÃ©rience Professionnelle</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
         <i class="fas fa-trash"></i>
       </button>
     </div>
     <div class="form-grid">
       <div class="form-group">
-        <label>Titre / Rôle</label>
-        <input type="text" class="form-control time-input-role" placeholder="ex: Développeur Web" value="${role}" oninput="triggerUpdate()">
+        <label>Titre / RÃ´le</label>
+        <input type="text" class="form-control time-input-role" placeholder="ex: DÃ©veloppeur Web" value="${role}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
         <label>Entreprise</label>
         <input type="text" class="form-control time-input-org" placeholder="ex: TechCorp" value="${org}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Date de début (MM/YYYY)</label>
+        <label>Date de dÃ©but (MM/YYYY)</label>
         <input type="text" class="form-control time-input-start" placeholder="ex: 09/2021" value="${start}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
         <label>Date de fin</label>
-        <input type="text" class="form-control time-input-end" placeholder="ex: Présent" value="${end}" oninput="triggerUpdate()">
+        <input type="text" class="form-control time-input-end" placeholder="ex: PrÃ©sent" value="${end}" oninput="triggerUpdate()">
       </div>
       <div class="form-group form-group-full">
-        <label>Description des réalisations</label>
-        <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous réalisé ?" oninput="triggerUpdate()">${desc}</textarea>
+        <label>Description des rÃ©alisations</label>
+        <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous rÃ©alisÃ© ?" oninput="triggerUpdate()">${desc}</textarea>
       </div>
     </div>
   `;
@@ -389,31 +399,136 @@ function addEducationItem(item = {}) {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-graduation-cap"></i> Formation / Diplôme</span>
+      <span class="repeater-card-title"><i class="fas fa-graduation-cap"></i> Formation / DiplÃ´me</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
         <i class="fas fa-trash"></i>
       </button>
     </div>
     <div class="form-grid">
       <div class="form-group">
-        <label>Diplôme / Spécialité</label>
+        <label>DiplÃ´me / SpÃ©cialitÃ©</label>
         <input type="text" class="form-control edu-input-degree" placeholder="ex: Master Informatique" value="${degree}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Établissement</label>
-        <input type="text" class="form-control edu-input-inst" placeholder="ex: Sorbonne Université" value="${inst}" oninput="triggerUpdate()">
+        <label>Ã‰tablissement</label>
+        <input type="text" class="form-control edu-input-inst" placeholder="ex: Sorbonne UniversitÃ©" value="${inst}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Année de début</label>
+        <label>AnnÃ©e de dÃ©but</label>
         <input type="text" class="form-control edu-input-start" placeholder="ex: 2018" value="${start}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Année d'obtention</label>
+        <label>AnnÃ©e d'obtention</label>
         <input type="text" class="form-control edu-input-end" placeholder="ex: 2020" value="${end}" oninput="triggerUpdate()">
       </div>
     </div>
   `;
   container.appendChild(card);
+}
+
+
+function addSoftSkillItem(name = '') {
+  const container = document.getElementById('soft-skills-repeater');
+  if (!container) return;
+  const cardId = 'softskill-' + Date.now() + Math.random().toString(36).substr(2, 4);
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-comment-dots"></i> Soft Skill</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-group-full">
+        <label>CompÃ©tence (Ex: Leadership)</label>
+        <input type="text" class="form-control softskill-input-name" placeholder="Soft Skill" value="${name}" oninput="triggerUpdate()">
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  triggerUpdate();
+}
+
+function addLanguageItem(name = '', level = '') {
+  const container = document.getElementById('languages-repeater');
+  if (!container) return;
+  const cardId = 'lang-' + Date.now() + Math.random().toString(36).substr(2, 4);
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-language"></i> Langue</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Langue</label>
+        <input type="text" class="form-control lang-input-name" placeholder="Ex: Anglais" value="${name}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Niveau</label>
+        <input type="text" class="form-control lang-input-level" placeholder="Ex: Courant (C1)" value="${level}" oninput="triggerUpdate()">
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  triggerUpdate();
+}
+
+function addHobbyItem(name = '') {
+  const container = document.getElementById('hobbies-repeater');
+  if (!container) return;
+  const cardId = 'hobby-' + Date.now() + Math.random().toString(36).substr(2, 4);
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-heart"></i> Centre d'intÃ©rÃªt</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-group-full">
+        <label>Loisir / Passion</label>
+        <input type="text" class="form-control hobby-input-name" placeholder="Ex: Photographie" value="${name}" oninput="triggerUpdate()">
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  triggerUpdate();
+}
+
+function addReferenceItem(name = '', role = '', contact = '') {
+  const container = document.getElementById('references-repeater');
+  if (!container) return;
+  const cardId = 'ref-' + Date.now() + Math.random().toString(36).substr(2, 4);
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-id-badge"></i> RÃ©fÃ©rence</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nom</label>
+        <input type="text" class="form-control ref-input-name" placeholder="Ex: Jean Dupont" value="${name}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Poste & Entreprise</label>
+        <input type="text" class="form-control ref-input-role" placeholder="Ex: CTO @ TechCorp" value="${role}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group form-group-full">
+        <label>Contact (Email / Tel)</label>
+        <input type="text" class="form-control ref-input-contact" placeholder="Ex: jean.dupont@email.com / +33..." value="${contact}" oninput="triggerUpdate()">
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  triggerUpdate();
 }
 
 function removeRepeaterItem(cardId) {
@@ -441,12 +556,12 @@ function selectTheme(themeId) {
   document.getElementById(`theme-${themeId}`).classList.add('selected');
   const themeNames = {
     minimalist: 'Minimaliste Moderne',
-    creative: 'Créatif Dégradé',
-    developer: 'Terminal Développeur',
-    brutalist: 'Néo-Brutaliste Pop',
-    editorial: 'Chic Éditorial'
+    creative: 'CrÃ©atif DÃ©gradÃ©',
+    developer: 'Terminal DÃ©veloppeur',
+    brutalist: 'NÃ©o-Brutaliste Pop',
+    editorial: 'Chic Ã‰ditorial'
   };
-  showToast(`Thème activé : ${themeNames[themeId] || themeId}.`, 'success');
+  showToast(`ThÃ¨me activÃ© : ${themeNames[themeId] || themeId}.`, 'success');
   
   previewMode = 'portfolio';
   const sel = document.getElementById('preview-mode-select');
@@ -462,7 +577,7 @@ function applyPreset(accentColor, secondaryColor, presetName) {
   document.getElementById('accent-hex').innerText = accentColor;
   document.getElementById('secondary-hex').innerText = secondaryColor;
   
-  showToast(`Palette appliquée : ${presetName}.`, 'success');
+  showToast(`Palette appliquÃ©e : ${presetName}.`, 'success');
   triggerUpdate();
 }
 
@@ -557,8 +672,8 @@ function getFormData() {
       address: document.getElementById('profile-address').value || '',
       availability: document.getElementById('profile-availability').value || '',
       contract: document.getElementById('profile-contract').value || '',
-      languages: document.getElementById('profile-languages').value || '',
-      hobbies: document.getElementById('profile-hobbies').value || '',
+      
+      
       github: document.getElementById('profile-github').value || '',
       linkedin: document.getElementById('profile-linkedin').value || '',
       twitter: document.getElementById('profile-twitter').value || '',
@@ -570,6 +685,10 @@ function getFormData() {
     timeline: [],
     experience: [],
     education: [],
+    softSkills: [],
+    languagesList: [],
+    hobbiesList: [],
+    references: [],
     design: {
       accentColor: accentVal,
       secondaryColor: secondaryVal,
@@ -704,7 +823,7 @@ function openPreviewWindow() {
     newWindow.document.write(htmlContent);
     newWindow.document.close();
   } else {
-    showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
+    showToast("Impossible d'ouvrir l'aperÃ§u. Veuillez autoriser les popups pour ce site.", "error");
   }
 }
 
@@ -724,7 +843,7 @@ function previewCV() {
     newWindow.document.write(html);
     newWindow.document.close();
   } else {
-    showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
+    showToast("Impossible d'ouvrir l'aperÃ§u. Veuillez autoriser les popups pour ce site.", "error");
   }
 }
 
@@ -747,7 +866,7 @@ function downloadCV() {
   container.appendChild(cvPage);
   document.body.appendChild(container);
   
-  showToast("Génération du PDF en cours...", "success");
+  showToast("GÃ©nÃ©ration du PDF en cours...", "success");
   
   // Give it a moment to load any images or fonts
   setTimeout(() => {
@@ -763,15 +882,15 @@ function downloadCV() {
     if (typeof html2pdf !== 'undefined') {
       html2pdf().set(opt).from(cvPage).save().then(() => {
         document.body.removeChild(container);
-        showToast("CV téléchargé avec succès !", "success");
+        showToast("CV tÃ©lÃ©chargÃ© avec succÃ¨s !", "success");
       }).catch(err => {
         console.error(err);
         document.body.removeChild(container);
-        showToast("Erreur lors de la génération.", "error");
+        showToast("Erreur lors de la gÃ©nÃ©ration.", "error");
       });
     } else {
       document.body.removeChild(container);
-      showToast("La librairie PDF n'est pas chargée.", "error");
+      showToast("La librairie PDF n'est pas chargÃ©e.", "error");
     }
   }, 500);
 }
@@ -799,7 +918,7 @@ function exportZip() {
     imgFolder.file(img.filename, img.base64, { base64: true });
   });
   
-  showToast("Génération du package ZIP en cours...", "success");
+  showToast("GÃ©nÃ©ration du package ZIP en cours...", "success");
   
   zip.generateAsync({ type: "blob" })
     .then((content) => {
@@ -811,11 +930,11 @@ function exportZip() {
       link.click();
       document.body.removeChild(link);
       
-      showToast("Fichier ZIP téléchargé avec succès ! Prêt à être déployé.", "success");
+      showToast("Fichier ZIP tÃ©lÃ©chargÃ© avec succÃ¨s ! PrÃªt Ã  Ãªtre dÃ©ployÃ©.", "success");
     })
     .catch((err) => {
       console.error(err);
-      showToast("Erreur lors de la création du fichier ZIP.", "error");
+      showToast("Erreur lors de la crÃ©ation du fichier ZIP.", "error");
     });
 }
 
@@ -844,3 +963,4 @@ function showToast(message, type = 'success') {
     toast.classList.remove('show');
   }, 4000);
 }
+
