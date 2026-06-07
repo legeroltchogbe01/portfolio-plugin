@@ -200,7 +200,7 @@ function loadDefaultData() {
 
 function setupEventListeners() {
   // Input changes triggers live-update
-  const generalInputs = document.querySelectorAll('#sec-about input, #sec-about textarea');
+  const generalInputs = document.querySelectorAll('.editor-section input, .editor-section textarea');
   generalInputs.forEach(input => {
     input.addEventListener('input', triggerUpdate);
   });

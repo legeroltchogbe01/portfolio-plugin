@@ -3672,6 +3672,13 @@ function generateCVTemplate(data) {
   const tpl = data.design.cvTemplate || 'modern';
   if (tpl === 'classic') return getCVClassic(data);
   if (tpl === 'minimalist') return getCVMinimalist(data);
+  if (tpl === 'terminal') return getCVTerminal(data);
+  if (tpl === 'split') return getCVSplit(data);
+  if (tpl === 'academic') return getCVAcademic(data);
+  if (tpl === 'executive') return getCVExecutive(data);
+  if (tpl === 'startup') return getCVStartup(data);
+  if (tpl === 'twotone') return getCVTwoTone(data);
+  if (tpl === 'artistic') return getCVArtistic(data);
   return getCVModern(data);
 }
 
