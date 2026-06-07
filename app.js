@@ -1,0 +1,673 @@
+/**
+ * Portfolio Builder Studio - Application Logic
+ */
+
+// Global state for images
+const imageAssets = {
+  avatar: '',
+  projects: {} // idx -> base64
+};
+
+let currentTheme = 'minimalist';
+
+// Default Demo Data
+const defaultData = {
+  profile: {
+    name: 'Alexandre Martin',
+    title: 'Développeur Web & Mobile',
+    bio: 'Passionné par l\'architecture logicielle et les interfaces interactives. J\'aide les entreprises à transformer leurs idées en produits numériques d\'exception.',
+    email: 'alexandre.martin@example.com',
+    phone: '+33 6 12 34 56 78',
+    age: '28',
+    experience: '6',
+    location: 'Paris, France',
+    address: '12 Rue de la Paix, 75002 Paris',
+    availability: 'Immédiate',
+    contract: 'Freelance / CDI / Alternance',
+    languages: 'Français (Natif), Anglais (C1, Technique)',
+    hobbies: 'Voyages, Photographie, Boxe, Échecs',
+    github: 'https://github.com/alexandremartin',
+    linkedin: 'https://linkedin.com/in/alexandremartin',
+    twitter: 'https://twitter.com/alexandre',
+    facebook: 'https://facebook.com/alexandre.martin'
+  },
+  skills: [
+    { name: 'JavaScript / TypeScript', level: 95 },
+    { name: 'React / Next.js', level: 90 },
+    { name: 'CSS & Animations (Vanilla)', level: 85 },
+    { name: 'Node.js & API REST', level: 80 }
+  ],
+  projects: [
+    {
+      title: 'SaaS Dashboard Financier',
+      description: 'Une plateforme d\'analyse financière en temps réel avec des graphiques interactifs et un mode sombre complet.',
+      category: 'Développement Web',
+      technologies: 'React, Chart.js, HSL CSS',
+      liveUrl: 'https://example.com/demo',
+      githubUrl: 'https://github.com/alexandremartin/dashboard',
+      image: '' // default used by templates if empty
+    },
+    {
+      title: 'Application E-Commerce',
+      description: 'Application d\'achat de vêtements en ligne avec intégration de Stripe, gestion du panier et catalogue dynamique.',
+      category: 'Mobile / PWA',
+      technologies: 'React, Service Workers, Stripe API',
+      liveUrl: 'https://example.com/shop',
+      githubUrl: 'https://github.com/alexandremartin/shop',
+      image: '' // default used by templates if empty
+    }
+  ],
+  timeline: [
+    {
+      role: 'Développeur Fullstack Lead',
+      organization: 'TechAgency Paris',
+      startDate: '2024',
+      endDate: 'Présent',
+      description: 'Conception d\'architectures frontend modernes et encadrement d\'une équipe de développeurs.'
+    },
+    {
+      role: 'Développeur Front-End',
+      organization: 'WebStudio Lyon',
+      startDate: '2022',
+      endDate: '2024',
+      description: 'Développement de composants UI complexes et intégration pixel-perfect de designs Figma.'
+    }
+  ],
+  design: {
+    accentColor: '#6366f1',
+    secondaryColor: '#ec4899'
+  }
+};
+
+// -------------------------------------------------------------
+// LIFE CYCLE EVENTS
+// -------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
+  initTabs();
+  loadDefaultData();
+  setupEventListeners();
+  triggerUpdate();
+});
+
+// -------------------------------------------------------------
+// AUTHENTICATION MANAGEMENT
+// -------------------------------------------------------------
+function initAuth() {
+  const isLogged = sessionStorage.getItem('studio_logged');
+  const loginOverlay = document.getElementById('login-overlay');
+  if (isLogged === 'true') {
+    loginOverlay.classList.add('hidden');
+  } else {
+    loginOverlay.classList.remove('hidden');
+  }
+}
+
+function handleLogin(event) {
+  event.preventDefault();
+  const user = document.getElementById('username').value.trim();
+  const pass = document.getElementById('password').value.trim();
+
+  // Simple validation for mock authentication
+  if (user === 'admin' && pass === 'admin') {
+    sessionStorage.setItem('studio_logged', 'true');
+    document.getElementById('login-overlay').classList.add('hidden');
+    showToast('Connexion réussie ! Bienvenue dans le studio.', 'success');
+  } else {
+    showToast('Identifiant ou mot de passe incorrect.', 'error');
+  }
+}
+
+function handleLogout() {
+  sessionStorage.removeItem('studio_logged');
+  document.getElementById('login-overlay').classList.remove('hidden');
+  showToast('Déconnecté avec succès.', 'success');
+}
+
+// -------------------------------------------------------------
+// TAB NAVIGATION
+// -------------------------------------------------------------
+function initTabs() {
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.editor-section');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // Update nav active state
+      navItems.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      // Show targeted editor section
+      const targetId = item.getAttribute('data-target');
+      sections.forEach(sec => {
+        if (sec.id === targetId) {
+          sec.classList.add('active');
+        } else {
+          sec.classList.remove('active');
+        }
+      });
+    });
+  });
+}
+
+// -------------------------------------------------------------
+// LOAD INITIAL DEFAULT DATA
+// -------------------------------------------------------------
+function loadDefaultData() {
+  // Profile info
+  document.getElementById('profile-name').value = defaultData.profile.name;
+  document.getElementById('profile-title').value = defaultData.profile.title;
+  document.getElementById('profile-bio').value = defaultData.profile.bio;
+  document.getElementById('profile-email').value = defaultData.profile.email;
+  document.getElementById('profile-phone').value = defaultData.profile.phone;
+  document.getElementById('profile-age').value = defaultData.profile.age;
+  document.getElementById('profile-experience').value = defaultData.profile.experience;
+  document.getElementById('profile-location').value = defaultData.profile.location;
+  document.getElementById('profile-address').value = defaultData.profile.address;
+  document.getElementById('profile-availability').value = defaultData.profile.availability;
+  document.getElementById('profile-contract').value = defaultData.profile.contract;
+  document.getElementById('profile-languages').value = defaultData.profile.languages;
+  document.getElementById('profile-hobbies').value = defaultData.profile.hobbies;
+  document.getElementById('profile-github').value = defaultData.profile.github;
+  document.getElementById('profile-linkedin').value = defaultData.profile.linkedin;
+  document.getElementById('profile-twitter').value = defaultData.profile.twitter;
+  document.getElementById('profile-facebook').value = defaultData.profile.facebook;
+
+  // Skills
+  const skillsContainer = document.getElementById('skills-repeater');
+  skillsContainer.innerHTML = '';
+  defaultData.skills.forEach(skill => addSkillItem(skill.name, skill.level));
+
+  // Projects
+  const projectsContainer = document.getElementById('projects-repeater');
+  projectsContainer.innerHTML = '';
+  defaultData.projects.forEach(project => addProjectItem(project));
+
+  // Timeline
+  const timelineContainer = document.getElementById('timeline-repeater');
+  timelineContainer.innerHTML = '';
+  defaultData.timeline.forEach(item => addTimelineItem(item));
+
+  // Design info
+  document.getElementById('design-accent').value = defaultData.design.accentColor;
+  document.getElementById('accent-hex').innerText = defaultData.design.accentColor;
+  document.getElementById('design-secondary').value = defaultData.design.secondaryColor;
+  document.getElementById('secondary-hex').innerText = defaultData.design.secondaryColor;
+}
+
+function setupEventListeners() {
+  // Input changes triggers live-update
+  const generalInputs = document.querySelectorAll('#sec-about input, #sec-about textarea');
+  generalInputs.forEach(input => {
+    input.addEventListener('input', triggerUpdate);
+  });
+}
+
+// -------------------------------------------------------------
+// REPEATER COMPONENT BUILDERS (DOM)
+// -------------------------------------------------------------
+
+// 1. Skill Repeater
+function addSkillItem(name = '', level = 50) {
+  const container = document.getElementById('skills-repeater');
+  const cardId = 'skill-' + Date.now() + Math.random().toString(36).substr(2, 4);
+
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-cog"></i> Compétence</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nom de la compétence</label>
+        <input type="text" class="form-control skill-input-name" placeholder="ex: JavaScript" value="${name}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Niveau de maîtrise (${level}%)</label>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <input type="range" class="form-control skill-input-level" min="10" max="100" step="5" value="${level}" 
+            oninput="this.parentElement.querySelector('.level-val').innerText = this.value + '%'; triggerUpdate()">
+          <span class="level-val" style="font-weight: 600; width: 45px;">${level}%</span>
+        </div>
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  triggerUpdate();
+}
+
+// 2. Project Repeater
+function addProjectItem(project = {}) {
+  const container = document.getElementById('projects-repeater');
+  const cardId = 'project-' + Date.now() + Math.random().toString(36).substr(2, 4);
+  const title = project.title || '';
+  const desc = project.description || '';
+  const cat = project.category || '';
+  const tech = project.technologies || '';
+  const live = project.liveUrl || '';
+  const git = project.githubUrl || '';
+  const base64Img = project.image || '';
+
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-briefcase"></i> Fiche Projet</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-group-full">
+        <label>Image de couverture du projet</label>
+        <div class="upload-wrapper">
+          <div id="${cardId}-preview" class="preview-thumb" style="${base64Img ? `background-image: url(${base64Img})` : ''}">
+            ${base64Img ? '' : '<i class="fas fa-image"></i>'}
+          </div>
+          <div class="upload-actions">
+            <label for="${cardId}-upload" class="upload-btn-label">Importer l'image</label>
+            <input type="file" id="${cardId}-upload" class="file-input project-image-input" accept="image/*" 
+              onchange="previewProjectImage(this, '${cardId}-preview', '${cardId}')">
+            <span class="upload-hint">Format PNG/JPG conseillé (max 2Mo)</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Titre du projet</label>
+        <input type="text" class="form-control proj-input-title" placeholder="ex: Site E-commerce" value="${title}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <input type="text" class="form-control proj-input-category" placeholder="ex: Web Design / Mobile" value="${cat}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group form-group-full">
+        <label>Description du projet</label>
+        <textarea class="form-control proj-input-desc" rows="3" placeholder="Décrivez en quelques lignes ce que fait le projet et vos accomplissements..." oninput="triggerUpdate()">${desc}</textarea>
+      </div>
+      <div class="form-group form-group-full">
+        <label>Technologies utilisées (séparées par virgules)</label>
+        <input type="text" class="form-control proj-input-tech" placeholder="ex: React, Tailwind, Node.js" value="${tech}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Lien Live Demo</label>
+        <input type="url" class="form-control proj-input-live" placeholder="https://..." value="${live}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Lien Source Code (GitHub)</label>
+        <input type="url" class="form-control proj-input-github" placeholder="https://github.com/..." value="${git}" oninput="triggerUpdate()">
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  
+  if (base64Img) {
+    imageAssets.projects[cardId] = base64Img;
+  }
+  triggerUpdate();
+}
+
+// 3. Timeline Repeater
+function addTimelineItem(item = {}) {
+  const container = document.getElementById('timeline-repeater');
+  const cardId = 'timeline-' + Date.now() + Math.random().toString(36).substr(2, 4);
+  const role = item.role || '';
+  const org = item.organization || '';
+  const start = item.startDate || '';
+  const end = item.endDate || '';
+  const desc = item.description || '';
+
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-graduation-cap"></i> Expérience / Diplôme</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Titre / Rôle</label>
+        <input type="text" class="form-control time-input-role" placeholder="ex: Développeur Frontend Lead" value="${role}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Entreprise / Établissement</label>
+        <input type="text" class="form-control time-input-org" placeholder="ex: Sorbonne Université / TechCorp" value="${org}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Date de début</label>
+        <input type="text" class="form-control time-input-start" placeholder="ex: Sept 2021" value="${start}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Date de fin</label>
+        <input type="text" class="form-control time-input-end" placeholder="ex: Présent / Janv 2023" value="${end}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group form-group-full">
+        <label>Description des réalisations / cours</label>
+        <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous appris ou réalisé ?" oninput="triggerUpdate()">${desc}</textarea>
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  triggerUpdate();
+}
+
+function removeRepeaterItem(cardId) {
+  const card = document.getElementById(cardId);
+  if (card) {
+    card.remove();
+    // clean images
+    if (cardId.startsWith('project-') && imageAssets.projects[cardId]) {
+      delete imageAssets.projects[cardId];
+    }
+    triggerUpdate();
+  }
+}
+
+// -------------------------------------------------------------
+// DESIGN MANAGEMENT
+// -------------------------------------------------------------
+function selectTheme(themeId) {
+  currentTheme = themeId;
+  
+  // Update selection UI
+  const themeCards = document.querySelectorAll('.theme-card');
+  themeCards.forEach(card => card.classList.remove('selected'));
+  
+  document.getElementById(`theme-${themeId}`).classList.add('selected');
+  const themeNames = {
+    minimalist: 'Minimaliste Moderne',
+    creative: 'Créatif Dégradé',
+    developer: 'Terminal Développeur',
+    brutalist: 'Néo-Brutaliste Pop',
+    editorial: 'Chic Éditorial'
+  };
+  showToast(`Thème activé : ${themeNames[themeId] || themeId}.`, 'success');
+  triggerUpdate();
+}
+
+function applyPreset(accentColor, secondaryColor, presetName) {
+  document.getElementById('design-accent').value = accentColor;
+  document.getElementById('design-secondary').value = secondaryColor;
+  
+  document.getElementById('accent-hex').innerText = accentColor;
+  document.getElementById('secondary-hex').innerText = secondaryColor;
+  
+  showToast(`Palette appliquée : ${presetName}.`, 'success');
+  triggerUpdate();
+}
+
+// -------------------------------------------------------------
+// IMAGE FILE READING (BASE64)
+// -------------------------------------------------------------
+function previewImage(input, previewId) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    showToast("L'image est trop volumineuse. (max 2Mo)", "error");
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const preview = document.getElementById(previewId);
+    preview.style.backgroundImage = `url(${e.target.result})`;
+    preview.innerHTML = ''; // Clear icon placeholder
+    
+    // Save to global assets
+    imageAssets.avatar = e.target.result;
+    triggerUpdate();
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewProjectImage(input, previewId, cardId) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    showToast("L'image est trop volumineuse. (max 2Mo)", "error");
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const preview = document.getElementById(previewId);
+    preview.style.backgroundImage = `url(${e.target.result})`;
+    preview.innerHTML = ''; // Clear icon
+    
+    // Store image
+    imageAssets.projects[cardId] = e.target.result;
+    triggerUpdate();
+  };
+  reader.readAsDataURL(file);
+}
+
+// -------------------------------------------------------------
+// DATA BINDING & LIVE PREVIEW SYSTEM
+// -------------------------------------------------------------
+function getFormData() {
+  // Color palette updates
+  const accentVal = document.getElementById('design-accent').value;
+  const secondaryVal = document.getElementById('design-secondary').value;
+  document.getElementById('accent-hex').innerText = accentVal;
+  document.getElementById('secondary-hex').innerText = secondaryVal;
+
+  // Profile data
+  const data = {
+    profile: {
+      name: document.getElementById('profile-name').value || 'Jean Dupont',
+      title: document.getElementById('profile-title').value || 'Profession',
+      bio: document.getElementById('profile-bio').value || '',
+      email: document.getElementById('profile-email').value || '',
+      phone: document.getElementById('profile-phone').value || '',
+      age: document.getElementById('profile-age').value || '',
+      experience: document.getElementById('profile-experience').value || '',
+      location: document.getElementById('profile-location').value || '',
+      address: document.getElementById('profile-address').value || '',
+      availability: document.getElementById('profile-availability').value || '',
+      contract: document.getElementById('profile-contract').value || '',
+      languages: document.getElementById('profile-languages').value || '',
+      hobbies: document.getElementById('profile-hobbies').value || '',
+      github: document.getElementById('profile-github').value || '',
+      linkedin: document.getElementById('profile-linkedin').value || '',
+      twitter: document.getElementById('profile-twitter').value || '',
+      facebook: document.getElementById('profile-facebook').value || '',
+      avatar: imageAssets.avatar || ''
+    },
+    skills: [],
+    projects: [],
+    timeline: [],
+    design: {
+      accentColor: accentVal,
+      secondaryColor: secondaryVal
+    }
+  };
+
+  // Compile Skills
+  const skillCards = document.querySelectorAll('#skills-repeater .repeater-card');
+  skillCards.forEach(card => {
+    const name = card.querySelector('.skill-input-name').value;
+    const level = card.querySelector('.skill-input-level').value;
+    if (name.trim()) {
+      data.skills.push({ name: name.trim(), level: parseInt(level, 10) });
+    }
+  });
+
+  // Compile Projects
+  const projectCards = document.querySelectorAll('#projects-repeater .repeater-card');
+  projectCards.forEach(card => {
+    const title = card.querySelector('.proj-input-title').value;
+    const cat = card.querySelector('.proj-input-category').value;
+    const desc = card.querySelector('.proj-input-desc').value;
+    const tech = card.querySelector('.proj-input-tech').value;
+    const live = card.querySelector('.proj-input-live').value;
+    const git = card.querySelector('.proj-input-github').value;
+    const cardId = card.id;
+
+    if (title.trim()) {
+      data.projects.push({
+        title: title.trim(),
+        category: cat.trim(),
+        description: desc.trim(),
+        technologies: tech.trim(),
+        liveUrl: live.trim(),
+        githubUrl: git.trim(),
+        image: imageAssets.projects[cardId] || ''
+      });
+    }
+  });
+
+  // Compile Timeline
+  const timelineCards = document.querySelectorAll('#timeline-repeater .repeater-card');
+  timelineCards.forEach(card => {
+    const role = card.querySelector('.time-input-role').value;
+    const org = card.querySelector('.time-input-org').value;
+    const start = card.querySelector('.time-input-start').value;
+    const end = card.querySelector('.time-input-end').value;
+    const desc = card.querySelector('.time-input-desc').value;
+
+    if (role.trim()) {
+      data.timeline.push({
+        role: role.trim(),
+        organization: org.trim(),
+        startDate: start.trim(),
+        endDate: end.trim(),
+        description: desc.trim()
+      });
+    }
+  });
+
+  return data;
+}
+
+// Throttle preview updates to avoid lag when typing fast
+let updateTimeout = null;
+function triggerUpdate() {
+  if (updateTimeout) clearTimeout(updateTimeout);
+  updateTimeout = setTimeout(() => {
+    updatePreview();
+  }, 350);
+}
+
+function updatePreview() {
+  const data = getFormData();
+  const compiled = generatePortfolio(data, currentTheme);
+  
+  // Combine CSS & JS directly for iframe rendering in runtime
+  let htmlContent = compiled.html;
+  htmlContent = htmlContent.replace('<link rel="stylesheet" href="styles.css">', `<style>${compiled.css}</style>`);
+  htmlContent = htmlContent.replace('<script src="script.js"></script>', `<script>${compiled.js}</script>`);
+
+  const iframe = document.getElementById('preview-frame');
+  if (iframe) {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(htmlContent);
+      doc.close();
+    } catch (e) {
+      console.error("Iframe write failed, falling back to srcdoc:", e);
+      iframe.srcdoc = htmlContent;
+    }
+  }
+}
+
+// Fullscreen opening of compiled content
+function openPreviewWindow() {
+  const data = getFormData();
+  const compiled = generatePortfolio(data, currentTheme);
+  
+  let htmlContent = compiled.html;
+  htmlContent = htmlContent.replace('<link rel="stylesheet" href="styles.css">', `<style>${compiled.css}</style>`);
+  htmlContent = htmlContent.replace('<script src="script.js"></script>', `<script>${compiled.js}</script>`);
+
+  const newWindow = window.open();
+  if (newWindow) {
+    newWindow.document.write(htmlContent);
+    newWindow.document.close();
+  } else {
+    showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
+  }
+}
+
+// -------------------------------------------------------------
+// ZIP EXPORT COMPILER (CLIENT-SIDE)
+// -------------------------------------------------------------
+function exportZip() {
+  const data = getFormData();
+  const compiled = generatePortfolio(data, currentTheme, true);
+  
+  const zip = new JSZip();
+  
+  // Write basic bundle files
+  zip.file("index.html", compiled.html);
+  zip.file("styles.css", compiled.css);
+  zip.file("script.js", compiled.js);
+  
+  // Create images folder
+  const imgFolder = zip.folder("images");
+  
+  // Bundle files and uploader assets
+  compiled.images.forEach(img => {
+    // img.base64 is the pure base64 data string
+    imgFolder.file(img.filename, img.base64, { base64: true });
+  });
+  
+  showToast("Génération du package ZIP en cours...", "success");
+  
+  zip.generateAsync({ type: "blob" })
+    .then((content) => {
+      // Create download trigger
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(content);
+      link.download = `portfolio_${data.profile.name.toLowerCase().replace(/\s+/g, '_')}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast("Fichier ZIP téléchargé avec succès ! Prêt à être déployé.", "success");
+    })
+    .catch((err) => {
+      console.error(err);
+      showToast("Erreur lors de la création du fichier ZIP.", "error");
+    });
+}
+
+// -------------------------------------------------------------
+// NOTIFICATION TOAST
+// -------------------------------------------------------------
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('studio-toast');
+  const toastMsg = document.getElementById('toast-message');
+  
+  // Configure icon
+  const icon = toast.querySelector('i');
+  if (type === 'success') {
+    toast.className = 'toast success show';
+    icon.className = 'fas fa-check-circle';
+    icon.style.color = '#10b981';
+  } else {
+    toast.className = 'toast error show';
+    icon.className = 'fas fa-exclamation-circle';
+    icon.style.color = '#ef4444';
+  }
+
+  toastMsg.innerText = message;
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 4000);
+}

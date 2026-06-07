@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Builder Studio</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-glow-orb orb-left"></div>
+  <div class="bg-glow-orb orb-right"></div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="studio-toast" class="toast">
+    <i class="fas fa-info-circle"></i>
+    <span id="toast-message">Message</span>
+  </div>
+
+  <!-- LOGIN SCREEN (OVERLAY) -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <h1 class="login-logo"><i class="fas fa-magic"></i> Portfolio Studio</h1>
+      <p class="login-subtitle">Connectez-vous pour commencer la création de votre portfolio</p>
+      
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="login-form-group">
+          <label for="username">Identifiant</label>
+          <div class="login-input-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" id="username" class="login-input" required placeholder="admin" value="admin">
+          </div>
+        </div>
+        <div class="login-form-group">
+          <label for="password">Mot de passe</label>
+          <div class="login-input-wrap">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" class="login-input" required placeholder="••••••••" value="admin">
+          </div>
+        </div>
+        <button type="submit" class="login-btn">Accéder au Studio</button>
+      </form>
+      
+      <p class="login-demo-hint">Utilisez les identifiants par défaut : <code>admin</code> / <code>admin</code></p>
+    </div>
+  </div>
+
+  <!-- STUDIO WORKSPACE -->
+  <div class="studio-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="studio-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fas fa-sliders-h"></i></div>
+        <span class="brand-name">PortfolioStudio</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-target="sec-about">
+          <i class="fas fa-user-circle"></i> Info Générale
+        </a>
+        <a href="#" class="nav-item" data-target="sec-skills">
+          <i class="fas fa-tasks"></i> Compétences
+        </a>
+        <a href="#" class="nav-item" data-target="sec-projects">
+          <i class="fas fa-laptop-code"></i> Projets
+        </a>
+        <a href="#" class="nav-item" data-target="sec-timeline">
+          <i class="fas fa-graduation-cap"></i> Parcours
+        </a>
+        <a href="#" class="nav-item" data-target="sec-design">
+          <i class="fas fa-palette"></i> Design & Thème
+        </a>
+        <a href="#" class="nav-item" data-target="sec-export">
+          <i class="fas fa-file-archive"></i> Téléchargement
+        </a>
+      </nav>
+      
+      <div class="sidebar-user">
+        <div class="user-info">
+          <div class="user-avatar-placeholder">A</div>
+          <span class="user-name">Administrateur</span>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()" title="Se déconnecter">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- split workspace -->
+    <div class="studio-workspace">
+      
+      <!-- Editor Panel (Left Column) -->
+      <section class="editor-panel">
+        
+        <!-- SECTION 1: ABOUT / INFO GENERALE -->
+        <div id="sec-about" class="editor-section active">
+          <h2 class="section-title">Informations Générales</h2>
+          <p class="section-desc">Renseignez vos coordonnées de base, votre biographie et vos réseaux sociaux.</p>
+          
+          <div class="form-grid">
+            <div class="form-group form-group-full">
+              <label>Photo de Profil</label>
+              <div class="upload-wrapper">
+                <div id="avatar-preview" class="preview-thumb">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="upload-actions">
+                  <label for="avatar-upload" class="upload-btn-label">Choisir une image</label>
+                  <input type="file" id="avatar-upload" class="file-input" accept="image/*" onchange="previewImage(this, 'avatar-preview')">
+                  <span class="upload-hint">Format PNG/JPG conseillé (max 2Mo)</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="profile-name">Nom complet</label>
+              <input type="text" id="profile-name" class="form-control" placeholder="Jean Dupont" value="Jean Dupont">
+            </div>
+            <div class="form-group">
+              <label for="profile-title">Rôle / Profession</label>
+              <input type="text" id="profile-title" class="form-control" placeholder="Développeur Web Fullstack" value="Développeur Web Fullstack">
+            </div>
+            
+            <div class="form-group form-group-full">
+              <label for="profile-bio">Bio / Résumé</label>
+              <textarea id="profile-bio" class="form-control" rows="4" placeholder="Décrivez votre parcours et ce qui vous passionne..."></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="profile-email">Adresse Email</label>
+              <input type="email" id="profile-email" class="form-control" placeholder="jean.dupont@example.com" value="jean.dupont@example.com">
+            </div>
+            <div class="form-group">
+              <label for="profile-phone">Téléphone / WhatsApp</label>
+              <input type="tel" id="profile-phone" class="form-control" placeholder="+33 6 12 34 56 78">
+            </div>
+            <div class="form-group">
+              <label for="profile-age">Âge</label>
+              <input type="number" id="profile-age" class="form-control" placeholder="28">
+            </div>
+            <div class="form-group">
+              <label for="profile-experience">Années d'expérience</label>
+              <input type="number" id="profile-experience" class="form-control" placeholder="5">
+            </div>
+            <div class="form-group">
+              <label for="profile-location">Localisation (Ville, Pays)</label>
+              <input type="text" id="profile-location" class="form-control" placeholder="Paris, France">
+            </div>
+            <div class="form-group">
+              <label for="profile-address">Adresse complète</label>
+              <input type="text" id="profile-address" class="form-control" placeholder="12 Rue de la Paix, 75002">
+            </div>
+            <div class="form-group">
+              <label for="profile-availability">Disponibilité</label>
+              <input type="text" id="profile-availability" class="form-control" placeholder="Immédiate / Sous 1 mois">
+            </div>
+            <div class="form-group">
+              <label for="profile-contract">Type de contrat recherché</label>
+              <input type="text" id="profile-contract" class="form-control" placeholder="Freelance / CDI / Alternance">
+            </div>
+            <div class="form-group">
+              <label for="profile-languages">Langues parlées (séparées par virgules)</label>
+              <input type="text" id="profile-languages" class="form-control" placeholder="Français (Natif), Anglais (C1)">
+            </div>
+            <div class="form-group">
+              <label for="profile-hobbies">Loisirs (séparés par virgules)</label>
+              <input type="text" id="profile-hobbies" class="form-control" placeholder="Voyages, Photographie, Échecs">
+            </div>
+            
+            <div class="form-group form-group-full" style="border-top: 1px solid var(--border-light); margin-top: 1.5rem; padding-top: 1.5rem;">
+              <h3 style="font-size: 1.1rem; color: white; margin-bottom: 0.5rem;">Réseaux Sociaux</h3>
+            </div>
+            
+            <div class="form-group">
+              <label for="profile-github">Lien GitHub</label>
+              <input type="url" id="profile-github" class="form-control" placeholder="https://github.com/jeandupont">
+            </div>
+            <div class="form-group">
+              <label for="profile-linkedin">Lien LinkedIn</label>
+              <input type="url" id="profile-linkedin" class="form-control" placeholder="https://linkedin.com/in/jeandupont">
+            </div>
+            <div class="form-group">
+              <label for="profile-twitter">Lien Twitter (X)</label>
+              <input type="url" id="profile-twitter" class="form-control" placeholder="https://twitter.com/jeandupont">
+            </div>
+            <div class="form-group">
+              <label for="profile-facebook">Lien Facebook</label>
+              <input type="url" id="profile-facebook" class="form-control" placeholder="https://facebook.com/jeandupont">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: SKILLS / COMPETENCES -->
+        <div id="sec-skills" class="editor-section">
+          <h2 class="section-title">Mes Compétences</h2>
+          <p class="section-desc">Ajoutez vos compétences techniques ou interpersonnelles et évaluez votre niveau d'expertise.</p>
+          
+          <div id="skills-repeater" class="repeater-container">
+            <!-- Repated skill cards will go here dynamically -->
+          </div>
+          
+          <button type="button" class="btn-add-item" onclick="addSkillItem()">
+            <i class="fas fa-plus"></i> Ajouter une compétence
+          </button>
+        </div>
+
+        <!-- SECTION 3: PROJECTS / PROJETS -->
+        <div id="sec-projects" class="editor-section">
+          <h2 class="section-title">Mes Projets</h2>
+          <p class="section-desc">Présentez vos plus belles créations avec images, liens et descriptifs.</p>
+          
+          <div id="projects-repeater" class="repeater-container">
+            <!-- Repeated project cards will go here dynamically -->
+          </div>
+          
+          <button type="button" class="btn-add-item" onclick="addProjectItem()">
+            <i class="fas fa-plus"></i> Ajouter un projet
+          </button>
+        </div>
+
+        <!-- SECTION 4: TIMELINE / PARCOURS -->
+        <div id="sec-timeline" class="editor-section">
+          <h2 class="section-title">Mon Parcours</h2>
+          <p class="section-desc">Structurez vos expériences professionnelles et vos diplômes académiques dans une frise chronologique.</p>
+          
+          <div id="timeline-repeater" class="repeater-container">
+            <!-- Repeated timeline items will go here dynamically -->
+          </div>
+          
+          <button type="button" class="btn-add-item" onclick="addTimelineItem()">
+            <i class="fas fa-plus"></i> Ajouter une expérience / formation
+          </button>
+        </div>
+
+        <!-- SECTION 5: DESIGN / STYLE -->
+        <div id="sec-design" class="editor-section">
+          <h2 class="section-title">Design & Style</h2>
+          <p class="section-desc">Sélectionnez le style graphique de votre portfolio et personnalisez la palette de couleurs.</p>
+          
+          <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-light)">1. Modèle de Portfolio</h3>
+          <div class="design-themes-grid">
+            <div class="theme-card selected" onclick="selectTheme('minimalist')" id="theme-minimalist">
+              <div class="theme-badge"><i class="fas fa-check"></i></div>
+              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)"></div>
+              <h4 class="theme-card-name">Minimaliste Moderne</h4>
+              <p class="theme-card-desc">Design épuré et clair, idéal pour les profils sobres et élégants.</p>
+            </div>
+            <div class="theme-card" onclick="selectTheme('creative')" id="theme-creative">
+              <div class="theme-badge"><i class="fas fa-check"></i></div>
+              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)"></div>
+              <h4 class="theme-card-name">Créatif Dégradé</h4>
+              <p class="theme-card-desc">Couleurs vibrantes, effets glassmorphic et animations fluides.</p>
+            </div>
+            <div class="theme-card" onclick="selectTheme('developer')" id="theme-developer">
+              <div class="theme-badge"><i class="fas fa-check"></i></div>
+              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #090d16 0%, #1e293b 100%)"></div>
+              <h4 class="theme-card-name">Terminal Développeur</h4>
+              <p class="theme-card-desc">Aperçu rétro style console système, idéal pour les programmeurs.</p>
+            </div>
+            <div class="theme-card" onclick="selectTheme('brutalist')" id="theme-brutalist">
+              <div class="theme-badge"><i class="fas fa-check"></i></div>
+              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #fde047 0%, #f97316 100%)"></div>
+              <h4 class="theme-card-name">Néo-Brutaliste Pop</h4>
+              <p class="theme-card-desc">Bordures épaisses, ombres marquées et couleurs vives rétro-pop.</p>
+            </div>
+            <div class="theme-card" onclick="selectTheme('editorial')" id="theme-editorial">
+              <div class="theme-badge"><i class="fas fa-check"></i></div>
+              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f5f5f4 0%, #d7c49e 100%)"></div>
+              <h4 class="theme-card-name">Chic Éditorial</h4>
+              <p class="theme-card-desc">Polices Serif raffinées, tons crème et mise en page littéraire.</p>
+            </div>
+          </div>
+          
+          <h3 style="font-size: 1.1rem; margin: 2rem 0 1rem 0; color: var(--text-light)">2. Palettes Prédéfinies</h3>
+          <div class="presets-palette-grid">
+            <div class="preset-color-card" onclick="applyPreset('#6366f1', '#ec4899', 'Sunset Indigo')">
+              <div class="preset-colors">
+                <span style="background-color: #6366f1"></span>
+                <span style="background-color: #ec4899"></span>
+              </div>
+              <span class="preset-name">Sunset Indigo</span>
+            </div>
+            <div class="preset-color-card" onclick="applyPreset('#10b981', '#059669', 'Emerald Mint')">
+              <div class="preset-colors">
+                <span style="background-color: #10b981"></span>
+                <span style="background-color: #059669"></span>
+              </div>
+              <span class="preset-name">Emerald Mint</span>
+            </div>
+            <div class="preset-color-card" onclick="applyPreset('#f43f5e', '#fb7185', 'Rose Sakura')">
+              <div class="preset-colors">
+                <span style="background-color: #f43f5e"></span>
+                <span style="background-color: #fb7185"></span>
+              </div>
+              <span class="preset-name">Rose Sakura</span>
+            </div>
+            <div class="preset-color-card" onclick="applyPreset('#0ea5e9', '#2563eb', 'Ocean Blue')">
+              <div class="preset-colors">
+                <span style="background-color: #0ea5e9"></span>
+                <span style="background-color: #2563eb"></span>
+              </div>
+              <span class="preset-name">Ocean Blue</span>
+            </div>
+            <div class="preset-color-card" onclick="applyPreset('#f59e0b', '#d97706', 'Amber Gold')">
+              <div class="preset-colors">
+                <span style="background-color: #f59e0b"></span>
+                <span style="background-color: #d97706"></span>
+              </div>
+              <span class="preset-name">Amber Gold</span>
+            </div>
+            <div class="preset-color-card" onclick="applyPreset('#2e7d32', '#8d6e63', 'Forest Timber')">
+              <div class="preset-colors">
+                <span style="background-color: #2e7d32"></span>
+                <span style="background-color: #8d6e63"></span>
+              </div>
+              <span class="preset-name">Forest Timber</span>
+            </div>
+          </div>
+          
+          <h3 style="font-size: 1.1rem; margin: 2rem 0 1rem 0; color: var(--text-light)">3. Ajustement Manuel</h3>
+          <div class="color-picker-grid">
+            <div class="color-input-wrapper">
+              <input type="color" id="design-accent" value="#6366f1" onchange="triggerUpdate()">
+              <div class="color-picker-lbl">
+                <span>Couleur d'Accent</span>
+                <span id="accent-hex">#6366f1</span>
+              </div>
+            </div>
+            <div class="color-input-wrapper">
+              <input type="color" id="design-secondary" value="#ec4899" onchange="triggerUpdate()">
+              <div class="color-picker-lbl">
+                <span>Couleur Secondaire</span>
+                <span id="secondary-hex">#ec4899</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 6: EXPORT / TÉLÉCHARGEMENT -->
+        <div id="sec-export" class="editor-section">
+          <h2 class="section-title">Téléchargement Direct</h2>
+          <p class="section-desc">Générez et téléchargez votre portfolio compressé en fichier ZIP autonome, prêt à être hébergé partout (Vercel, Netlify, Github Pages, etc.).</p>
+          
+          <div class="export-card">
+            <div class="export-icon"><i class="fas fa-file-zipper"></i></div>
+            <h3 style="margin-bottom: 0.5rem">Exporter votre Projet</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem">
+              L'archive ZIP contiendra la structure complète : <code>index.html</code>, <code>styles.css</code>, <code>script.js</code> ainsi qu'un dossier <code>images/</code> autonome.
+            </p>
+            <button class="export-btn" onclick="exportZip()">
+              <i class="fas fa-download"></i> Télécharger le ZIP
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Live Preview Panel (Right Column) -->
+      <section class="preview-panel">
+        <div class="preview-bar">
+          <span class="preview-title">Aperçu en Direct</span>
+          <div class="preview-actions">
+            <button class="preview-btn" onclick="openPreviewWindow()">
+              <i class="fas fa-external-link-alt"></i> Plein Écran
+            </button>
+          </div>
+        </div>
+        <div class="preview-frame-wrapper">
+          <iframe id="preview-frame" class="preview-iframe"></iframe>
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+  <!-- CDN dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="templates.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
