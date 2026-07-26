@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Portfolio Builder Studio - Application Logic
  */
 
@@ -16,18 +16,18 @@ let previewMode = 'portfolio';
 const defaultData = {
   profile: {
     name: 'Alexandre Martin',
-    title: 'DÃ©veloppeur Web & Mobile',
-    bio: 'PassionnÃ© par l\'architecture logicielle et les interfaces interactives. J\'aide les entreprises Ã  transformer leurs idÃ©es en produits numÃ©riques d\'exception.',
+    title: 'Développeur Web & Mobile',
+    bio: 'Passionné par l\'architecture logicielle et les interfaces interactives. J\'aide les entreprises à transformer leurs idées en produits numériques d\'exception.',
     email: 'alexandre.martin@example.com',
     phone: '+33 6 12 34 56 78',
     age: '28',
     experience: '6',
     location: 'Paris, France',
     address: '12 Rue de la Paix, 75002 Paris',
-    availability: 'ImmÃ©diate',
+    availability: 'Immédiate',
     contract: 'Freelance / CDI / Alternance',
-    languages: 'FranÃ§ais (Natif), Anglais (C1, Technique)',
-    hobbies: 'Voyages, Photographie, Boxe, Ã‰checs',
+    languages: 'Français (Natif), Anglais (C1, Technique)',
+    hobbies: 'Voyages, Photographie, Boxe, Échecs',
     github: 'https://github.com/alexandremartin',
     linkedin: 'https://linkedin.com/in/alexandremartin',
     twitter: 'https://twitter.com/alexandre',
@@ -42,8 +42,8 @@ const defaultData = {
   projects: [
     {
       title: 'SaaS Dashboard Financier',
-      description: 'Une plateforme d\'analyse financiÃ¨re en temps rÃ©el avec des graphiques interactifs et un mode sombre complet.',
-      category: 'DÃ©veloppement Web',
+      description: 'Une plateforme d\'analyse financière en temps réel avec des graphiques interactifs et un mode sombre complet.',
+      category: 'Développement Web',
       technologies: 'React, Chart.js, HSL CSS',
       liveUrl: 'https://example.com/demo',
       githubUrl: 'https://github.com/alexandremartin/dashboard',
@@ -51,7 +51,7 @@ const defaultData = {
     },
     {
       title: 'Application E-Commerce',
-      description: 'Application d\'achat de vÃªtements en ligne avec intÃ©gration de Stripe, gestion du panier et catalogue dynamique.',
+      description: 'Application d\'achat de vêtements en ligne avec intégration de Stripe, gestion du panier et catalogue dynamique.',
       category: 'Mobile / PWA',
       technologies: 'React, Service Workers, Stripe API',
       liveUrl: 'https://example.com/shop',
@@ -61,18 +61,18 @@ const defaultData = {
   ],
   timeline: [
     {
-      role: 'DÃ©veloppeur Fullstack Lead',
+      role: 'Développeur Fullstack Lead',
       organization: 'TechAgency Paris',
       startDate: '2024',
-      endDate: 'PrÃ©sent',
-      description: 'Conception d\'architectures frontend modernes et encadrement d\'une Ã©quipe de dÃ©veloppeurs.'
+      endDate: 'Présent',
+      description: 'Conception d\'architectures frontend modernes et encadrement d\'une équipe de développeurs.'
     },
     {
-      role: 'DÃ©veloppeur Front-End',
+      role: 'Développeur Front-End',
       organization: 'WebStudio Lyon',
       startDate: '2022',
       endDate: '2024',
-      description: 'DÃ©veloppement de composants UI complexes et intÃ©gration pixel-perfect de designs Figma.'
+      description: 'Développement de composants UI complexes et intégration pixel-perfect de designs Figma.'
     }
   ],
   design: {
@@ -114,7 +114,7 @@ function handleLogin(event) {
   if (user === 'admin' && pass === 'admin') {
     sessionStorage.setItem('studio_logged', 'true');
     document.getElementById('login-overlay').classList.add('hidden');
-    showToast('Connexion rÃ©ussie ! Bienvenue dans le studio.', 'success');
+    showToast('Connexion réussie ! Bienvenue dans le studio.', 'success');
   } else {
     showToast('Identifiant ou mot de passe incorrect.', 'error');
   }
@@ -123,7 +123,7 @@ function handleLogin(event) {
 function handleLogout() {
   sessionStorage.removeItem('studio_logged');
   document.getElementById('login-overlay').classList.remove('hidden');
-  showToast('DÃ©connectÃ© avec succÃ¨s.', 'success');
+  showToast('Déconnecté avec succès.', 'success');
 }
 
 // -------------------------------------------------------------
@@ -200,8 +200,8 @@ function loadDefaultData() {
     
   // Default extra fields
   addSoftSkillItem('Leadership');
-  addSoftSkillItem('Esprit d\'Ã©quipe');
-  addLanguageItem('FranÃ§ais', 'Langue maternelle');
+  addSoftSkillItem('Esprit d\'équipe');
+  addLanguageItem('Français', 'Langue maternelle');
   addLanguageItem('Anglais', 'Courant (C1)');
   addHobbyItem('Photographie');
   addHobbyItem('Voyages');
@@ -246,18 +246,18 @@ function addSkillItem(name = '', level = 50) {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-cog"></i> CompÃ©tence</span>
+      <span class="repeater-card-title"><i class="fas fa-cog"></i> Compétence</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
         <i class="fas fa-trash"></i>
       </button>
     </div>
     <div class="form-grid">
       <div class="form-group">
-        <label>Nom de la compÃ©tence</label>
+        <label>Nom de la compétence</label>
         <input type="text" class="form-control skill-input-name" placeholder="ex: JavaScript" value="${name}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Niveau de maÃ®trise (${level}%)</label>
+        <label>Niveau de maîtrise (${level}%)</label>
         <div style="display: flex; align-items: center; gap: 1rem;">
           <input type="range" class="form-control skill-input-level" min="10" max="100" step="5" value="${level}" 
             oninput="this.parentElement.querySelector('.level-val').innerText = this.value + '%'; triggerUpdate()">
@@ -303,7 +303,7 @@ function addProjectItem(project = {}) {
             <label for="${cardId}-upload" class="upload-btn-label">Importer l'image</label>
             <input type="file" id="${cardId}-upload" class="file-input project-image-input" accept="image/*" 
               onchange="previewProjectImage(this, '${cardId}-preview', '${cardId}')">
-            <span class="upload-hint">Format PNG/JPG conseillÃ© (max 2Mo)</span>
+            <span class="upload-hint">Format PNG/JPG conseillé (max 2Mo)</span>
           </div>
         </div>
       </div>
@@ -312,15 +312,15 @@ function addProjectItem(project = {}) {
         <input type="text" class="form-control proj-input-title" placeholder="ex: Site E-commerce" value="${title}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>CatÃ©gorie</label>
+        <label>Catégorie</label>
         <input type="text" class="form-control proj-input-category" placeholder="ex: Web Design / Mobile" value="${cat}" oninput="triggerUpdate()">
       </div>
       <div class="form-group form-group-full">
         <label>Description du projet</label>
-        <textarea class="form-control proj-input-desc" rows="3" placeholder="DÃ©crivez en quelques lignes ce que fait le projet et vos accomplissements..." oninput="triggerUpdate()">${desc}</textarea>
+        <textarea class="form-control proj-input-desc" rows="3" placeholder="Décrivez en quelques lignes ce que fait le projet et vos accomplissements..." oninput="triggerUpdate()">${desc}</textarea>
       </div>
       <div class="form-group form-group-full">
-        <label>Technologies utilisÃ©es (sÃ©parÃ©es par virgules)</label>
+        <label>Technologies utilisées (séparées par virgules)</label>
         <input type="text" class="form-control proj-input-tech" placeholder="ex: React, Tailwind, Node.js" value="${tech}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
@@ -355,31 +355,31 @@ function addTimelineItem(item = {}) {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-briefcase"></i> ExpÃ©rience Professionnelle</span>
+      <span class="repeater-card-title"><i class="fas fa-briefcase"></i> Expérience Professionnelle</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
         <i class="fas fa-trash"></i>
       </button>
     </div>
     <div class="form-grid">
       <div class="form-group">
-        <label>Titre / RÃ´le</label>
-        <input type="text" class="form-control time-input-role" placeholder="ex: DÃ©veloppeur Web" value="${role}" oninput="triggerUpdate()">
+        <label>Titre / Rôle</label>
+        <input type="text" class="form-control time-input-role" placeholder="ex: Développeur Web" value="${role}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
         <label>Entreprise</label>
         <input type="text" class="form-control time-input-org" placeholder="ex: TechCorp" value="${org}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Date de dÃ©but (MM/YYYY)</label>
+        <label>Date de début (MM/YYYY)</label>
         <input type="text" class="form-control time-input-start" placeholder="ex: 09/2021" value="${start}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
         <label>Date de fin</label>
-        <input type="text" class="form-control time-input-end" placeholder="ex: PrÃ©sent" value="${end}" oninput="triggerUpdate()">
+        <input type="text" class="form-control time-input-end" placeholder="ex: Présent" value="${end}" oninput="triggerUpdate()">
       </div>
       <div class="form-group form-group-full">
-        <label>Description des rÃ©alisations</label>
-        <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous rÃ©alisÃ© ?" oninput="triggerUpdate()">${desc}</textarea>
+        <label>Description des réalisations</label>
+        <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous réalisé ?" oninput="triggerUpdate()">${desc}</textarea>
       </div>
     </div>
   `;
@@ -399,26 +399,26 @@ function addEducationItem(item = {}) {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-graduation-cap"></i> Formation / DiplÃ´me</span>
+      <span class="repeater-card-title"><i class="fas fa-graduation-cap"></i> Formation / Diplôme</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
         <i class="fas fa-trash"></i>
       </button>
     </div>
     <div class="form-grid">
       <div class="form-group">
-        <label>DiplÃ´me / SpÃ©cialitÃ©</label>
+        <label>Diplôme / Spécialité</label>
         <input type="text" class="form-control edu-input-degree" placeholder="ex: Master Informatique" value="${degree}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>Ã‰tablissement</label>
-        <input type="text" class="form-control edu-input-inst" placeholder="ex: Sorbonne UniversitÃ©" value="${inst}" oninput="triggerUpdate()">
+        <label>Établissement</label>
+        <input type="text" class="form-control edu-input-inst" placeholder="ex: Sorbonne Université" value="${inst}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>AnnÃ©e de dÃ©but</label>
+        <label>Année de début</label>
         <input type="text" class="form-control edu-input-start" placeholder="ex: 2018" value="${start}" oninput="triggerUpdate()">
       </div>
       <div class="form-group">
-        <label>AnnÃ©e d'obtention</label>
+        <label>Année d'obtention</label>
         <input type="text" class="form-control edu-input-end" placeholder="ex: 2020" value="${end}" oninput="triggerUpdate()">
       </div>
     </div>
@@ -441,7 +441,7 @@ function addSoftSkillItem(name = '') {
     </div>
     <div class="form-grid">
       <div class="form-group form-group-full">
-        <label>CompÃ©tence (Ex: Leadership)</label>
+        <label>Compétence (Ex: Leadership)</label>
         <input type="text" class="form-control softskill-input-name" placeholder="Soft Skill" value="${name}" oninput="triggerUpdate()">
       </div>
     </div>
@@ -486,7 +486,7 @@ function addHobbyItem(name = '') {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-heart"></i> Centre d'intÃ©rÃªt</span>
+      <span class="repeater-card-title"><i class="fas fa-heart"></i> Centre d'intérêt</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
     </div>
     <div class="form-grid">
@@ -509,7 +509,7 @@ function addReferenceItem(name = '', role = '', contact = '') {
   card.id = cardId;
   card.innerHTML = `
     <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-id-badge"></i> RÃ©fÃ©rence</span>
+      <span class="repeater-card-title"><i class="fas fa-id-badge"></i> Référence</span>
       <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
     </div>
     <div class="form-grid">
@@ -556,12 +556,12 @@ function selectTheme(themeId) {
   document.getElementById(`theme-${themeId}`).classList.add('selected');
   const themeNames = {
     minimalist: 'Minimaliste Moderne',
-    creative: 'CrÃ©atif DÃ©gradÃ©',
-    developer: 'Terminal DÃ©veloppeur',
-    brutalist: 'NÃ©o-Brutaliste Pop',
-    editorial: 'Chic Ã‰ditorial'
+    creative: 'Créatif Dégradé',
+    developer: 'Terminal Développeur',
+    brutalist: 'Néo-Brutaliste Pop',
+    editorial: 'Chic Éditorial'
   };
-  showToast(`ThÃ¨me activÃ© : ${themeNames[themeId] || themeId}.`, 'success');
+  showToast(`Thème activé : ${themeNames[themeId] || themeId}.`, 'success');
   
   previewMode = 'portfolio';
   const sel = document.getElementById('preview-mode-select');
@@ -577,7 +577,7 @@ function applyPreset(accentColor, secondaryColor, presetName) {
   document.getElementById('accent-hex').innerText = accentColor;
   document.getElementById('secondary-hex').innerText = secondaryColor;
   
-  showToast(`Palette appliquÃ©e : ${presetName}.`, 'success');
+  showToast(`Palette appliquée : ${presetName}.`, 'success');
   triggerUpdate();
 }
 
@@ -823,7 +823,7 @@ function openPreviewWindow() {
     newWindow.document.write(htmlContent);
     newWindow.document.close();
   } else {
-    showToast("Impossible d'ouvrir l'aperÃ§u. Veuillez autoriser les popups pour ce site.", "error");
+    showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
   }
 }
 
@@ -843,7 +843,7 @@ function previewCV() {
     newWindow.document.write(html);
     newWindow.document.close();
   } else {
-    showToast("Impossible d'ouvrir l'aperÃ§u. Veuillez autoriser les popups pour ce site.", "error");
+    showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
   }
 }
 
@@ -866,7 +866,7 @@ function downloadCV() {
   container.appendChild(cvPage);
   document.body.appendChild(container);
   
-  showToast("GÃ©nÃ©ration du PDF en cours...", "success");
+  showToast("Génération du PDF en cours...", "success");
   
   // Give it a moment to load any images or fonts
   setTimeout(() => {
@@ -882,15 +882,15 @@ function downloadCV() {
     if (typeof html2pdf !== 'undefined') {
       html2pdf().set(opt).from(cvPage).save().then(() => {
         document.body.removeChild(container);
-        showToast("CV tÃ©lÃ©chargÃ© avec succÃ¨s !", "success");
+        showToast("CV téléchargé avec succès !", "success");
       }).catch(err => {
         console.error(err);
         document.body.removeChild(container);
-        showToast("Erreur lors de la gÃ©nÃ©ration.", "error");
+        showToast("Erreur lors de la génération.", "error");
       });
     } else {
       document.body.removeChild(container);
-      showToast("La librairie PDF n'est pas chargÃ©e.", "error");
+      showToast("La librairie PDF n'est pas chargée.", "error");
     }
   }, 500);
 }
@@ -918,7 +918,7 @@ function exportZip() {
     imgFolder.file(img.filename, img.base64, { base64: true });
   });
   
-  showToast("GÃ©nÃ©ration du package ZIP en cours...", "success");
+  showToast("Génération du package ZIP en cours...", "success");
   
   zip.generateAsync({ type: "blob" })
     .then((content) => {
@@ -930,11 +930,11 @@ function exportZip() {
       link.click();
       document.body.removeChild(link);
       
-      showToast("Fichier ZIP tÃ©lÃ©chargÃ© avec succÃ¨s ! PrÃªt Ã  Ãªtre dÃ©ployÃ©.", "success");
+      showToast("Fichier ZIP téléchargé avec succès ! Prêt à être déployé.", "success");
     })
     .catch((err) => {
       console.error(err);
-      showToast("Erreur lors de la crÃ©ation du fichier ZIP.", "error");
+      showToast("Erreur lors de la création du fichier ZIP.", "error");
     });
 }
 
