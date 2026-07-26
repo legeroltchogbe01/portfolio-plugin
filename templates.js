@@ -4,7 +4,42 @@
  * to build the client-side portfolios.
  */
 
+function escapeHtml(unsafe) {
+  if (unsafe === undefined || unsafe === null) return '';
+  return String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function deepEscape(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'string') {
+    return escapeHtml(obj);
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => deepEscape(item));
+  }
+  if (typeof obj === 'object') {
+    const escapedObj = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        if ((key === 'avatar' || key === 'image') && typeof obj[key] === 'string' && obj[key].startsWith('data:')) {
+          escapedObj[key] = obj[key];
+        } else {
+          escapedObj[key] = deepEscape(obj[key]);
+        }
+      }
+    }
+    return escapedObj;
+  }
+  return obj;
+}
+
 function extractImageInfo(dataUrl, defaultName) {
+
   if (!dataUrl) return null;
   if (dataUrl.startsWith('data:')) {
     const matches = dataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
@@ -26,6 +61,15 @@ function getPersonalSpecsHtml(p, themeId) {
   if (p.languages) specs.push({ label: 'Langues', value: p.languages, icon: 'fa-language' });
   if (p.hobbies) specs.push({ label: 'Loisirs', value: p.hobbies, icon: 'fa-heart' });
   
+  if (p.relocation) specs.push({ label: 'Mobilité', value: p.relocation, icon: 'fa-route' });
+  if (p.website) {
+    specs.push({
+      label: 'Site Web',
+      value: `<a href="${p.website}" target="_blank" class="spec-link">${p.website.replace(/^https?:\/\//, '')}</a>`,
+      icon: 'fa-globe'
+    });
+  }
+
   if (p.phone) {
     const cleanPhone = p.phone.replace(/[^0-9+]/g, '');
     const isWhatsapp = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : '#';
@@ -59,8 +103,71 @@ function getPersonalSpecsHtml(p, themeId) {
   return `<div class="specs-grid theme-${themeId}">${items}</div>`;
 }
 
-function generatePortfolio(data, themeId, isExport = false) {
+function getCertificationsCVHtml(data, accent, isDarkSidebar = false) {
+  if (!data.certificationsList || data.certificationsList.length === 0) return '';
+  const textColor = isDarkSidebar ? 'rgba(255,255,255,0.85)' : '#444';
+  const borderBottom = isDarkSidebar ? '1px solid rgba(255,255,255,0.25)' : '1px solid #ccc';
+  const headingColor = isDarkSidebar ? '#fff' : accent;
+  const titleSize = isDarkSidebar ? '11.5pt' : '13pt';
+  
+  const headingStyle = isDarkSidebar 
+    ? `class="side" style="font-size:${titleSize}; text-transform:uppercase; letter-spacing:1px; margin:14px 0 8px; border-bottom:${borderBottom}; padding-bottom:4px; color:${headingColor};"` 
+    : `class="sec" style="font-size:${titleSize}; color:${accent}; text-transform:uppercase; border-bottom:${borderBottom}; margin:14px 0 8px 0; padding-bottom:3px;"`;
+
+  return `
+    <h3 ${headingStyle}>Certifications</h3>
+    <div style="font-size:10pt; color:${textColor}; line-height:1.4; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
+      ${data.certificationsList.map(c => `
+        <div style="margin-bottom:2px;">
+          <strong>${c.name}</strong><br>
+          <span style="font-size:9pt; opacity:0.85;">${c.authority} (${c.date})</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+
+function generatePortfolio(rawConfig, themeId, isExport = false) {
+  const data = deepEscape(rawConfig);
+
+  // Preprocess experience description to include achievements
+  if (data.experience) {
+    data.experience = data.experience.map(t => {
+      if (t.achievements) {
+        return {
+          ...t,
+          description: t.description + `<div class="experience-achievements" style="margin-top:10px; font-size:0.9em; border-left: 2px solid var(--accent); padding-left: 10px; opacity: 0.95;"><strong>Réalisations clés :</strong> ${t.achievements}</div>`
+        };
+      }
+      return t;
+    });
+    data.timeline = data.experience; // sync timeline
+  }
+
+  // Preprocess projects to include date, role, video link
+  if (data.projects) {
+    data.projects = data.projects.map(p => {
+      let meta = '';
+      if (p.date || p.role) {
+        meta += `<div class="project-meta-details" style="font-size:0.85em; font-weight:600; margin-bottom:8px; display:flex; gap:12px; opacity:0.85; color:var(--text-muted, #777);">`;
+        if (p.date) meta += `<span><i class="far fa-calendar-alt"></i> ${p.date}</span>`;
+        if (p.role) meta += `<span><i class="far fa-user"></i> ${p.role}</span>`;
+        meta += `</div>`;
+      }
+      let desc = meta + p.description;
+      if (p.videoUrl) {
+        desc += `<div class="project-video-link" style="margin-top:10px;"><a href="${p.videoUrl}" target="_blank" style="font-size:0.85em; font-weight:700; color:var(--accent); text-decoration:underline; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-video"></i> Démo Vidéo</a></div>`;
+      }
+      return {
+        ...p,
+        description: desc
+      };
+    });
+  }
+
   // 1. Process images
+
   const images = [];
   let avatarPath = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300';
   
@@ -100,9 +207,354 @@ function generatePortfolio(data, themeId, isExport = false) {
     ({ html, css, js } = getBrutalistTemplate(data, avatarPath, processedProjects));
   } else if (themeId === 'editorial') {
     ({ html, css, js } = getEditorialTemplate(data, avatarPath, processedProjects));
+  } else if (themeId === 'corporate') {
+    ({ html, css, js } = getCorporateTemplate(data, avatarPath, processedProjects));
   } else {
     ({ html, css, js } = getMinimalistTemplate(data, avatarPath, processedProjects));
   }
+
+  // Certifications injection for Portfolios
+  let certsHtml = '';
+  if (data.certificationsList && data.certificationsList.length > 0) {
+    certsHtml = `
+      <section class="section certifications-container" id="certifications" style="padding: 80px 0; border-top: 1px solid var(--border, rgba(0,0,0,0.1));">
+        <div class="container" style="max-width:1100px; margin:0 auto; padding:0 20px;">
+          <h2 class="section-title" style="margin-bottom: 40px; font-size: 2.2rem; text-align: center; color:var(--text-title, #111);">Certifications</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;">
+            ${data.certificationsList.map(c => `
+              <div class="cert-card reveal" style="background: var(--card-bg, #fff); border: 1px solid var(--border, rgba(0,0,0,0.1)); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: all 0.3s ease; display:flex; align-items:center; gap:15px;">
+                <div style="background: var(--accent, #6366f1); color: #fff; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink:0;">
+                  <i class="fas fa-certificate"></i>
+                </div>
+                <div>
+                  <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-title, #111);">${c.name}</h3>
+                  <p style="margin: 3px 0 0 0; font-size: 0.85rem; color: var(--text-muted, #666);">${c.authority} &middot; ${c.date}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // Inject Certifications section right before </main> or </body>
+  if (certsHtml) {
+    if (html.includes('</main>')) {
+      html = html.replace('</main>', `${certsHtml}</main>`);
+    } else if (html.includes('</body>')) {
+      html = html.replace('</body>', `${certsHtml}</body>`);
+    }
+  }
+
+  // Inject Light/Dark toggle button and CSS overrides
+  const toggleBtnHtml = `
+    <button class="portfolio-theme-toggle-btn" onclick="togglePortfolioTheme()" aria-label="Changer de mode" style="position:fixed; bottom:30px; right:30px; z-index:9999; background:var(--card-bg, #fff); border:2px solid var(--border, #eee); color:var(--text-title, #333); width:50px; height:50px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(0,0,0,0.15); transition:all 0.3s; font-size:1.3rem;">
+      <i class="fas fa-adjust"></i>
+    </button>
+    <style>
+      .portfolio-theme-toggle-btn:hover {
+        transform: scale(1.1);
+      }
+       /* Define theme colors for light/dark mode override */
+      body.dark-mode-override {
+        background: #0f172a !important;
+        color: #cbd5e1 !important;
+      }
+      body.dark-mode-override h1, 
+      body.dark-mode-override h2, 
+      body.dark-mode-override h3, 
+      body.dark-mode-override h4, 
+      body.dark-mode-override h5, 
+      body.dark-mode-override h6, 
+      body.dark-mode-override .section-title, 
+      body.dark-mode-override .hero-title,
+      body.dark-mode-override .logo,
+      body.dark-mode-override .nav a,
+      body.dark-mode-override .project-title,
+      body.dark-mode-override .timeline-role,
+      body.dark-mode-override strong {
+        color: #f8fafc !important;
+      }
+      body.dark-mode-override .project-card, 
+      body.dark-mode-override .skill-item, 
+      body.dark-mode-override .timeline-item, 
+      body.dark-mode-override .cert-card,
+      body.dark-mode-override header,
+      body.dark-mode-override footer,
+      body.dark-mode-override .card {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #cbd5e1 !important;
+      }
+      body.dark-mode-override p,
+      body.dark-mode-override span,
+      body.dark-mode-override li,
+      body.dark-mode-override .hero-desc,
+      body.dark-mode-override .spec-label,
+      body.dark-mode-override .spec-value,
+      body.dark-mode-override .skill-name,
+      body.dark-mode-override .project-desc,
+      body.dark-mode-override .timeline-desc,
+      body.dark-mode-override .timeline-org,
+      body.dark-mode-override .cert-card p,
+      body.dark-mode-override footer p,
+      body.dark-mode-override footer div,
+      body.dark-mode-override .spec-link {
+        color: #cbd5e1 !important;
+      }
+      body.dark-mode-override .tech-tag {
+        background: rgba(255,255,255,0.08) !important;
+        color: #f8fafc !important;
+      }
+      body.dark-mode-override .spec-label, 
+      body.dark-mode-override .timeline-period,
+      body.dark-mode-override .timeline-org {
+        color: #94a3b8 !important;
+      }
+      body.dark-mode-override section,
+      body.dark-mode-override .skills,
+      body.dark-mode-override .experience,
+      body.dark-mode-override .hero,
+      body.dark-mode-override .contact,
+      body.dark-mode-override .about,
+      body.dark-mode-override .container,
+      body.dark-mode-override .profile-section {
+        background: #0f172a !important;
+        background-color: #0f172a !important;
+      }
+      body.dark-mode-override .btn-secondary,
+      body.dark-mode-override .btn-outline,
+      body.dark-mode-override .proj-link {
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+        background: transparent !important;
+      }
+      body.dark-mode-override .btn-secondary:hover,
+      body.dark-mode-override .btn-outline:hover,
+      body.dark-mode-override .proj-link:hover {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+      }
+      body.dark-mode-override .btn-primary {
+        background: var(--accent, #6366f1) !important;
+        color: #ffffff !important;
+        border-color: var(--accent, #6366f1) !important;
+      }
+      body.dark-mode-override .social-links a,
+      body.dark-mode-override .social-link,
+      body.dark-mode-override .social-icon,
+      body.dark-mode-override .social-links i,
+      body.dark-mode-override .hero-socials-bar a,
+      body.dark-mode-override .hero-socials-bar a i,
+      body.dark-mode-override .contact-social-icons a,
+      body.dark-mode-override .contact-social-icons a i {
+        color: #cbd5e1 !important;
+      }
+      body.dark-mode-override .hero-socials-bar a,
+      body.dark-mode-override .contact-social-icons a {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+      }
+      body.dark-mode-override .social-links a:hover,
+      body.dark-mode-override .social-link:hover,
+      body.dark-mode-override .social-icon:hover,
+      body.dark-mode-override .hero-socials-bar a:hover,
+      body.dark-mode-override .contact-social-icons a:hover {
+        color: #f8fafc !important;
+        background-color: rgba(255, 255, 255, 0.15) !important;
+      }
+      body.dark-mode-override .portfolio-theme-toggle-btn {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+      }
+
+      /* Light mode overrides for naturally dark themes */
+      body.light-mode-override {
+        background: #f8fafc !important;
+        color: #334155 !important;
+      }
+      body.light-mode-override h1, 
+      body.light-mode-override h2, 
+      body.light-mode-override h3, 
+      body.light-mode-override h4, 
+      body.light-mode-override h5, 
+      body.light-mode-override h6, 
+      body.light-mode-override .section-title, 
+      body.light-mode-override .hero-title,
+      body.light-mode-override .logo,
+      body.light-mode-override .nav a,
+      body.light-mode-override .project-title,
+      body.light-mode-override .timeline-role,
+      body.light-mode-override strong {
+        color: #0f172a !important;
+      }
+      body.light-mode-override .project-card, 
+      body.light-mode-override .skill-item, 
+      body.light-mode-override .timeline-item, 
+      body.light-mode-override .cert-card,
+      body.light-mode-override header,
+      body.light-mode-override footer,
+      body.light-mode-override .card {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        color: #334155 !important;
+      }
+      body.light-mode-override p,
+      body.light-mode-override span,
+      body.light-mode-override li,
+      body.light-mode-override .hero-desc,
+      body.light-mode-override .spec-label,
+      body.light-mode-override .spec-value,
+      body.light-mode-override .skill-name,
+      body.light-mode-override .project-desc,
+      body.light-mode-override .timeline-desc,
+      body.light-mode-override .timeline-org,
+      body.light-mode-override .cert-card p,
+      body.light-mode-override footer p,
+      body.light-mode-override footer div,
+      body.light-mode-override .spec-link {
+        color: #334155 !important;
+      }
+      body.light-mode-override .tech-tag {
+        background: rgba(0,0,0,0.05) !important;
+        color: #0f172a !important;
+      }
+      body.light-mode-override .spec-label, 
+      body.light-mode-override .timeline-period,
+      body.light-mode-override .timeline-org {
+        color: #64748b !important;
+      }
+      body.light-mode-override section,
+      body.light-mode-override .skills,
+      body.light-mode-override .experience,
+      body.light-mode-override .hero,
+      body.light-mode-override .contact,
+      body.light-mode-override .about,
+      body.light-mode-override .container,
+      body.light-mode-override .profile-section {
+        background: #f8fafc !important;
+        background-color: #f8fafc !important;
+      }
+      body.light-mode-override .btn-secondary,
+      body.light-mode-override .btn-outline,
+      body.light-mode-override .proj-link {
+        color: #334155 !important;
+        border-color: #e2e8f0 !important;
+        background: transparent !important;
+      }
+      body.light-mode-override .btn-secondary:hover,
+      body.light-mode-override .btn-outline:hover,
+      body.light-mode-override .proj-link:hover {
+        background: #ffffff !important;
+        color: #0f172a !important;
+      }
+      body.light-mode-override .btn-primary {
+        background: var(--accent, #6366f1) !important;
+        color: #ffffff !important;
+        border-color: var(--accent, #6366f1) !important;
+      }
+      body.light-mode-override .social-links a,
+      body.light-mode-override .social-link,
+      body.light-mode-override .social-icon,
+      body.light-mode-override .social-links i,
+      body.light-mode-override .hero-socials-bar a,
+      body.light-mode-override .hero-socials-bar a i,
+      body.light-mode-override .contact-social-icons a,
+      body.light-mode-override .contact-social-icons a i {
+        color: #334155 !important;
+      }
+      body.light-mode-override .hero-socials-bar a,
+      body.light-mode-override .contact-social-icons a {
+        background-color: rgba(0, 0, 0, 0.05) !important;
+        border-color: rgba(0, 0, 0, 0.1) !important;
+      }
+      body.light-mode-override .social-links a:hover,
+      body.light-mode-override .social-link:hover,
+      body.light-mode-override .social-icon:hover,
+      body.light-mode-override .hero-socials-bar a:hover,
+      body.light-mode-override .contact-social-icons a:hover {
+        color: #0f172a !important;
+        background-color: rgba(0, 0, 0, 0.1) !important;
+      }
+      body.light-mode-override .cyan {
+        color: #0369a1 !important;
+      }
+      body.light-mode-override .green {
+        color: #15803d !important;
+      }
+      body.light-mode-override .yellow {
+        color: #a16207 !important;
+      }
+      body.light-mode-override .comment {
+        color: #64748b !important;
+      }
+      body.light-mode-override .portfolio-theme-toggle-btn {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+
+      /* Global Mobile Responsiveness */
+      @media (max-width: 600px) {
+        .specs-grid {
+          grid-template-columns: 1fr !important;
+          gap: 12px !important;
+          margin: 1.5rem 0 !important;
+          padding: 1rem 0 !important;
+        }
+        .cert-card {
+          flex-direction: column !important;
+          text-align: center;
+          gap: 10px !important;
+        }
+        .hero-cta-group, .hero-actions {
+          flex-direction: column !important;
+          gap: 10px !important;
+          width: 100% !important;
+          display: flex !important;
+        }
+        .hero-cta-group a, .hero-actions a, .hero-actions button {
+          width: 100% !important;
+          text-align: center !important;
+          box-sizing: border-box !important;
+        }
+      }
+    </style>
+    <script>
+      function togglePortfolioTheme() {
+        const isDarkDefault = ['creative', 'developer'].includes('${themeId}');
+        if (isDarkDefault) {
+          document.body.classList.toggle('light-mode-override');
+          localStorage.setItem('portfolio-mode', document.body.classList.contains('light-mode-override') ? 'light' : 'dark');
+        } else {
+          document.body.classList.toggle('dark-mode-override');
+          localStorage.setItem('portfolio-mode', document.body.classList.contains('dark-mode-override') ? 'dark' : 'light');
+        }
+      }
+      (function() {
+        const isDarkDefault = ['creative', 'developer'].includes('${themeId}');
+        const savedMode = localStorage.getItem('portfolio-mode');
+        if (savedMode) {
+          if (isDarkDefault && savedMode === 'light') {
+            document.body.classList.add('light-mode-override');
+          } else if (!isDarkDefault && savedMode === 'dark') {
+            document.body.classList.add('dark-mode-override');
+          }
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          if (!isDarkDefault) {
+            document.body.classList.add('dark-mode-override');
+          }
+        }
+      })();
+    </script>
+  `;
+
+  if (html.includes('</body>')) {
+    html = html.replace('</body>', `${toggleBtnHtml}</body>`);
+  }
+
 
   return { html, css, js, images };
 }
@@ -3888,7 +4340,7 @@ function getCVSplit(data) {
   const avatarStyle = 'width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:15px;border:3px solid rgba(255,255,255,0.5);display:block;';
   const avatar = getCVAvatar(p.avatar, avatarStyle);
   const skills = data.skills.map(s => `<span style="display:inline-block;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:12px;margin:2px 4px 2px 0;font-size:8pt;">${s.name}</span>`).join('');
-  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:14px;"><div style="font-weight:bold;color:${accent};">${t.role}</div><div style="font-size:11.5pt;color:#666;">${t.organization} | ${t.startDate}"“${t.endDate||'Présent'}</div><p style="font-size:11.5pt;margin-top:3px;">${t.description}</p></div>`).join('');
+  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:14px;"><div style="font-weight:bold;color:${accent};">${t.role}</div><div style="font-size:11.5pt;color:#666;">${t.organization} | ${t.startDate} - ${t.endDate||'Présent'}</div><p style="font-size:11.5pt;margin-top:3px;">${t.description}</p></div>`).join('');
   const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:10px;"><div style="font-weight:bold;font-size:11.5pt;">${e.degree}</div><div style="font-size:11.5pt;color:#666;">${e.institution} | ${e.endDate||e.startDate}</div></div>`).join('');
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Split - ${p.name}</title>
   <style>
@@ -3923,7 +4375,7 @@ function getCVSplit(data) {
 function getCVAcademic(data) {
   const p = data.profile;
   const avatar = getCVAvatar(p.avatar, 'width:90px;height:90px;border-radius:4px;object-fit:cover;float:right;margin-left:15px;border:1px solid #000;');
-  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:10px;"><strong>${t.role}</strong>, <em>${t.organization}</em> (${t.startDate}"“${t.endDate||'Présent'})<br>${t.description}</div>`).join('');
+  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:10px;"><strong>${t.role}</strong>, <em>${t.organization}</em> (${t.startDate} - ${t.endDate||'Présent'})<br>${t.description}</div>`).join('');
   const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:8px;"><strong>${e.degree}</strong>, <em>${e.institution}</em>${e.endDate?' – '+e.endDate:''}</div>`).join('');
   const skills = data.skills.map(s => s.name).join(', ');
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Académique - ${p.name}</title>
@@ -3993,7 +4445,7 @@ function getCVStartup(data) {
     <div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:12px;">
       <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
         <strong style="font-size:11.5pt;">${t.role}</strong>
-        <span style="color:#64748b;font-size:11.5pt;background:#e2e8f0;padding:2px 8px;border-radius:10px;">${t.startDate}"“${t.endDate||'Présent'}</span>
+        <span style="color:#64748b;font-size:11.5pt;background:#e2e8f0;padding:2px 8px;border-radius:10px;">${t.startDate} - ${t.endDate||'Présent'}</span>
       </div>
       <div style="color:${accent};font-weight:600;font-size:10.5pt;margin-bottom:6px;">${t.organization}</div>
       <p style="font-size:10.5pt;color:#475569;">${t.description}</p>
@@ -4037,7 +4489,7 @@ function getCVTwoTone(data) {
     <div style="margin-bottom:18px;border-left:2px solid ${accent};padding-left:14px;position:relative;">
       <div style="position:absolute;left:-5px;top:3px;width:8px;height:8px;border-radius:50%;background:${accent};"></div>
       <div style="font-weight:bold;font-size:12pt;">${t.role}</div>
-      <div style="font-size:10.5pt;color:#666;margin-bottom:4px;">${t.organization} | ${t.startDate}"“${t.endDate||'Présent'}</div>
+      <div style="font-size:10.5pt;color:#666;margin-bottom:4px;">${t.organization} | ${t.startDate} - ${t.endDate||'Présent'}</div>
       <p style="font-size:11.5pt;line-height:1.5;color:#333;">${t.description}</p>
     </div>`).join('');
   const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:10px;"><strong style="font-size:11.5pt;">${e.degree}</strong><div style="color:#94a3b8;font-size:11.5pt;">${e.institution} Â· ${e.endDate||e.startDate}</div></div>`).join('');
@@ -4076,7 +4528,7 @@ function getCVArtistic(data) {
   const accent = data.design.cvAccent || '#d946ef';
   const avatar = getCVAvatar(p.avatar, 'width:100%;border-radius:8px;object-fit:cover;box-shadow: 4px 4px 0 ' + accent + ';display:block;margin-bottom:15px;');
   const skills = data.skills.map(s => `<span style="color:${accent};border:1px solid ${accent};padding:3px 8px;border-radius:4px;font-size:8pt;margin:0 5px 5px 0;display:inline-block;">${s.name}</span>`).join('');
-  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:18px;"><div style="font-size:14pt;font-weight:bold;color:#111;">${t.role}</div><div style="color:${accent};font-weight:bold;font-size:11.5pt;margin-bottom:5px;">${t.organization} // ${t.startDate}"“${t.endDate||'Présent'}</div><p style="font-size:11.5pt;color:#555;line-height:1.6;">${t.description}</p></div>`).join('');
+  const expHtml = (data.experience || data.timeline || []).map(t => `<div style="margin-bottom:18px;"><div style="font-size:14pt;font-weight:bold;color:#111;">${t.role}</div><div style="color:${accent};font-weight:bold;font-size:11.5pt;margin-bottom:5px;">${t.organization} // ${t.startDate} - ${t.endDate||'Présent'}</div><p style="font-size:11.5pt;color:#555;line-height:1.6;">${t.description}</p></div>`).join('');
   const eduHtml = (data.education || []).map(e => `<div style="margin-bottom:12px;"><div style="font-style:italic;font-size:13pt;">${e.degree}</div><div style="color:${accent};font-family:sans-serif;font-size:11.5pt;">${e.institution} Â· ${e.endDate||e.startDate}</div></div>`).join('');
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV Artiste - ${p.name}</title>
   <style>
@@ -4112,16 +4564,366 @@ function getCVArtistic(data) {
   </div></body></html>`;
 }
 
-function generateCVTemplate(data) {
+function generateCVTemplate(rawConfig) {
+  const data = deepEscape(rawConfig);
+
+  // Preprocess tagline, website, relocation for CV templates
+  const p = data.profile;
+  if (p.tagline) {
+    p.title = p.title + ` &mdash; ${p.tagline}`;
+  }
+  if (p.relocation) {
+    p.location = p.location + ` (${p.relocation})`;
+  }
+  if (p.website) {
+    p.phone = p.phone + ` | ${p.website}`;
+  }
+
+  // Preprocess experiences to append achievements as formatted text block
+  if (data.experience) {
+    data.experience = data.experience.map(t => {
+      if (t.achievements) {
+        return {
+          ...t,
+          description: t.description + `<div style="margin-top:5px; font-size:10pt; font-weight:bold; color:#555;">&rarr; Accomplissement : ${t.achievements}</div>`
+        };
+      }
+      return t;
+    });
+  }
+
   const tpl = data.design.cvTemplate || 'modern';
-  if (tpl === 'classic') return getCVClassic(data);
-  if (tpl === 'minimalist') return getCVMinimalist(data);
-  if (tpl === 'terminal') return getCVTerminal(data);
-  if (tpl === 'split') return getCVSplit(data);
-  if (tpl === 'academic') return getCVAcademic(data);
-  if (tpl === 'executive') return getCVExecutive(data);
-  if (tpl === 'startup') return getCVStartup(data);
-  if (tpl === 'twotone') return getCVTwoTone(data);
-  if (tpl === 'artistic') return getCVArtistic(data);
-  return getCVModern(data);
+  let html = '';
+  if (tpl === 'classic') html = getCVClassic(data);
+  else if (tpl === 'minimalist') html = getCVMinimalist(data);
+  else if (tpl === 'terminal') html = getCVTerminal(data);
+  else if (tpl === 'split') html = getCVSplit(data);
+  else if (tpl === 'academic') html = getCVAcademic(data);
+  else if (tpl === 'executive') html = getCVExecutive(data);
+  else if (tpl === 'startup') html = getCVStartup(data);
+  else if (tpl === 'twotone') html = getCVTwoTone(data);
+  else if (tpl === 'artistic') html = getCVArtistic(data);
+  else html = getCVModern(data);
+
+  // Inject certifications in CV HTML
+  const cvAccent = data.design.cvAccent || '#3b82f6';
+  const isDarkCerts = ['startup', 'twotone'].includes(tpl);
+  const cvCertsHtml = getCertificationsCVHtml(data, cvAccent, isDarkCerts);
+  if (cvCertsHtml) {
+    if (html.includes('</div></body></html>')) {
+      html = html.replace('</div></body></html>', `${cvCertsHtml}</div></body></html>`);
+    } else {
+      html = html.replace('</body>', `${cvCertsHtml}</body>`);
+    }
+  }
+
+  const singlePageStyles = `
+    <style>
+      .cv-page {
+        box-sizing: border-box !important;
+        height: 297mm !important;
+        max-height: 297mm !important;
+        overflow: hidden !important;
+        position: relative !important;
+      }
+      /* Tighten up margins and paddings globally for A4 single-page constraint */
+      .cv-sidebar {
+        padding-top: 10mm !important;
+        padding-bottom: 10mm !important;
+        padding-left: 6mm !important;
+        padding-right: 6mm !important;
+      }
+      .cv-main {
+        padding-top: 10mm !important;
+        padding-bottom: 10mm !important;
+        padding-left: 10mm !important;
+        padding-right: 10mm !important;
+      }
+      .left {
+        padding: 10mm 6mm !important;
+      }
+      .right {
+        padding: 10mm 10mm !important;
+      }
+      .sidebar {
+        padding: 10mm 6mm !important;
+      }
+      .main {
+        padding: 10mm 10mm !important;
+      }
+      /* Class, Minimalist, Academic, Executive, Startup, Artistic padding */
+      .cv-page {
+        padding: 10mm 12mm !important;
+      }
+      /* Restore flexbox sidebar layouts padding */
+      .cv-page:has(.cv-sidebar), .cv-page:has(.left), .cv-page:has(.sidebar) {
+        padding: 0 !important;
+      }
+      /* Adjust header sizes */
+      h1 {
+        font-size: 24pt !important;
+        margin-bottom: 5px !important;
+      }
+      h2.cv-title, h2.sub, h2.job, div.subtitle {
+        font-size: 13pt !important;
+        margin-bottom: 8px !important;
+      }
+      h3.sec, h3.sec-main, h3 {
+        margin-top: 10px !important;
+        margin-bottom: 6px !important;
+      }
+      /* Adjust experiences & education item gaps */
+      .cv-main div[style*="margin-bottom"],
+      .right div[style*="margin-bottom"],
+      .main div[style*="margin-bottom"],
+      .cv-page div[style*="margin-bottom"] {
+        margin-bottom: 8px !important;
+      }
+      p {
+        line-height: 1.4 !important;
+        margin-bottom: 6px !important;
+      }
+    </style>
+  `;
+  if (html.includes('</head>')) {
+    html = html.replace('</head>', `${singlePageStyles}</head>`);
+  }
+  return html;
+}
+
+function getCorporateTemplate(data, avatarPath, projects) {
+  const p = data.profile;
+  const accent = data.design.accentColor || '#1e3a8a';
+  const secondary = data.design.secondaryColor || '#475569';
+
+  const skillsHtml = data.skills.map(s => `
+    <div class="skill-item reveal">
+      <div class="skill-info" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+        <span class="skill-name" style="font-weight:600; color:var(--text-title);">${s.name}</span>
+        <span class="skill-level" style="color:var(--text-muted);">${s.level}%</span>
+      </div>
+      <div class="skill-bar-container" style="background:var(--border); height:8px; border-radius:4px; overflow:hidden;">
+        <div class="skill-bar" style="width:${s.level}%; background:var(--accent); height:100%; border-radius:4px;"></div>
+      </div>
+    </div>
+  `).join('');
+
+  const projectsHtml = projects.map(p => `
+    <div class="project-card reveal" style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; transition:transform 0.3s ease, box-shadow 0.3s ease; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div class="project-img-container" style="height:200px; overflow:hidden;">
+        <img src="${p.imagePath}" alt="${p.title}" class="project-img" style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s ease;" loading="lazy">
+      </div>
+      <div class="project-info" style="padding:20px;">
+        <span class="project-tag" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--accent); font-weight:700;">${p.category || 'PROJET'}</span>
+        <h3 class="project-title" style="margin:5px 0 10px 0; font-size:1.3rem; color:var(--text-title);">${p.title}</h3>
+        <p class="project-desc" style="font-size:0.9rem; color:var(--text); line-height:1.5; margin-bottom:15px;">${p.description}</p>
+        <div class="project-tech" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px;">
+          ${(p.technologies || '').split(',').map(t => `<span class="tech-tag" style="font-size:0.75rem; background:rgba(30,58,138,0.05); color:var(--accent); padding:2px 8px; border-radius:4px; font-weight:500;">${t.trim()}</span>`).join('')}
+        </div>
+        <div class="project-links" style="display:flex; gap:15px;">
+          ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank" class="proj-link" style="font-size:0.9rem; font-weight:600; color:var(--accent); display:flex; align-items:center; gap:5px; text-decoration:none;"><i class="fas fa-external-link-alt"></i> Demo</a>` : ''}
+          ${p.githubUrl ? `<a href="${p.githubUrl}" target="_blank" class="proj-link" style="font-size:0.9rem; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:5px; text-decoration:none;"><i class="fab fa-github"></i> Code</a>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  const timelineHtml = data.timeline.map(t => `
+    <div class="timeline-item reveal" style="display:flex; gap:20px; margin-bottom:30px; position:relative;">
+      <div class="timeline-bullet" style="width:12px; height:12px; background:var(--accent); border-radius:50%; margin-top:6px; flex-shrink:0; position:relative; z-index:2;"></div>
+      <div class="timeline-body">
+        <span class="timeline-period" style="font-size:0.85rem; font-weight:700; color:var(--accent); text-transform:uppercase;">${t.startDate} - ${t.endDate || 'Présent'}</span>
+        <h4 class="timeline-role" style="margin:5px 0 2px 0; font-size:1.2rem; color:var(--text-title);">${t.role}</h4>
+        <span class="timeline-org" style="font-size:0.95rem; font-weight:600; color:var(--text-muted);">${t.organization}</span>
+        <p class="timeline-desc" style="margin-top:10px; font-size:0.95rem; color:var(--text); line-height:1.6;">${t.description}</p>
+      </div>
+    </div>
+  `).join('');
+
+  const socialHtml = `
+    ${p.github ? `<a href="${p.github}" target="_blank" aria-label="GitHub" style="color:var(--text-muted); font-size:1.3rem; transition:color 0.3s;"><i class="fab fa-github"></i></a>` : ''}
+    ${p.linkedin ? `<a href="${p.linkedin}" target="_blank" aria-label="LinkedIn" style="color:var(--text-muted); font-size:1.3rem; transition:color 0.3s;"><i class="fab fa-linkedin"></i></a>` : ''}
+    ${p.twitter ? `<a href="${p.twitter}" target="_blank" aria-label="Twitter" style="color:var(--text-muted); font-size:1.3rem; transition:color 0.3s;"><i class="fab fa-twitter"></i></a>` : ''}
+    ${p.facebook ? `<a href="${p.facebook}" target="_blank" aria-label="Facebook" style="color:var(--text-muted); font-size:1.3rem; transition:color 0.3s;"><i class="fab fa-facebook"></i></a>` : ''}
+    ${p.email ? `<a href="mailto:${p.email}" aria-label="Email" style="color:var(--text-muted); font-size:1.3rem; transition:color 0.3s;"><i class="fas fa-envelope"></i></a>` : ''}
+  `;
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${p.name} | Portfolio Professionnel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header style="background:var(--card-bg); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; transition:background 0.3s, border-color 0.3s;">
+    <div style="max-width:1100px; margin:0 auto; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
+      <a href="#" style="font-weight:800; font-size:1.25rem; color:var(--accent); text-decoration:none; letter-spacing:-0.5px;">${p.name}</a>
+      <nav style="display:flex; gap:25px;">
+        <a href="#about" style="font-size:0.9rem; font-weight:600; color:var(--text-title); text-decoration:none; transition:color 0.3s;">À Propos</a>
+        <a href="#skills" style="font-size:0.9rem; font-weight:600; color:var(--text-title); text-decoration:none; transition:color 0.3s;">Compétences</a>
+        <a href="#projects" style="font-size:0.9rem; font-weight:600; color:var(--text-title); text-decoration:none; transition:color 0.3s;">Projets</a>
+        <a href="#experience" style="font-size:0.9rem; font-weight:600; color:var(--text-title); text-decoration:none; transition:color 0.3s;">Parcours</a>
+        <a href="#contact" style="font-size:0.9rem; font-weight:600; color:var(--text-title); text-decoration:none; transition:color 0.3s;">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width:1100px; margin:0 auto; padding:40px 20px;">
+    <!-- HERO SECTION -->
+    <section id="about" style="padding:60px 0; display:flex; gap:40px; align-items:center; border-bottom:1px solid var(--border); flex-wrap:wrap;">
+      <div style="flex:1 1 500px;">
+        <span style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent); font-weight:700;">${p.title}</span>
+        <h1 style="font-size:3rem; font-weight:800; color:var(--text-title); margin:10px 0 15px 0; line-height:1.15; letter-spacing:-1px;">
+          ${p.tagline ? p.tagline : `Bonjour, je suis ${p.name}`}
+        </h1>
+        <p style="font-size:1.1rem; color:var(--text); line-height:1.6; margin-bottom:25px;">
+          ${p.bio}
+        </p>
+        ${getPersonalSpecsHtml(p, 'corporate')}
+        <div style="margin-top:25px; display:flex; gap:15px; align-items:center;">
+          <a href="#contact" style="background:var(--accent); color:#fff; font-weight:600; padding:12px 24px; border-radius:6px; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 6px rgba(30,58,138,0.15); transition:all 0.3s;">Me Contacter</a>
+          <a href="#projects" style="border:1px solid var(--border); color:var(--text-title); font-weight:600; padding:12px 24px; border-radius:6px; text-decoration:none; font-size:0.95rem; transition:all 0.3s; background:var(--card-bg);">Voir les projets</a>
+        </div>
+      </div>
+      <div style="flex:0 0 280px; display:flex; justify-content:center;">
+        <img src="${avatarPath}" alt="${p.avatarAlt || p.name}" style="width:280px; height:280px; border-radius:12px; object-fit:cover; border:4px solid var(--card-bg); box-shadow:0 20px 25px -5px rgba(0,0,0,0.08);">
+      </div>
+    </section>
+
+    <!-- SKILLS SECTION -->
+    <section id="skills" style="padding:60px 0; border-bottom:1px solid var(--border);">
+      <h2 style="font-size:2rem; font-weight:800; color:var(--text-title); margin-bottom:35px; text-align:center; letter-spacing:-0.5px;">Domaines d'Expertise</h2>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
+        ${skillsHtml}
+      </div>
+    </section>
+
+    <!-- PROJECTS SECTION -->
+    <section id="projects" style="padding:60px 0; border-bottom:1px solid var(--border);">
+      <h2 style="font-size:2rem; font-weight:800; color:var(--text-title); margin-bottom:35px; text-align:center; letter-spacing:-0.5px;">Projets Récents</h2>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:30px;">
+        ${projectsHtml}
+      </div>
+    </section>
+
+    <!-- EXPERIENCE SECTION -->
+    <section id="experience" style="padding:60px 0;">
+      <h2 style="font-size:2rem; font-weight:800; color:var(--text-title); margin-bottom:45px; text-align:center; letter-spacing:-0.5px;">Parcours Professionnel</h2>
+      <div style="max-width:800px; margin:0 auto; position:relative;">
+        <div style="position:absolute; left:5px; top:10px; bottom:10px; width:2px; background:var(--border); z-index:1;"></div>
+        ${timelineHtml}
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact" style="background:var(--card-bg); border-top:1px solid var(--border); padding:60px 20px; transition:background 0.3s, border-color 0.3s;">
+    <div style="max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:40px;">
+      <div style="flex:1 1 300px;">
+        <h3 style="font-weight:800; font-size:1.5rem; color:var(--text-title); margin-bottom:15px; letter-spacing:-0.5px;">${p.name}</h3>
+        <p style="color:var(--text); font-size:0.95rem; line-height:1.6; max-width:400px; margin-bottom:20px;">
+          N'hésitez pas à me contacter pour toute opportunité de collaboration.
+        </p>
+        <div style="display:flex; gap:15px;">
+          ${socialHtml}
+        </div>
+      </div>
+      <div style="flex:1 1 300px; display:flex; flex-direction:column; gap:10px;">
+        <h4 style="font-size:1.1rem; font-weight:700; color:var(--text-title); margin-bottom:10px;">Coordonnées</h4>
+        <div style="display:flex; align-items:center; gap:10px; color:var(--text); font-size:0.95rem;"><i class="fas fa-envelope" style="color:var(--accent); width:20px;"></i> ${p.email}</div>
+        ${p.phone ? `<div style="display:flex; align-items:center; gap:10px; color:var(--text); font-size:0.95rem;"><i class="fas fa-phone" style="color:var(--accent); width:20px;"></i> ${p.phone}</div>` : ''}
+        ${p.website ? `<div style="display:flex; align-items:center; gap:10px; color:var(--text); font-size:0.95rem;"><i class="fas fa-globe" style="color:var(--accent); width:20px;"></i> <a href="${p.website}" target="_blank" style="color:inherit; text-decoration:none;">${p.website}</a></div>` : ''}
+        <div style="display:flex; align-items:center; gap:10px; color:var(--text); font-size:0.95rem;"><i class="fas fa-map-marker-alt" style="color:var(--accent); width:20px;"></i> ${p.location} ${p.relocation ? `(${p.relocation})` : ''}</div>
+      </div>
+    </div>
+    <div style="max-width:1100px; margin:40px auto 0 auto; padding-top:20px; border-top:1px solid var(--border); text-align:center; color:var(--text-muted); font-size:0.85rem;">
+      &copy; ${new Date().getFullYear()} ${p.name}. Tous droits réservés.
+    </div>
+  </footer>
+</body>
+</html>`;
+
+  const css = `
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #475569;
+      --text-title: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent: ${accent};
+      --accent-secondary: ${secondary};
+    }
+    body.dark-mode {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #94a3b8;
+      --text-title: #f8fafc;
+      --text-muted: #64748b;
+      --border: #334155;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    .project-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .project-card:hover .project-img {
+      transform: scale(1.05);
+    }
+    a:focus-visible, button:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+    @media (max-width: 768px) {
+      header > div {
+        flex-direction: column !important;
+        gap: 15px !important;
+        text-align: center !important;
+      }
+      header nav {
+        gap: 15px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      #about {
+        text-align: center !important;
+        flex-direction: column-reverse !important;
+        gap: 25px !important;
+      }
+      #about > div {
+        flex: 1 1 100% !important;
+      }
+      #about h1 {
+        font-size: 2.2rem !important;
+      }
+      #about div[style*="display:flex"] {
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+      }
+      footer > div {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 30px !important;
+      }
+    }
+  `;
+
+  return { html, css, js: '' };
 }

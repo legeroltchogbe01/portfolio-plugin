@@ -967,3 +967,48 @@ textarea.form-control {
 .preset-color-card:hover .preset-name {
   color: white;
 }
+
+/* Custom Utility Classes to replace inline styles */
+.form-section-divider {
+  border-top: 1px solid var(--border-light);
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+.form-section-header {
+  font-size: 1.1rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.subsection-title {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.subsection-title-no-mt {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+
+.subsection-title-mt-sm {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.text-muted-sm {
+  font-size: 0.9rem;
+}
+
+.avatar-alt-input {
+  margin-top: 0.75rem !important;
+  font-size: 0.85rem !important;
+  height: auto !important;
+  padding: 0.35rem 0.75rem !important;
+}
+

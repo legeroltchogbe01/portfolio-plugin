@@ -11,12 +11,17 @@ const imageAssets = {
 let currentTheme = 'minimalist';
 let currentCVTemplate = 'modern';
 let previewMode = 'portfolio';
+let isRestoringDraft = false;
 
 // Default Demo Data
 const defaultData = {
   profile: {
     name: 'Alexandre Martin',
     title: 'Développeur Web & Mobile',
+    tagline: 'Spécialiste React & architectures résilientes',
+    avatarAlt: 'Portrait d\'Alexandre Martin',
+    website: 'https://alexandre-martin.dev',
+    relocation: 'Disponible pour relocalisation / Hybride',
     bio: 'Passionné par l\'architecture logicielle et les interfaces interactives. J\'aide les entreprises à transformer leurs idées en produits numériques d\'exception.',
     email: 'alexandre.martin@example.com',
     phone: '+33 6 12 34 56 78',
@@ -47,7 +52,10 @@ const defaultData = {
       technologies: 'React, Chart.js, HSL CSS',
       liveUrl: 'https://example.com/demo',
       githubUrl: 'https://github.com/alexandremartin/dashboard',
-      image: '' // default used by templates if empty
+      image: '',
+      date: '2024 (3 mois)',
+      role: 'Solo (Fullstack)',
+      videoUrl: 'https://youtube.com/watch?v=demo1'
     },
     {
       title: 'Application E-Commerce',
@@ -56,7 +64,10 @@ const defaultData = {
       technologies: 'React, Service Workers, Stripe API',
       liveUrl: 'https://example.com/shop',
       githubUrl: 'https://github.com/alexandremartin/shop',
-      image: '' // default used by templates if empty
+      image: '',
+      date: '2023 (6 mois)',
+      role: 'Lead Frontend',
+      videoUrl: ''
     }
   ],
   timeline: [
@@ -65,14 +76,28 @@ const defaultData = {
       organization: 'TechAgency Paris',
       startDate: '2024',
       endDate: 'Présent',
-      description: 'Conception d\'architectures frontend modernes et encadrement d\'une équipe de développeurs.'
+      description: 'Conception d\'architectures frontend modernes et encadrement d\'une équipe de développeurs.',
+      achievements: 'Amélioration de 35% des temps de chargement LCP. Encadrement de 4 développeurs frontend.'
     },
     {
       role: 'Développeur Front-End',
       organization: 'WebStudio Lyon',
       startDate: '2022',
       endDate: '2024',
-      description: 'Développement de composants UI complexes et intégration pixel-perfect de designs Figma.'
+      description: 'Développement de composants UI complexes et intégration pixel-perfect de designs Figma.',
+      achievements: 'Intégration de plus de 50 maquettes Figma. Développement d\'une bibliothèque de composants réutilisables.'
+    }
+  ],
+  certifications: [
+    {
+      name: 'AWS Certified Solutions Architect',
+      authority: 'Amazon Web Services',
+      date: '2024'
+    },
+    {
+      name: 'Professional Scrum Master I',
+      authority: 'Scrum.org',
+      date: '2023'
     }
   ],
   design: {
@@ -85,9 +110,12 @@ const defaultData = {
 // LIFE CYCLE EVENTS
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-  initAuth();
   initTabs();
-  loadDefaultData();
+  if (localStorage.getItem('portfolio_studio_draft')) {
+    loadDraftFromLocalStorage();
+  } else {
+    loadDefaultData();
+  }
   setupEventListeners();
   triggerUpdate();
 });
@@ -95,36 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // -------------------------------------------------------------
 // AUTHENTICATION MANAGEMENT
 // -------------------------------------------------------------
-function initAuth() {
-  const isLogged = sessionStorage.getItem('studio_logged');
-  const loginOverlay = document.getElementById('login-overlay');
-  if (isLogged === 'true') {
-    loginOverlay.classList.add('hidden');
-  } else {
-    loginOverlay.classList.remove('hidden');
-  }
-}
 
-function handleLogin(event) {
-  event.preventDefault();
-  const user = document.getElementById('username').value.trim();
-  const pass = document.getElementById('password').value.trim();
-
-  // Simple validation for mock authentication
-  if (user === 'admin' && pass === 'admin') {
-    sessionStorage.setItem('studio_logged', 'true');
-    document.getElementById('login-overlay').classList.add('hidden');
-    showToast('Connexion réussie ! Bienvenue dans le studio.', 'success');
-  } else {
-    showToast('Identifiant ou mot de passe incorrect.', 'error');
-  }
-}
-
-function handleLogout() {
-  sessionStorage.removeItem('studio_logged');
-  document.getElementById('login-overlay').classList.remove('hidden');
-  showToast('Déconnecté avec succès.', 'success');
-}
 
 // -------------------------------------------------------------
 // TAB NAVIGATION
@@ -177,16 +176,19 @@ function loadDefaultData() {
   // Profile info
   document.getElementById('profile-name').value = defaultData.profile.name;
   document.getElementById('profile-title').value = defaultData.profile.title;
+  document.getElementById('profile-tagline').value = defaultData.profile.tagline || '';
+  document.getElementById('profile-avatar-alt').value = defaultData.profile.avatarAlt || '';
   document.getElementById('profile-bio').value = defaultData.profile.bio;
   document.getElementById('profile-email').value = defaultData.profile.email;
   document.getElementById('profile-phone').value = defaultData.profile.phone;
+  document.getElementById('profile-website').value = defaultData.profile.website || '';
   document.getElementById('profile-age').value = defaultData.profile.age;
   document.getElementById('profile-experience').value = defaultData.profile.experience;
   document.getElementById('profile-location').value = defaultData.profile.location;
+  document.getElementById('profile-relocation').value = defaultData.profile.relocation || '';
   document.getElementById('profile-address').value = defaultData.profile.address;
   document.getElementById('profile-availability').value = defaultData.profile.availability;
   document.getElementById('profile-contract').value = defaultData.profile.contract;
-  
   
   document.getElementById('profile-github').value = defaultData.profile.github;
   document.getElementById('profile-linkedin').value = defaultData.profile.linkedin;
@@ -199,12 +201,23 @@ function loadDefaultData() {
   defaultData.skills.forEach(skill => addSkillItem(skill.name, skill.level));
     
   // Default extra fields
+  const softSkillsContainer = document.getElementById('soft-skills-repeater');
+  if (softSkillsContainer) softSkillsContainer.innerHTML = '';
   addSoftSkillItem('Leadership');
   addSoftSkillItem('Esprit d\'équipe');
+
+  const languagesContainer = document.getElementById('languages-repeater');
+  if (languagesContainer) languagesContainer.innerHTML = '';
   addLanguageItem('Français', 'Langue maternelle');
   addLanguageItem('Anglais', 'Courant (C1)');
+
+  const hobbiesContainer = document.getElementById('hobbies-repeater');
+  if (hobbiesContainer) hobbiesContainer.innerHTML = '';
   addHobbyItem('Photographie');
   addHobbyItem('Voyages');
+
+  const referencesContainer = document.getElementById('references-repeater');
+  if (referencesContainer) referencesContainer.innerHTML = '';
   addReferenceItem('', '', '');
 
   // Projects
@@ -217,11 +230,179 @@ function loadDefaultData() {
   timelineContainer.innerHTML = '';
   defaultData.timeline.forEach(item => addTimelineItem(item));
 
+  // Certifications
+  const certsContainer = document.getElementById('certs-repeater');
+  if (certsContainer) certsContainer.innerHTML = '';
+  (defaultData.certifications || []).forEach(cert => addCertItem(cert.name, cert.authority, cert.date));
+
   // Design info
   document.getElementById('design-accent').value = defaultData.design.accentColor;
   document.getElementById('accent-hex').innerText = defaultData.design.accentColor;
   document.getElementById('design-secondary').value = defaultData.design.secondaryColor;
   document.getElementById('secondary-hex').innerText = defaultData.design.secondaryColor;
+}
+
+function saveDraftToLocalStorage() {
+  if (isRestoringDraft) return;
+  const data = getFormData();
+  data.currentTheme = currentTheme;
+  data.currentCVTemplate = currentCVTemplate;
+  data.previewMode = previewMode;
+  
+  try {
+    localStorage.setItem('portfolio_studio_draft', JSON.stringify(data));
+    const saveStatus = document.getElementById('save-status');
+    if (saveStatus) {
+      saveStatus.innerText = "Brouillon auto";
+      saveStatus.style.color = "";
+    }
+  } catch (err) {
+    console.error("Failed to save draft:", err);
+  }
+}
+
+function loadDraftFromLocalStorage() {
+  const jsonStr = localStorage.getItem('portfolio_studio_draft');
+  if (!jsonStr) return;
+  try {
+    isRestoringDraft = true;
+    const draft = JSON.parse(jsonStr);
+    
+    // Restore profile fields
+    const p = draft.profile;
+    document.getElementById('profile-name').value = p.name || '';
+    document.getElementById('profile-title').value = p.title || '';
+    document.getElementById('profile-tagline').value = p.tagline || '';
+    document.getElementById('profile-avatar-alt').value = p.avatarAlt || '';
+    document.getElementById('profile-bio').value = p.bio || '';
+    document.getElementById('profile-email').value = p.email || '';
+    document.getElementById('profile-phone').value = p.phone || '';
+    document.getElementById('profile-website').value = p.website || '';
+    document.getElementById('profile-age').value = p.age || '';
+    document.getElementById('profile-experience').value = p.experience || '';
+    document.getElementById('profile-location').value = p.location || '';
+    document.getElementById('profile-relocation').value = p.relocation || '';
+    document.getElementById('profile-address').value = p.address || '';
+    document.getElementById('profile-availability').value = p.availability || '';
+    document.getElementById('profile-contract').value = p.contract || '';
+    document.getElementById('profile-github').value = p.github || '';
+    document.getElementById('profile-linkedin').value = p.linkedin || '';
+    document.getElementById('profile-twitter').value = p.twitter || '';
+    document.getElementById('profile-facebook').value = p.facebook || '';
+    
+    // Restore profile image assets
+    imageAssets.avatar = p.avatar || '';
+    const avatarPreview = document.getElementById('avatar-preview');
+    if (avatarPreview) {
+      if (imageAssets.avatar) {
+        avatarPreview.style.backgroundImage = `url(${imageAssets.avatar})`;
+        avatarPreview.innerHTML = '';
+      } else {
+        avatarPreview.style.backgroundImage = '';
+        avatarPreview.innerHTML = '<i class="fas fa-user"></i>';
+      }
+    }
+    
+    // Restore repeaters
+    const skillsContainer = document.getElementById('skills-repeater');
+    skillsContainer.innerHTML = '';
+    (draft.skills || []).forEach(skill => addSkillItem(skill.name, skill.level));
+    
+    const softSkillsContainer = document.getElementById('soft-skills-repeater');
+    if (softSkillsContainer) softSkillsContainer.innerHTML = '';
+    (draft.softSkills || []).forEach(s => addSoftSkillItem(s.name));
+    
+    const languagesContainer = document.getElementById('languages-repeater');
+    if (languagesContainer) languagesContainer.innerHTML = '';
+    (draft.languagesList || []).forEach(l => addLanguageItem(l.name, l.level));
+    
+    const hobbiesContainer = document.getElementById('hobbies-repeater');
+    if (hobbiesContainer) hobbiesContainer.innerHTML = '';
+    (draft.hobbiesList || []).forEach(h => addHobbyItem(h.name));
+    
+    const referencesContainer = document.getElementById('references-repeater');
+    if (referencesContainer) referencesContainer.innerHTML = '';
+    (draft.references || []).forEach(r => addReferenceItem(r.name, r.role, r.contact));
+    
+    // Restore projects
+    imageAssets.projects = {};
+    const projectsContainer = document.getElementById('projects-repeater');
+    projectsContainer.innerHTML = '';
+    (draft.projects || []).forEach(project => {
+      addProjectItem(project);
+    });
+
+    // Restore timeline
+    const timelineContainer = document.getElementById('timeline-repeater');
+    timelineContainer.innerHTML = '';
+    (draft.experience || draft.timeline || []).forEach(item => addTimelineItem(item));
+    
+    // Restore education
+    const educationContainer = document.getElementById('education-repeater');
+    educationContainer.innerHTML = '';
+    (draft.education || []).forEach(item => addEducationItem(item));
+
+    // Restore certifications
+    const certsContainer = document.getElementById('certs-repeater');
+    if (certsContainer) certsContainer.innerHTML = '';
+    (draft.certificationsList || []).forEach(c => addCertItem(c.name, c.authority, c.date));
+    
+    // Restore design settings
+    if (draft.design) {
+      document.getElementById('design-accent').value = draft.design.accentColor || '#6366f1';
+      document.getElementById('accent-hex').innerText = draft.design.accentColor || '#6366f1';
+      document.getElementById('design-secondary').value = draft.design.secondaryColor || '#ec4899';
+      document.getElementById('secondary-hex').innerText = draft.design.secondaryColor || '#ec4899';
+      
+      if (document.getElementById('cv-design-accent') && draft.design.cvAccent) {
+        document.getElementById('cv-design-accent').value = draft.design.cvAccent;
+        document.getElementById('cv-accent-hex').innerText = draft.design.cvAccent;
+      }
+    }
+    
+    // Theme & Mode settings
+    currentTheme = draft.currentTheme || 'minimalist';
+    currentCVTemplate = draft.currentCVTemplate || 'modern';
+    previewMode = draft.previewMode || 'portfolio';
+    
+    // Highlight active cards
+    document.querySelectorAll('#sec-design .theme-card').forEach(card => card.classList.remove('selected'));
+    const activeThemeCard = document.getElementById(`theme-${currentTheme}`);
+    if (activeThemeCard) activeThemeCard.classList.add('selected');
+    
+    document.querySelectorAll('#sec-cv .theme-card').forEach(card => card.classList.remove('selected'));
+    const activeCVCard = document.getElementById(`cv-tpl-${currentCVTemplate}`);
+    if (activeCVCard) activeCVCard.classList.add('selected');
+    
+    const previewSelect = document.getElementById('preview-mode-select');
+    if (previewSelect) previewSelect.value = previewMode;
+    
+  } catch (err) {
+    console.error("Failed to load draft:", err);
+    showToast("Erreur lors de la récupération du brouillon.", "error");
+  } finally {
+    isRestoringDraft = false;
+  }
+}
+
+function resetToDefaultData() {
+  if (confirm("Voulez-vous réinitialiser le formulaire avec les données de démonstration ? Tout votre brouillon actuel sera écrasé.")) {
+    localStorage.removeItem('portfolio_studio_draft');
+    
+    // Clear image assets
+    imageAssets.avatar = '';
+    imageAssets.projects = {};
+    
+    const avatarPreview = document.getElementById('avatar-preview');
+    if (avatarPreview) {
+      avatarPreview.style.backgroundImage = '';
+      avatarPreview.innerHTML = '<i class="fas fa-user"></i>';
+    }
+    
+    loadDefaultData();
+    triggerUpdate();
+    showToast("Données réinitialisées avec succès.", "success");
+  }
 }
 
 function setupEventListeners() {
@@ -281,6 +462,9 @@ function addProjectItem(project = {}) {
   const live = project.liveUrl || '';
   const git = project.githubUrl || '';
   const base64Img = project.image || '';
+  const date = project.date || '';
+  const role = project.role || '';
+  const videoUrl = project.videoUrl || '';
 
   const card = document.createElement('div');
   card.className = 'repeater-card';
@@ -315,6 +499,14 @@ function addProjectItem(project = {}) {
         <label>Catégorie</label>
         <input type="text" class="form-control proj-input-category" placeholder="ex: Web Design / Mobile" value="${cat}" oninput="triggerUpdate()">
       </div>
+      <div class="form-group">
+        <label>Date / Durée du projet</label>
+        <input type="text" class="form-control proj-input-date" placeholder="ex: 2024 (3 mois)" value="${date}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Rôle joué dans le projet</label>
+        <input type="text" class="form-control proj-input-role" placeholder="ex: Lead Developer / Solo" value="${role}" oninput="triggerUpdate()">
+      </div>
       <div class="form-group form-group-full">
         <label>Description du projet</label>
         <textarea class="form-control proj-input-desc" rows="3" placeholder="Décrivez en quelques lignes ce que fait le projet et vos accomplissements..." oninput="triggerUpdate()">${desc}</textarea>
@@ -330,6 +522,10 @@ function addProjectItem(project = {}) {
       <div class="form-group">
         <label>Lien Source Code (GitHub)</label>
         <input type="url" class="form-control proj-input-github" placeholder="https://github.com/..." value="${git}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group form-group-full">
+        <label>Lien Vidéo Démo (YouTube/Vimeo)</label>
+        <input type="url" class="form-control proj-input-video" placeholder="https://youtube.com/watch?v=..." value="${videoUrl}" oninput="triggerUpdate()">
       </div>
     </div>
   `;
@@ -349,6 +545,7 @@ function addTimelineItem(item = {}) {
   const start = item.startDate || '';
   const end = item.endDate || '';
   const desc = item.description || '';
+  const achievements = item.achievements || '';
 
   const card = document.createElement('div');
   card.className = 'repeater-card';
@@ -381,9 +578,47 @@ function addTimelineItem(item = {}) {
         <label>Description des réalisations</label>
         <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous réalisé ?" oninput="triggerUpdate()">${desc}</textarea>
       </div>
+      <div class="form-group form-group-full">
+        <label>Réalisations clés & indicateurs (ATS-friendly, ex: +30% perf)</label>
+        <textarea class="form-control time-input-achievements" rows="2" placeholder="ex: Amélioration des temps de réponse de 30%..." oninput="triggerUpdate()">${achievements}</textarea>
+      </div>
     </div>
   `;
   container.appendChild(card);
+}
+
+function addCertItem(name = '', authority = '', date = '') {
+  const container = document.getElementById('certs-repeater');
+  if (!container) return;
+  const cardId = 'cert-' + Date.now() + Math.random().toString(36).substr(2, 4);
+
+  const card = document.createElement('div');
+  card.className = 'repeater-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="repeater-card-header">
+      <span class="repeater-card-title"><i class="fas fa-certificate"></i> Certification</span>
+      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nom de la certification</label>
+        <input type="text" class="form-control cert-input-name" placeholder="ex: AWS Certified" value="${name}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group">
+        <label>Organisme émetteur</label>
+        <input type="text" class="form-control cert-input-authority" placeholder="ex: Amazon Web Services" value="${authority}" oninput="triggerUpdate()">
+      </div>
+      <div class="form-group form-group-full">
+        <label>Date / Année d'obtention</label>
+        <input type="text" class="form-control cert-input-date" placeholder="ex: 2024" value="${date}" oninput="triggerUpdate()">
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  triggerUpdate();
 }
 
 function addEducationItem(item = {}) {
@@ -600,52 +835,99 @@ function selectCVTemplate(templateId) {
 }
 
 // -------------------------------------------------------------
-// IMAGE FILE READING (BASE64)
+// IMAGE FILE READING (BASE64) & COMPRESSION
 // -------------------------------------------------------------
+function resizeAndCompressImage(file, maxWidth, maxHeight, quality, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+      if (height > maxHeight) {
+        width = Math.round((width * maxHeight) / height);
+        height = maxHeight;
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Export as data URL (JPEG format)
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+      callback(compressedDataUrl);
+    };
+    img.onerror = function() {
+      showToast("Impossible de lire l'image.", "error");
+    };
+    img.src = e.target.result;
+  };
+  reader.onerror = function() {
+    showToast("Erreur lors de la lecture du fichier.", "error");
+  };
+  reader.readAsDataURL(file);
+}
+
 function previewImage(input, previewId) {
   const file = input.files[0];
   if (!file) return;
 
-  if (file.size > 2 * 1024 * 1024) {
-    showToast("L'image est trop volumineuse. (max 2Mo)", "error");
+  const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+  if (!validTypes.includes(file.type)) {
+    showToast("Format d'image non supporté (PNG, JPG, WEBP, GIF recommandés).", "error");
     input.value = '';
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
+  showToast("Optimisation de l'image...", "success");
+
+  resizeAndCompressImage(file, 800, 800, 0.8, (compressedDataUrl) => {
     const preview = document.getElementById(previewId);
-    preview.style.backgroundImage = `url(${e.target.result})`;
-    preview.innerHTML = ''; // Clear icon placeholder
+    if (preview) {
+      preview.style.backgroundImage = `url(${compressedDataUrl})`;
+      preview.innerHTML = ''; // Clear icon placeholder
+    }
     
     // Save to global assets
-    imageAssets.avatar = e.target.result;
+    imageAssets.avatar = compressedDataUrl;
     triggerUpdate();
-  };
-  reader.readAsDataURL(file);
+    showToast("Image importée et optimisée !", "success");
+  });
 }
 
 function previewProjectImage(input, previewId, cardId) {
   const file = input.files[0];
   if (!file) return;
 
-  if (file.size > 2 * 1024 * 1024) {
-    showToast("L'image est trop volumineuse. (max 2Mo)", "error");
+  const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+  if (!validTypes.includes(file.type)) {
+    showToast("Format d'image non supporté (PNG, JPG, WEBP, GIF recommandés).", "error");
     input.value = '';
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
+  showToast("Optimisation de l'image...", "success");
+
+  resizeAndCompressImage(file, 800, 800, 0.8, (compressedDataUrl) => {
     const preview = document.getElementById(previewId);
-    preview.style.backgroundImage = `url(${e.target.result})`;
-    preview.innerHTML = ''; // Clear icon
+    if (preview) {
+      preview.style.backgroundImage = `url(${compressedDataUrl})`;
+      preview.innerHTML = ''; // Clear icon
+    }
     
     // Store image
-    imageAssets.projects[cardId] = e.target.result;
+    imageAssets.projects[cardId] = compressedDataUrl;
     triggerUpdate();
-  };
-  reader.readAsDataURL(file);
+    showToast("Image importée et optimisée !", "success");
+  });
 }
 
 // -------------------------------------------------------------
@@ -663,17 +945,19 @@ function getFormData() {
     profile: {
       name: document.getElementById('profile-name').value || 'Jean Dupont',
       title: document.getElementById('profile-title').value || 'Profession',
+      tagline: document.getElementById('profile-tagline') ? document.getElementById('profile-tagline').value : '',
+      avatarAlt: document.getElementById('profile-avatar-alt') ? document.getElementById('profile-avatar-alt').value : '',
       bio: document.getElementById('profile-bio').value || '',
       email: document.getElementById('profile-email').value || '',
       phone: document.getElementById('profile-phone').value || '',
+      website: document.getElementById('profile-website') ? document.getElementById('profile-website').value : '',
       age: document.getElementById('profile-age').value || '',
       experience: document.getElementById('profile-experience').value || '',
       location: document.getElementById('profile-location').value || '',
+      relocation: document.getElementById('profile-relocation') ? document.getElementById('profile-relocation').value : '',
       address: document.getElementById('profile-address').value || '',
       availability: document.getElementById('profile-availability').value || '',
       contract: document.getElementById('profile-contract').value || '',
-      
-      
       github: document.getElementById('profile-github').value || '',
       linkedin: document.getElementById('profile-linkedin').value || '',
       twitter: document.getElementById('profile-twitter').value || '',
@@ -685,6 +969,7 @@ function getFormData() {
     timeline: [],
     experience: [],
     education: [],
+    certificationsList: [],
     softSkills: [],
     languagesList: [],
     hobbiesList: [],
@@ -726,7 +1011,10 @@ function getFormData() {
         technologies: tech.trim(),
         liveUrl: live.trim(),
         githubUrl: git.trim(),
-        image: imageAssets.projects[cardId] || ''
+        image: imageAssets.projects[cardId] || '',
+        date: card.querySelector('.proj-input-date') ? card.querySelector('.proj-input-date').value.trim() : '',
+        role: card.querySelector('.proj-input-role') ? card.querySelector('.proj-input-role').value.trim() : '',
+        videoUrl: card.querySelector('.proj-input-video') ? card.querySelector('.proj-input-video').value.trim() : ''
       });
     }
   });
@@ -746,7 +1034,8 @@ function getFormData() {
         organization: org.trim(),
         startDate: start.trim(),
         endDate: end.trim(),
-        description: desc.trim()
+        description: desc.trim(),
+        achievements: card.querySelector('.time-input-achievements') ? card.querySelector('.time-input-achievements').value.trim() : ''
       };
       data.experience.push(entry);
       data.timeline.push(entry); // backward compat
@@ -770,15 +1059,78 @@ function getFormData() {
     }
   });
 
+  // Compile Certifications
+  const certCards = document.querySelectorAll('#certs-repeater .repeater-card');
+  certCards.forEach(card => {
+    const name = card.querySelector('.cert-input-name').value;
+    const auth = card.querySelector('.cert-input-authority').value;
+    const date = card.querySelector('.cert-input-date').value;
+    if (name.trim()) {
+      data.certificationsList.push({
+        name: name.trim(),
+        authority: auth.trim(),
+        date: date.trim()
+      });
+    }
+  });
+
+  // Compile Soft Skills
+  const softSkillCards = document.querySelectorAll('#soft-skills-repeater .repeater-card');
+  softSkillCards.forEach(card => {
+    const name = card.querySelector('.softskill-input-name').value;
+    if (name.trim()) {
+      data.softSkills.push({ name: name.trim() });
+    }
+  });
+
+  // Compile Languages
+  const langCards = document.querySelectorAll('#languages-repeater .repeater-card');
+  langCards.forEach(card => {
+    const name = card.querySelector('.lang-input-name').value;
+    const level = card.querySelector('.lang-input-level').value;
+    if (name.trim()) {
+      data.languagesList.push({ name: name.trim(), level: level.trim() });
+    }
+  });
+
+  // Compile Hobbies
+  const hobbyCards = document.querySelectorAll('#hobbies-repeater .repeater-card');
+  hobbyCards.forEach(card => {
+    const name = card.querySelector('.hobby-input-name').value;
+    if (name.trim()) {
+      data.hobbiesList.push({ name: name.trim() });
+    }
+  });
+
+  // Compile References
+  const refCards = document.querySelectorAll('#references-repeater .repeater-card');
+  refCards.forEach(card => {
+    const name = card.querySelector('.ref-input-name').value;
+    const role = card.querySelector('.ref-input-role').value;
+    const contact = card.querySelector('.ref-input-contact').value;
+    if (name.trim()) {
+      data.references.push({ name: name.trim(), role: role.trim(), contact: contact.trim() });
+    }
+  });
+
   return data;
 }
 
 // Throttle preview updates to avoid lag when typing fast
 let updateTimeout = null;
 function triggerUpdate() {
+  if (isRestoringDraft) return;
+  
+  const saveStatus = document.getElementById('save-status');
+  if (saveStatus) {
+    saveStatus.innerText = "Enregistrement...";
+    saveStatus.style.color = "#fbbf24";
+  }
+  
   if (updateTimeout) clearTimeout(updateTimeout);
   updateTimeout = setTimeout(() => {
     updatePreview();
+    saveDraftToLocalStorage();
   }, 350);
 }
 
@@ -810,7 +1162,94 @@ function updatePreview() {
 }
 
 // Fullscreen opening of compiled content
+function isValidUrl(string) {
+  if (!string) return true;
+  try {
+    const url = new URL(string);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (_) {
+    return false;  
+  }
+}
+
+function validateForm() {
+  // 1. Required Name Check
+  const nameVal = document.getElementById('profile-name').value.trim();
+  if (!nameVal) {
+    showToast("Le nom complet est requis.", "error");
+    switchTab('about');
+    document.getElementById('profile-name').focus();
+    return false;
+  }
+
+  // 2. Email Validation
+  const emailVal = document.getElementById('profile-email').value.trim();
+  if (emailVal) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailVal)) {
+      showToast("Veuillez saisir une adresse email valide.", "error");
+      switchTab('about');
+      document.getElementById('profile-email').focus();
+      return false;
+    }
+  }
+  
+  // 3. Profile Social URLs Validation
+  const urlInputs = [
+    { id: 'profile-github', label: 'GitHub du profil' },
+    { id: 'profile-linkedin', label: 'LinkedIn du profil' },
+    { id: 'profile-twitter', label: 'Twitter du profil' },
+    { id: 'profile-facebook', label: 'Facebook du profil' },
+    { id: 'profile-website', label: 'Site Web du profil' }
+  ];
+  
+  for (const input of urlInputs) {
+    const element = document.getElementById(input.id);
+    if (element) {
+      const val = element.value.trim();
+      if (val && !isValidUrl(val)) {
+        showToast(`Le lien ${input.label} doit être une URL valide (ex: https://...).`, "error");
+        switchTab('about');
+        element.focus();
+        return false;
+      }
+    }
+  }
+
+  // 4. Projects URLs Validation
+  const projectCards = document.querySelectorAll('#projects-repeater .repeater-card');
+  for (let i = 0; i < projectCards.length; i++) {
+    const card = projectCards[i];
+    const title = card.querySelector('.proj-input-title').value.trim();
+    const live = card.querySelector('.proj-input-live').value.trim();
+    const git = card.querySelector('.proj-input-github').value.trim();
+    const video = card.querySelector('.proj-input-video') ? card.querySelector('.proj-input-video').value.trim() : '';
+
+    if (live && !isValidUrl(live)) {
+      showToast(`Le lien de démonstration pour le projet "${title || (i + 1)}" n'est pas valide.`, "error");
+      switchTab('projects');
+      card.querySelector('.proj-input-live').focus();
+      return false;
+    }
+    if (git && !isValidUrl(git)) {
+      showToast(`Le lien GitHub pour le projet "${title || (i + 1)}" n'est pas valide.`, "error");
+      switchTab('projects');
+      card.querySelector('.proj-input-github').focus();
+      return false;
+    }
+    if (video && !isValidUrl(video)) {
+      showToast(`Le lien vidéo pour le projet "${title || (i + 1)}" n'est pas valide.`, "error");
+      switchTab('projects');
+      card.querySelector('.proj-input-video').focus();
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function openPreviewWindow() {
+  if (!validateForm()) return;
   const data = getFormData();
   const compiled = generatePortfolio(data, currentTheme);
   
@@ -837,6 +1276,7 @@ function getCVHtml() {
 }
 
 function previewCV() {
+  if (!validateForm()) return;
   const html = getCVHtml();
   const newWindow = window.open();
   if (newWindow) {
@@ -848,6 +1288,7 @@ function previewCV() {
 }
 
 function downloadCV() {
+  if (!validateForm()) return;
   const data = getFormData();
   const htmlStr = generateCVTemplate(data);
   
@@ -855,14 +1296,14 @@ function downloadCV() {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlStr, 'text/html');
   const cvPage = doc.querySelector('.cv-page');
-  const styleEl = doc.querySelector('style');
+  const styleElements = doc.querySelectorAll('style');
   
   // Create a hidden container in the body
   const container = document.createElement('div');
   container.style.position = 'absolute';
   container.style.left = '-9999px';
   container.style.top = '-9999px';
-  container.appendChild(styleEl.cloneNode(true));
+  styleElements.forEach(s => container.appendChild(s.cloneNode(true)));
   container.appendChild(cvPage);
   document.body.appendChild(container);
   
@@ -899,6 +1340,7 @@ function downloadCV() {
 // ZIP EXPORT COMPILER (CLIENT-SIDE)
 // -------------------------------------------------------------
 function exportZip() {
+  if (!validateForm()) return;
   const data = getFormData();
   const compiled = generatePortfolio(data, currentTheme, true);
   

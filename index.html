@@ -17,33 +17,7 @@
     <span id="toast-message">Message</span>
   </div>
 
-  <!-- LOGIN SCREEN (OVERLAY) -->
-  <div id="login-overlay" class="login-overlay">
-    <div class="login-card">
-      <h1 class="login-logo"><i class="fas fa-magic"></i> Portfolio Studio</h1>
-      <p class="login-subtitle">Connectez-vous pour commencer la création de votre portfolio</p>
-      
-      <form id="login-form" onsubmit="handleLogin(event)">
-        <div class="login-form-group">
-          <label for="username">Identifiant</label>
-          <div class="login-input-wrap">
-            <i class="fas fa-user"></i>
-            <input type="text" id="username" class="login-input" required placeholder="admin" value="admin">
-          </div>
-        </div>
-        <div class="login-form-group">
-          <label for="password">Mot de passe</label>
-          <div class="login-input-wrap">
-            <i class="fas fa-lock"></i>
-            <input type="password" id="password" class="login-input" required placeholder="••••••••" value="admin">
-          </div>
-        </div>
-        <button type="submit" class="login-btn">Accéder au Studio</button>
-      </form>
-      
-      <p class="login-demo-hint">Utilisez les identifiants par défaut : <code>admin</code> / <code>admin</code></p>
-    </div>
-  </div>
+
 
   <!-- STUDIO WORKSPACE -->
   <div class="studio-container">
@@ -87,11 +61,11 @@
       
       <div class="sidebar-user">
         <div class="user-info">
-          <div class="user-avatar-placeholder">A</div>
-          <span class="user-name">Administrateur</span>
+          <div class="user-avatar-placeholder"><i class="fas fa-save"></i></div>
+          <span class="user-name" id="save-status">Brouillon auto</span>
         </div>
-        <button class="logout-btn" onclick="handleLogout()" title="Se déconnecter">
-          <i class="fas fa-sign-out-alt"></i>
+        <button class="logout-btn btn-reset" onclick="resetToDefaultData()" title="Réinitialiser les données">
+          <i class="fas fa-undo"></i>
         </button>
       </div>
     </aside>
@@ -114,11 +88,12 @@
                 <div id="avatar-preview" class="preview-thumb">
                   <i class="fas fa-user"></i>
                 </div>
-                <div class="upload-actions">
-                  <label for="avatar-upload" class="upload-btn-label">Choisir une image</label>
-                  <input type="file" id="avatar-upload" class="file-input" accept="image/*" onchange="previewImage(this, 'avatar-preview')">
-                  <span class="upload-hint">Format PNG/JPG conseillé (max 2Mo)</span>
-                </div>
+                 <div class="upload-actions">
+                   <label for="avatar-upload" class="upload-btn-label">Choisir une image</label>
+                   <input type="file" id="avatar-upload" class="file-input" accept="image/*" onchange="previewImage(this, 'avatar-preview')">
+                   <span class="upload-hint">Format PNG/JPG conseillé (max 2Mo)</span>
+                   <input type="text" id="profile-avatar-alt" class="form-control avatar-alt-input" placeholder="Description photo pour lecteur d'écran (Alt)">
+                 </div>
               </div>
             </div>
             
@@ -126,10 +101,14 @@
               <label for="profile-name">Nom complet</label>
               <input type="text" id="profile-name" class="form-control" placeholder="Jean Dupont" value="Jean Dupont">
             </div>
-            <div class="form-group">
-              <label for="profile-title">Rôle / Profession</label>
-              <input type="text" id="profile-title" class="form-control" placeholder="Développeur Web Fullstack" value="Développeur Web Fullstack">
-            </div>
+             <div class="form-group">
+               <label for="profile-title">Rôle / Profession</label>
+               <input type="text" id="profile-title" class="form-control" placeholder="Développeur Web Fullstack" value="Développeur Web Fullstack">
+             </div>
+             <div class="form-group">
+               <label for="profile-tagline">Accroche / Phrase de présentation courte</label>
+               <input type="text" id="profile-tagline" class="form-control" placeholder="ex: Spécialiste React & architectures résilientes">
+             </div>
             
             <div class="form-group form-group-full">
               <label for="profile-bio">Bio / Résumé</label>
@@ -140,10 +119,14 @@
               <label for="profile-email">Adresse Email</label>
               <input type="email" id="profile-email" class="form-control" placeholder="jean.dupont@example.com" value="jean.dupont@example.com">
             </div>
-            <div class="form-group">
-              <label for="profile-phone">Téléphone / WhatsApp</label>
-              <input type="tel" id="profile-phone" class="form-control" placeholder="+33 6 12 34 56 78">
-            </div>
+             <div class="form-group">
+               <label for="profile-phone">Téléphone / WhatsApp</label>
+               <input type="tel" id="profile-phone" class="form-control" placeholder="+33 6 12 34 56 78">
+             </div>
+             <div class="form-group">
+               <label for="profile-website">Site Web Personnel / Blog</label>
+               <input type="url" id="profile-website" class="form-control" placeholder="https://mon-site.fr">
+             </div>
             <div class="form-group">
               <label for="profile-age">Âge</label>
               <input type="number" id="profile-age" class="form-control" placeholder="28">
@@ -152,10 +135,14 @@
               <label for="profile-experience">Années d'expérience</label>
               <input type="number" id="profile-experience" class="form-control" placeholder="5">
             </div>
-            <div class="form-group">
-              <label for="profile-location">Localisation (Ville, Pays)</label>
-              <input type="text" id="profile-location" class="form-control" placeholder="Paris, France">
-            </div>
+             <div class="form-group">
+               <label for="profile-location">Localisation (Ville, Pays)</label>
+               <input type="text" id="profile-location" class="form-control" placeholder="Paris, France">
+             </div>
+             <div class="form-group">
+               <label for="profile-relocation">Mobilité / Relocalisation recherchée</label>
+               <input type="text" id="profile-relocation" class="form-control" placeholder="ex: Disponible pour relocalisation / Hybride">
+             </div>
             <div class="form-group">
               <label for="profile-address">Adresse complète</label>
               <input type="text" id="profile-address" class="form-control" placeholder="12 Rue de la Paix, 75002">
@@ -177,8 +164,8 @@
               <input type="text" id="profile-hobbies" class="form-control" placeholder="Voyages, Photographie, Échecs">
             </div>
             
-            <div class="form-group form-group-full" style="border-top: 1px solid var(--border-light); margin-top: 1.5rem; padding-top: 1.5rem;">
-              <h3 style="font-size: 1.1rem; color: white; margin-bottom: 0.5rem;">Réseaux Sociaux</h3>
+            <div class="form-group form-group-full form-section-divider">
+              <h3 class="form-section-header">Réseaux Sociaux</h3>
             </div>
             
             <div class="form-group">
@@ -214,8 +201,8 @@
           </button>
         </div>
 
-          <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-light); font-size: 1.1rem;">Soft Skills (Savoir-être)</h3>
-          <p class="section-desc" style="font-size: 0.9rem;">Ex: Leadership, Esprit d'équipe, Gestion du stress.</p>
+          <h3 class="subsection-title">Soft Skills (Savoir-être)</h3>
+          <p class="section-desc text-muted-sm">Ex: Leadership, Esprit d'équipe, Gestion du stress.</p>
           <div id="soft-skills-repeater" class="repeater-container"></div>
           <button type="button" class="btn-add-item" onclick="addSoftSkillItem()">
             <i class="fas fa-plus"></i> Ajouter un soft skill
@@ -258,10 +245,19 @@
           <div id="education-repeater" class="repeater-container">
             <!-- Repeated education items will go here dynamically -->
           </div>
-          
-          <button type="button" class="btn-add-item" onclick="addEducationItem()">
-            <i class="fas fa-plus"></i> Ajouter une formation
-          </button>
+          <button type="button" class="btn-add-item" onclick="addEducationItem()" style="margin-bottom: 2rem;">
+             <i class="fas fa-plus"></i> Ajouter une formation
+           </button>
+           
+           <h3 class="subsection-title-mt-sm">Certifications</h3>
+           <p class="section-desc text-muted-sm">Ajoutez vos certifications pro (ex: AWS, Scrum Master, TOEFL...) distinctes des diplômes.</p>
+           <div id="certs-repeater" class="repeater-container">
+             <!-- Repeated cert cards will go here dynamically -->
+           </div>
+           
+           <button type="button" class="btn-add-item" onclick="addCertItem()">
+             <i class="fas fa-plus"></i> Ajouter une certification
+           </button>
         </div>
 
         <!-- SECTION 5: DESIGN / STYLE -->
@@ -271,19 +267,19 @@
           <h2 class="section-title">Informations Complémentaires</h2>
           <p class="section-desc">Langues, centres d'intérêt et références professionnelles.</p>
           
-          <h3 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--text-light); font-size: 1.1rem;">Langues</h3>
+          <h3 class="subsection-title-mt-sm">Langues</h3>
           <div id="languages-repeater" class="repeater-container"></div>
           <button type="button" class="btn-add-item" onclick="addLanguageItem()">
             <i class="fas fa-plus"></i> Ajouter une langue
           </button>
 
-          <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-light); font-size: 1.1rem;">Centres d'intérêt</h3>
+          <h3 class="subsection-title">Centres d'intérêt</h3>
           <div id="hobbies-repeater" class="repeater-container"></div>
           <button type="button" class="btn-add-item" onclick="addHobbyItem()">
             <i class="fas fa-plus"></i> Ajouter un centre d'intérêt
           </button>
 
-          <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-light); font-size: 1.1rem;">Références</h3>
+          <h3 class="subsection-title">Références</h3>
           <div id="references-repeater" class="repeater-container"></div>
           <button type="button" class="btn-add-item" onclick="addReferenceItem()">
             <i class="fas fa-plus"></i> Ajouter une référence
@@ -294,7 +290,7 @@
           <h2 class="section-title">Design & Style</h2>
           <p class="section-desc">Sélectionnez le style graphique de votre portfolio et personnalisez la palette de couleurs.</p>
           
-          <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-light)">1. Modèle de Portfolio</h3>
+          <h3 class="subsection-title-no-mt">1. Modèle de Portfolio</h3>
           <div class="design-themes-grid">
             <div class="theme-card selected" onclick="selectTheme('minimalist')" id="theme-minimalist">
               <div class="theme-badge"><i class="fas fa-check"></i></div>
@@ -320,15 +316,21 @@
               <h4 class="theme-card-name">Néo-Brutaliste Pop</h4>
               <p class="theme-card-desc">Bordures épaisses, ombres marquées et couleurs vives rétro-pop.</p>
             </div>
-            <div class="theme-card" onclick="selectTheme('editorial')" id="theme-editorial">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f5f5f4 0%, #d7c49e 100%)"></div>
-              <h4 class="theme-card-name">Chic Éditorial</h4>
-              <p class="theme-card-desc">Polices Serif raffinées, tons crème et mise en page littéraire.</p>
-            </div>
+             <div class="theme-card" onclick="selectTheme('editorial')" id="theme-editorial">
+               <div class="theme-badge"><i class="fas fa-check"></i></div>
+               <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f5f5f4 0%, #d7c49e 100%)"></div>
+               <h4 class="theme-card-name">Chic Éditorial</h4>
+               <p class="theme-card-desc">Polices Serif raffinées, tons crème et mise en page littéraire.</p>
+             </div>
+             <div class="theme-card" onclick="selectTheme('corporate')" id="theme-corporate">
+               <div class="theme-badge"><i class="fas fa-check"></i></div>
+               <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #1e3a8a 0%, #475569 100%)"></div>
+               <h4 class="theme-card-name">Corporate / Sobre</h4>
+               <p class="theme-card-desc">Structure classique, bleus institutionnels. Idéal pour la finance, le conseil et le juridique.</p>
+             </div>
           </div>
           
-          <h3 style="font-size: 1.1rem; margin: 2rem 0 1rem 0; color: var(--text-light)">2. Palettes Prédéfinies</h3>
+          <h3 class="subsection-title">2. Palettes Prédéfinies</h3>
           <div class="presets-palette-grid">
             <div class="preset-color-card" onclick="applyPreset('#6366f1', '#ec4899', 'Sunset Indigo')">
               <div class="preset-colors">
@@ -416,7 +418,7 @@
             </div>
           </div>
           
-          <h3 style="font-size: 1.1rem; margin: 2rem 0 1rem 0; color: var(--text-light)">3. Ajustement Manuel</h3>
+          <h3 class="subsection-title">3. Ajustement Manuel</h3>
           <div class="color-picker-grid">
             <div class="color-input-wrapper">
               <input type="color" id="design-accent" value="#6366f1" onchange="triggerUpdate()">
@@ -440,7 +442,7 @@
           <h2 class="section-title">Création de CV (PDF)</h2>
           <p class="section-desc">Générez un Curriculum Vitae personnalisé. Ajustez le design puis téléchargez-le directement en PDF.</p>
           
-          <h3 style="font-size: 1.1rem; margin: 1.5rem 0 1rem 0; color: var(--text-light)">1. Modèle de CV</h3>
+          <h3 class="subsection-title-mt-sm">1. Modèle de CV</h3>
           <div class="design-themes-grid" style="margin-bottom: 2rem;">
             <div class="theme-card selected" onclick="selectCVTemplate('modern')" id="cv-tpl-modern">
               <div class="theme-badge"><i class="fas fa-check"></i></div>
@@ -504,7 +506,7 @@
             </div>
           </div>
           
-          <h3 style="font-size: 1.1rem; margin: 1.5rem 0 1rem 0; color: var(--text-light)">2. Couleur d'Accent</h3>
+          <h3 class="subsection-title-mt-sm">2. Couleur d'Accent</h3>
           <div class="color-picker-grid" style="margin-bottom: 2rem;">
             <div class="color-input-wrapper">
               <input type="color" id="cv-design-accent" value="#3b82f6" onchange="triggerUpdate(); document.getElementById('cv-accent-hex').innerText = this.value;">
