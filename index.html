@@ -17,6 +17,49 @@
     <span id="toast-message"></span>
   </div>
 
+  <!-- ================= Connexion (mode hébergé) ================= -->
+  <div class="auth-screen" id="auth-screen" hidden>
+    <div class="auth-card">
+      <div class="auth-brand"><div class="brand-icon"><i class="fas fa-layer-group" aria-hidden="true"></i></div><span>Portfolio Studio</span></div>
+
+      <form class="auth-form" id="login-form" data-auth-view="login">
+        <h1>Connexion</h1>
+        <p class="auth-sub">Accédez à l'espace d'administration de votre portfolio.</p>
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" class="form-control" autocomplete="email" required>
+        <label for="login-password">Mot de passe</label>
+        <input type="password" id="login-password" class="form-control" autocomplete="current-password" required>
+        <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+        <button type="button" class="link-btn" data-auth-goto="forgot">Mot de passe oublié ?</button>
+      </form>
+
+      <form class="auth-form" id="forgot-form" data-auth-view="forgot" hidden>
+        <h1>Mot de passe oublié</h1>
+        <p class="auth-sub">Indiquez votre email : vous recevrez un lien pour choisir un nouveau mot de passe.</p>
+        <label for="forgot-email">Email</label>
+        <input type="email" id="forgot-email" class="form-control" autocomplete="email" required>
+        <button type="submit" class="btn btn-primary btn-block">Recevoir le lien</button>
+        <button type="button" class="link-btn" data-auth-goto="login">Retour à la connexion</button>
+      </form>
+
+      <form class="auth-form" id="password-form" data-auth-view="password" hidden>
+        <h1>Choisissez votre mot de passe</h1>
+        <p class="auth-sub">Au moins 8 caractères. Vous l'utiliserez pour vous connecter.</p>
+        <label for="new-password">Nouveau mot de passe</label>
+        <input type="password" id="new-password" class="form-control" autocomplete="new-password" minlength="8" required>
+        <label for="new-password-2">Confirmez</label>
+        <input type="password" id="new-password-2" class="form-control" autocomplete="new-password" minlength="8" required>
+        <button type="submit" class="btn btn-primary btn-block">Enregistrer et continuer</button>
+      </form>
+
+      <div class="auth-form" data-auth-view="loading" hidden>
+        <p class="auth-sub"><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> Chargement…</p>
+      </div>
+
+      <p class="auth-message" id="auth-message" role="alert" hidden></p>
+    </div>
+  </div>
+
   <div class="studio" data-view="edit">
     <!-- ================= Navigation ================= -->
     <aside class="studio-sidebar">
@@ -35,7 +78,13 @@
         <button type="button" class="nav-item" data-tab="design"><i class="fas fa-palette" aria-hidden="true"></i><span>Design</span></button>
         <button type="button" class="nav-item" data-tab="cv"><i class="fas fa-file-lines" aria-hidden="true"></i><span>CV</span></button>
         <button type="button" class="nav-item" data-tab="export"><i class="fas fa-download" aria-hidden="true"></i><span>Exporter</span></button>
+        <button type="button" class="nav-item cloud-only admin-only" data-tab="accounts" hidden><i class="fas fa-users" aria-hidden="true"></i><span>Comptes</span></button>
       </nav>
+
+      <div class="account-box cloud-only" hidden>
+        <span class="account-email" id="account-email"></span>
+        <button type="button" class="icon-btn" id="logout-btn" title="Se déconnecter" aria-label="Se déconnecter"><i class="fas fa-right-from-bracket" aria-hidden="true"></i></button>
+      </div>
 
       <div class="sidebar-footer">
         <span class="save-status" id="save-status"><i class="fas fa-circle-check" aria-hidden="true"></i> Brouillon enregistré</span>
@@ -47,6 +96,10 @@
 
     <!-- ================= Éditeur ================= -->
     <main class="editor-panel" id="editor">
+      <div class="editing-banner" id="editing-banner" hidden>
+        <span><i class="fas fa-user-pen" aria-hidden="true"></i> Vous modifiez le portfolio de <strong id="editing-name"></strong></span>
+        <a href="?" class="link-btn">Revenir au mien</a>
+      </div>
 
       <!-- PROFIL -->
       <section id="sec-about" class="editor-section active">
@@ -293,10 +346,46 @@
           <input type="file" id="json-import" class="file-input" accept="application/json,.json">
         </div>
       </section>
+
+      <!-- COMPTES (super-admin) -->
+      <section id="sec-accounts" class="editor-section">
+        <h1 class="section-title">Comptes</h1>
+        <p class="section-desc">Invitez vos clients : chacun reçoit un email pour choisir son mot de passe, puis gère son portfolio en toute autonomie.</p>
+
+        <form class="invite-card" id="invite-form">
+          <h2 class="subsection-title subsection-first">Inviter un client</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="invite-name">Nom complet</label>
+              <input type="text" id="invite-name" class="form-control" placeholder="Awa Koffi" required>
+            </div>
+            <div class="form-group">
+              <label for="invite-email">Email</label>
+              <input type="email" id="invite-email" class="form-control" placeholder="awa@exemple.com" required>
+            </div>
+            <div class="form-group form-group-full">
+              <label for="invite-slug">Adresse du portfolio</label>
+              <div class="slug-input"><span id="slug-prefix"></span><input type="text" id="invite-slug" class="form-control" placeholder="awa-koffi" pattern="[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?" required></div>
+              <span class="hint">Lettres minuscules, chiffres et tirets. Elle ne pourra plus être modifiée par le client.</span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane" aria-hidden="true"></i> Envoyer l'invitation</button>
+        </form>
+
+        <h2 class="subsection-title">Tous les portfolios</h2>
+        <div class="accounts-list" id="accounts-list"><p class="empty">Chargement…</p></div>
+      </section>
     </main>
 
     <!-- ================= Aperçu ================= -->
     <section class="preview-panel" aria-label="Aperçu en direct">
+      <div class="publish-bar cloud-only" id="publish-bar" hidden>
+        <span class="publish-status" id="publish-status"></span>
+        <div class="publish-actions">
+          <a class="btn btn-secondary btn-sm" id="view-live" target="_blank" rel="noopener" hidden><i class="fas fa-up-right-from-square" aria-hidden="true"></i> Voir en ligne</a>
+          <button type="button" class="btn btn-primary btn-sm" id="publish-btn"><i class="fas fa-rocket" aria-hidden="true"></i> Publier</button>
+        </div>
+      </div>
       <div class="preview-bar">
         <div class="segmented" role="group" aria-label="Que prévisualiser">
           <button type="button" class="seg-btn active" data-preview="portfolio">Portfolio</button>
@@ -321,9 +410,12 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="engine.js"></script>
   <script src="themes.js"></script>
   <script src="cv.js"></script>
+  <script src="cloud.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

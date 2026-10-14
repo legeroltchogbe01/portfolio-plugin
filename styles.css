@@ -326,3 +326,69 @@ textarea.form-control { resize: vertical; min-height: 96px; line-height: 1.55; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* =========================================================
+   Mode hébergé : connexion, publication, comptes
+   ========================================================= */
+.btn-sm { padding: 7px 12px; font-size: .82rem; text-decoration: none; }
+.btn-block { width: 100%; }
+.btn:disabled, button:disabled { opacity: .6; cursor: default; transform: none; }
+
+/* Connexion */
+.auth-screen {
+  position: fixed; inset: 0; z-index: 500; display: grid; place-items: center; padding: 20px;
+  background: radial-gradient(60% 50% at 50% 0%, var(--accent-soft), transparent 70%), var(--bg);
+}
+.auth-card { width: 100%; max-width: 400px; padding: 32px 28px; border-radius: 18px; border: 1px solid var(--border); background: var(--surface); box-shadow: 0 30px 60px -30px rgba(0,0,0,.7); }
+.auth-brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; margin-bottom: 26px; }
+.auth-form { display: flex; flex-direction: column; gap: 8px; }
+.auth-form h1 { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: -0.02em; }
+.auth-sub { color: var(--text-muted); font-size: .9rem; margin-bottom: 10px; }
+.auth-form label { font-size: .8rem; font-weight: 600; color: var(--text-soft); margin-top: 6px; }
+.auth-form .btn { margin-top: 14px; }
+.auth-form .link-btn { align-self: center; margin-top: 8px; text-decoration: none; }
+.auth-form .link-btn:hover { color: var(--text); text-decoration: underline; }
+.auth-message { margin-top: 16px; padding: 10px 12px; border-radius: var(--radius-sm); font-size: .88rem; background: var(--accent-soft); color: var(--text); }
+.auth-message.error { background: rgba(240, 82, 82, .14); }
+.auth-message + .btn { margin-top: 14px; }
+
+/* Compte dans la barre latérale */
+.account-box { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.account-email { font-size: .8rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Bandeau « vous modifiez le portfolio de … » */
+.editing-banner { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: -12px 0 24px; padding: 10px 14px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid var(--accent); font-size: .9rem; max-width: 720px; }
+.editing-banner i { color: var(--accent); margin-right: 4px; }
+
+/* Barre de publication */
+.publish-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
+.publish-status { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--text-soft); min-width: 0; }
+.publish-status a { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.publish-status.draft i { color: var(--text-muted); font-size: .55rem; }
+.publish-status.pending i { color: #f5b041; font-size: .55rem; }
+.publish-status.live i { color: var(--success); }
+.publish-actions { display: flex; gap: 8px; }
+
+/* Comptes */
+.invite-card { padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); }
+.invite-card .btn { margin-top: 16px; }
+.slug-input { display: flex; align-items: stretch; }
+.slug-input span { display: flex; align-items: center; padding: 0 10px; border: 1px solid var(--border); border-right: 0; border-radius: var(--radius-sm) 0 0 var(--radius-sm); background: var(--surface-2); color: var(--text-muted); font-size: .85rem; white-space: nowrap; max-width: 55%; overflow: hidden; text-overflow: ellipsis; }
+.slug-input .form-control { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.accounts-list { display: flex; flex-direction: column; gap: 10px; }
+.account-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
+.account-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.account-main strong { display: flex; align-items: center; gap: 8px; }
+.account-meta { font-size: .8rem; color: var(--text-muted); }
+.account-link { font-size: .85rem; color: var(--accent); text-decoration: none; overflow: hidden; text-overflow: ellipsis; }
+.account-link:hover { text-decoration: underline; }
+.account-actions { display: flex; gap: 8px; }
+.pill { align-self: flex-start; font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-soft); border: 1px solid var(--border); }
+.pill.live { background: rgba(52, 199, 123, .14); color: var(--success); border-color: transparent; }
+.pill.pending { background: rgba(245, 176, 65, .14); color: #f5b041; border-color: transparent; }
+
+@media (max-width: 960px) {
+  .account-box { border-top: 0; padding: 8px 12px 8px 4px; }
+  .account-email { display: none; }
+  .publish-bar { padding: 8px 10px; }
+}

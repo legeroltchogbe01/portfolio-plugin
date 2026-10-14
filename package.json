@@ -5,7 +5,12 @@
   "private": true,
   "scripts": {
     "start": "npx --yes http-server -c-1 .",
-    "test": "node tests/test.js"
+    "test": "node tests/test.js",
+    "test:db": "node tests/db.test.js",
+    "test:all": "node tests/test.js && node tests/db.test.js"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.9"
+  }
 }

@@ -2,7 +2,10 @@
 
 Un éditeur qui tourne entièrement dans le navigateur : on remplit son profil, ses projets et son parcours, on voit le résultat en direct, puis on télécharge **un site web prêt à publier** et **un CV en PDF**.
 
-Aucun serveur, aucun compte : les données restent dans le navigateur de l'utilisateur.
+Deux façons de l'utiliser :
+
+- **En local**, sans serveur ni compte : les données restent dans le navigateur.
+- **En ligne avec comptes** (Supabase) : vous invitez vos clients ; chacun a son espace admin et son portfolio publié à l'adresse `site.com/pseudo`. Voir **[HEBERGEMENT.md](HEBERGEMENT.md)**.
 
 ## Fonctionnalités
 
@@ -18,6 +21,8 @@ Aucun serveur, aucun compte : les données restent dans le navigateur de l'utili
 - **Compétences par domaine** (pas de barres de pourcentage), savoir-être, langues, centres d'intérêt, certifications, références (CV uniquement).
 - **Réordonner** projets, expériences et compétences avec les flèches.
 - **Sauvegarde automatique** dans le navigateur, plus **export / import JSON** pour garder ou transférer ses données.
+- **CV sur une page** : les espacements puis le texte sont réduits automatiquement (jamais sous 8,5 pt) ; sinon le CV continue proprement sur la page suivante. Option « Autoriser plusieurs pages ».
+- **Version hébergée** : connexion par email et mot de passe, invitations, photos stockées en ligne, bouton **Publier**, espace super-admin pour gérer tous les comptes.
 - **Export ZIP** : `index.html`, `styles.css`, `script.js` et `images/`, avec balises SEO et de partage, favicon, menu mobile, accessibilité clavier.
 
 ## Sécurité
@@ -30,19 +35,24 @@ Ouvrir `index.html` dans un navigateur suffit. Pour un fonctionnement identique 
 
 ```bash
 npm start        # sert le dossier sur http://127.0.0.1:8080
-npm test         # lance les tests du moteur (Node 18+, aucune dépendance)
+npm test         # tests du moteur (Node 18+, aucune dépendance)
+npm install && npm run test:db   # tests des règles d'accès de la base (PostgreSQL embarqué)
 ```
 
 ## Organisation du code
 
 ```text
-index.html   Interface de l'éditeur
-styles.css   Styles de l'éditeur
-app.js       Logique de l'éditeur : état, formulaires, aperçu, exports
-engine.js    Moteur : normalisation des données, sécurité, HTML/CSS/JS du portfolio
-themes.js    Les thèmes (polices, palettes clair/sombre, complément de CSS)
-cv.js        Les modèles de CV
-tests/       Tests du moteur
+index.html       Interface de l'éditeur (et écran de connexion en mode hébergé)
+styles.css       Styles de l'éditeur
+app.js           Logique de l'éditeur : état, formulaires, aperçu, exports
+cloud.js         Mode hébergé : connexion, sauvegarde en base, photos, publication, comptes
+config.js        Adresse et clé publique Supabase (vide = mode local)
+engine.js        Moteur : normalisation des données, sécurité, HTML/CSS/JS du portfolio
+themes.js        Les thèmes (polices, palettes clair/sombre, complément de CSS)
+cv.js            Les modèles de CV et l'ajustement sur une page
+portfolio.html   Page publique site.com/pseudo
+supabase/        Schéma de la base, fonction d'invitation, scripts d'administration
+tests/           Tests du moteur et des règles d'accès de la base
 ```
 
 Le principe : **une seule structure HTML pour tous les thèmes**. Un thème ne contient que du style, si bien qu'une correction dans `engine.js` profite à tous.
@@ -53,7 +63,9 @@ Copier un bloc dans `themes.js`, changer `id` et `name`, puis ajuster les police
 
 ## Mettre en ligne
 
-**L'éditeur** est un site statique. Le fichier `render.yaml` permet de le déployer sur Render ; GitHub Pages, Netlify ou Vercel fonctionnent aussi.
+**Version avec comptes** : suivez [HEBERGEMENT.md](HEBERGEMENT.md).
+
+**L'éditeur seul** est un site statique. Le fichier `render.yaml` permet de le déployer sur Render ; GitHub Pages, Netlify ou Vercel fonctionnent aussi.
 
 **Un portfolio exporté** se publie de trois façons :
 

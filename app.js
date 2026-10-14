@@ -207,6 +207,7 @@
      ========================================================== */
 
   let state = null;
+  let backend = null;        // mode hébergé (cloud.js) ; null = mode local
   let previewMode = 'portfolio';
   let device = 'desktop';
   let saveWarned = false;
@@ -265,7 +266,19 @@
     return clone(DEMO);
   }
 
+  let saving = Promise.resolve();
   function saveState() {
+    if (backend) {
+      const snapshot = clone(state);
+      saving = saving.then(() => backend.save(snapshot))
+        .then(() => setSaveStatus('saved'))
+        .catch(err => {
+          console.error(err);
+          setSaveStatus('error');
+          toast('Enregistrement impossible : ' + (err.message || 'erreur réseau') + '. Vos modifications seront renvoyées à la prochaine saisie.', 'error');
+        });
+      return saving;
+    }
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
       setSaveStatus('saved');
@@ -309,10 +322,20 @@
      ========================================================== */
 
   let timer = null;
+  let saveTimer = null;
   function changed() {
     setSaveStatus('saving');
     clearTimeout(timer);
-    timer = setTimeout(() => { renderPreview(); saveState(); }, 300);
+    timer = setTimeout(renderPreview, 300);
+    // En ligne, on regroupe les sauvegardes pour ne pas appeler le serveur à chaque frappe.
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { saveTimer = null; saveState(); }, backend ? 1200 : 300);
+  }
+
+  /** Termine immédiatement une sauvegarde en attente (avant publication, déconnexion…). */
+  function flush() {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; return saveState(); }
+    return saving;
   }
 
   function renderPreview() {
@@ -558,12 +581,12 @@
       const file = e.target.files && e.target.files[0];
       e.target.value = '';
       if (!file) return;
-      readImage(file, 1200, dataUrl => {
-        item.image = dataUrl;
-        setThumb($('.preview-thumb', card), dataUrl, 'fa-image');
+      readImage(file, 1200, dataUrl => storeImage(dataUrl, 'project', src => {
+        item.image = src;
+        setThumb($('.preview-thumb', card), src, 'fa-image');
         $('[data-image-remove]', card).hidden = false;
         changed();
-      });
+      }));
       return;
     }
 
@@ -636,6 +659,15 @@
       img.src = reader.result;
     };
     reader.readAsDataURL(file);
+  }
+
+  /** Mode local : l'image reste en data URL. Mode hébergé : envoyée au stockage, on garde l'URL. */
+  function storeImage(dataUrl, kind, done) {
+    if (!backend) { done(dataUrl); return; }
+    toast('Envoi de l’image…');
+    backend.uploadImage(dataUrl, kind)
+      .then(url => { done(url); toast('Image enregistrée.'); })
+      .catch(err => { console.error(err); toast('Envoi de l’image impossible : ' + (err.message || 'erreur'), 'error'); });
   }
 
   function renderAvatar() {
@@ -974,8 +1006,19 @@
     renderPreview();
   }
 
-  function init() {
-    state = loadState();
+  async function init() {
+    if (window.StudioCloud && window.StudioCloud.enabled) {
+      try {
+        backend = await window.StudioCloud.start();
+      } catch (err) {
+        console.warn(err);
+        return; // l'écran de connexion affiche le message
+      }
+      const loaded = await backend.load();
+      state = migrate({ theme: loaded.theme, cvTemplate: loaded.cvTemplate, data: loaded.data || {} });
+    } else {
+      state = loadState();
+    }
     renderPresets();
     renderAll();
 
@@ -1007,7 +1050,7 @@
       const file = e.target.files && e.target.files[0];
       e.target.value = '';
       if (!file) return;
-      readImage(file, 800, url => { state.data.profile.avatar = url; renderAvatar(); changed(); });
+      readImage(file, 800, dataUrl => storeImage(dataUrl, 'avatar', src => { state.data.profile.avatar = src; renderAvatar(); changed(); }));
     });
     $('#avatar-remove').addEventListener('click', () => { state.data.profile.avatar = ''; renderAvatar(); changed(); });
 
@@ -1029,6 +1072,19 @@
     if ('ResizeObserver' in window) new ResizeObserver(fitPreview).observe($('#preview-wrapper'));
     else window.addEventListener('resize', fitPreview);
     setSaveStatus('saved');
+
+    if (backend) {
+      backend.attach({
+        get state() { return state; },
+        payload,
+        toast,
+        flush,
+        switchTab
+      });
+      window.addEventListener('beforeunload', e => {
+        if (saveTimer) { flush(); e.preventDefault(); e.returnValue = ''; }
+      });
+    }
   }
 
   // Exposé pour les tests et le débogage

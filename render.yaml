@@ -1,5 +1,30 @@
 services:
-  - type: static
+  - type: web
     name: portfolio-builder-studio
+    runtime: static
     buildCommand: ""
     staticPublishPath: "."
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      # config.js et les scripts changent à chaque déploiement : pas de cache long
+      - path: /*.js
+        name: Cache-Control
+        value: no-cache
+    routes:
+      # Toute adresse qui ne correspond à aucun fichier (ex. /awa-koffi)
+      # affiche la page publique, qui charge le portfolio publié.
+      # Les vrais fichiers (index.html, engine.js…) restent prioritaires.
+      - type: rewrite
+        source: /:slug
+        destination: /portfolio.html
+      - type: rewrite
+        source: /:slug/
+        destination: /portfolio.html
