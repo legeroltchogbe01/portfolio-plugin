@@ -1,1408 +1,1000 @@
 /**
- * Portfolio Builder Studio - Application Logic
+ * Portfolio Studio — éditeur
+ *
+ * Tout l'état vit dans `state`. Le formulaire écrit dans `state`, l'aperçu et
+ * les exports lisent `state`. Les valeurs saisies ne sont jamais injectées
+ * dans le HTML de l'éditeur : elles passent par `.value`, ce qui évite qu'un
+ * guillemet ou une balise ne casse le formulaire.
  */
+(function () {
+  'use strict';
 
-// Global state for images
-const imageAssets = {
-  avatar: '',
-  projects: {} // idx -> base64
-};
+  const E = window.PortfolioEngine;
+  const THEMES = window.PORTFOLIO_THEMES;
+  const CV_TEMPLATES = window.CV_TEMPLATES;
 
-let currentTheme = 'minimalist';
-let currentCVTemplate = 'modern';
-let previewMode = 'portfolio';
-let isRestoringDraft = false;
+  const DRAFT_KEY = 'portfolio_studio_draft_v2';
+  const LEGACY_DRAFT_KEY = 'portfolio_studio_draft';
 
-// Default Demo Data
-const defaultData = {
-  profile: {
-    name: 'Alexandre Martin',
-    title: 'Développeur Web & Mobile',
-    tagline: 'Spécialiste React & architectures résilientes',
-    avatarAlt: 'Portrait d\'Alexandre Martin',
-    website: 'https://alexandre-martin.dev',
-    relocation: 'Disponible pour relocalisation / Hybride',
-    bio: 'Passionné par l\'architecture logicielle et les interfaces interactives. J\'aide les entreprises à transformer leurs idées en produits numériques d\'exception.',
-    email: 'alexandre.martin@example.com',
-    phone: '+33 6 12 34 56 78',
-    age: '28',
-    experience: '6',
-    location: 'Paris, France',
-    address: '12 Rue de la Paix, 75002 Paris',
-    availability: 'Immédiate',
-    contract: 'Freelance / CDI / Alternance',
-    languages: 'Français (Natif), Anglais (C1, Technique)',
-    hobbies: 'Voyages, Photographie, Boxe, Échecs',
-    github: 'https://github.com/alexandremartin',
-    linkedin: 'https://linkedin.com/in/alexandremartin',
-    twitter: 'https://twitter.com/alexandre',
-    facebook: 'https://facebook.com/alexandre.martin'
-  },
-  skills: [
-    { name: 'JavaScript / TypeScript', level: 95 },
-    { name: 'React / Next.js', level: 90 },
-    { name: 'CSS & Animations (Vanilla)', level: 85 },
-    { name: 'Node.js & API REST', level: 80 }
-  ],
-  projects: [
-    {
-      title: 'SaaS Dashboard Financier',
-      description: 'Une plateforme d\'analyse financière en temps réel avec des graphiques interactifs et un mode sombre complet.',
-      category: 'Développement Web',
-      technologies: 'React, Chart.js, HSL CSS',
-      liveUrl: 'https://example.com/demo',
-      githubUrl: 'https://github.com/alexandremartin/dashboard',
-      image: '',
-      date: '2024 (3 mois)',
-      role: 'Solo (Fullstack)',
-      videoUrl: 'https://youtube.com/watch?v=demo1'
+  /* ==========================================================
+     Données d'exemple
+     ========================================================== */
+
+  const DEMO = {
+    theme: 'signature',
+    cvTemplate: 'modern',
+    data: {
+      profile: {
+        name: 'Awa Koffi',
+        title: 'Développeuse web full-stack',
+        tagline: 'Je conçois des applications web rapides, utiles et agréables à utiliser.',
+        bio: "Basée à Cotonou, j'accompagne PME et startups de l'idée à la mise en ligne.\n- Sites vitrines et e-commerce\n- Applications métier sur mesure\n- Automatisation des tâches répétitives",
+        email: 'awa.koffi@exemple.com',
+        phone: '+229 01 23 45 67 89',
+        location: 'Cotonou, Bénin',
+        relocation: 'Ouverte au télétravail',
+        availability: 'Immédiate',
+        contract: 'Freelance / CDI',
+        experience: '4',
+        website: '',
+        github: 'https://github.com/',
+        linkedin: 'https://linkedin.com/',
+        twitter: '',
+        facebook: '',
+        avatar: '',
+        avatarAlt: ''
+      },
+      projects: [
+        {
+          title: 'Marché en ligne',
+          category: 'E-commerce',
+          date: '2025 · 4 mois',
+          role: 'Solo · Full-stack',
+          description: "Boutique en ligne pour une coopérative de producteurs locaux.\n- Catalogue et panier\n- Paiement mobile money\n- Tableau de bord des commandes",
+          result: 'Plus de 300 commandes le premier mois',
+          technologies: 'Next.js, Node.js, PostgreSQL',
+          liveUrl: 'https://example.com',
+          githubUrl: '',
+          videoUrl: '',
+          image: ''
+        },
+        {
+          title: 'Gestion de stock',
+          category: 'Application métier',
+          date: '2024 · 2 mois',
+          role: 'Équipe de 3 · Front-end',
+          description: "Application interne de suivi des stocks pour un distributeur, utilisable sur tablette en entrepôt.",
+          result: '',
+          technologies: 'React, Firebase',
+          liveUrl: '',
+          githubUrl: 'https://github.com/',
+          videoUrl: '',
+          image: ''
+        }
+      ],
+      experience: [
+        {
+          role: 'Développeuse full-stack',
+          organization: 'Agence Digitale Atlantique',
+          startDate: '2023',
+          endDate: 'aujourd’hui',
+          description: "- Développement de sites et d'applications pour une quinzaine de clients\n- Mise en place des déploiements automatiques",
+          achievements: 'Temps de chargement des sites divisé par deux'
+        },
+        {
+          role: 'Développeuse front-end (stage)',
+          organization: 'StartUp Bénin',
+          startDate: '2022',
+          endDate: '2023',
+          description: 'Intégration des maquettes et création de composants réutilisables.',
+          achievements: ''
+        }
+      ],
+      skills: [
+        { name: 'JavaScript / TypeScript', group: 'Développement web' },
+        { name: 'React / Next.js', group: 'Développement web' },
+        { name: 'Node.js', group: 'Développement web' },
+        { name: 'PostgreSQL', group: 'Développement web' },
+        { name: 'Figma', group: 'Design' },
+        { name: 'n8n', group: 'Automatisation' }
+      ],
+      softSkills: [{ name: 'Autonomie' }, { name: 'Esprit d’équipe' }],
+      education: [{ degree: 'Licence en informatique', institution: 'Université d’Abomey-Calavi', startDate: '2019', endDate: '2022' }],
+      certificationsList: [{ name: 'Marketing numérique', authority: 'OIF', date: '2025' }],
+      languagesList: [{ name: 'Français', level: 'Langue maternelle' }, { name: 'Anglais', level: 'Courant (B2)' }],
+      hobbiesList: [{ name: 'Photographie' }],
+      references: [],
+      design: { accentColor: '', secondaryColor: '', cvAccent: '' }
+    }
+  };
+
+  /* ==========================================================
+     Schéma des listes répétables
+     ========================================================== */
+
+  const REPEATERS = {
+    projects: {
+      label: 'Projet', icon: 'fa-folder-open', titleKey: 'title',
+      fields: [
+        { key: 'image', type: 'image', label: 'Capture d’écran', full: true },
+        { key: 'title', label: 'Nom du projet', placeholder: 'Marché en ligne' },
+        { key: 'category', label: 'Catégorie', placeholder: 'E-commerce' },
+        { key: 'date', label: 'Date / durée', placeholder: '2025 · 3 mois' },
+        { key: 'role', label: 'Votre rôle', placeholder: 'Solo · Full-stack' },
+        { key: 'description', type: 'textarea', label: 'Description', placeholder: "Ce que fait le projet et ce que vous avez réalisé.\n- Une fonctionnalité clé\n- Une autre", full: true },
+        { key: 'result', label: 'Résultat clé (optionnel)', placeholder: 'Ventes en hausse de 60 %', full: true },
+        { key: 'technologies', label: 'Technologies (séparées par des virgules)', placeholder: 'React, Node.js, PostgreSQL', full: true },
+        { key: 'liveUrl', type: 'url', label: 'Lien du site', placeholder: 'https://…' },
+        { key: 'githubUrl', type: 'url', label: 'Lien du code', placeholder: 'https://github.com/…' },
+        { key: 'videoUrl', type: 'url', label: 'Vidéo de démo (optionnel)', placeholder: 'https://youtube.com/…', full: true }
+      ]
     },
-    {
-      title: 'Application E-Commerce',
-      description: 'Application d\'achat de vêtements en ligne avec intégration de Stripe, gestion du panier et catalogue dynamique.',
-      category: 'Mobile / PWA',
-      technologies: 'React, Service Workers, Stripe API',
-      liveUrl: 'https://example.com/shop',
-      githubUrl: 'https://github.com/alexandremartin/shop',
-      image: '',
-      date: '2023 (6 mois)',
-      role: 'Lead Frontend',
-      videoUrl: ''
-    }
-  ],
-  timeline: [
-    {
-      role: 'Développeur Fullstack Lead',
-      organization: 'TechAgency Paris',
-      startDate: '2024',
-      endDate: 'Présent',
-      description: 'Conception d\'architectures frontend modernes et encadrement d\'une équipe de développeurs.',
-      achievements: 'Amélioration de 35% des temps de chargement LCP. Encadrement de 4 développeurs frontend.'
+    experience: {
+      label: 'Expérience', icon: 'fa-briefcase', titleKey: 'role',
+      fields: [
+        { key: 'role', label: 'Poste', placeholder: 'Développeur web' },
+        { key: 'organization', label: 'Entreprise', placeholder: 'Nom de l’entreprise' },
+        { key: 'startDate', label: 'Début', placeholder: '09/2023' },
+        { key: 'endDate', label: 'Fin', placeholder: 'aujourd’hui' },
+        { key: 'description', type: 'textarea', label: 'Missions', placeholder: "- Une mission\n- Une autre mission", full: true },
+        { key: 'achievements', label: 'Résultat chiffré (optionnel)', placeholder: '+30 % de conversions', full: true }
+      ]
     },
-    {
-      role: 'Développeur Front-End',
-      organization: 'WebStudio Lyon',
-      startDate: '2022',
-      endDate: '2024',
-      description: 'Développement de composants UI complexes et intégration pixel-perfect de designs Figma.',
-      achievements: 'Intégration de plus de 50 maquettes Figma. Développement d\'une bibliothèque de composants réutilisables.'
-    }
-  ],
-  certifications: [
-    {
-      name: 'AWS Certified Solutions Architect',
-      authority: 'Amazon Web Services',
-      date: '2024'
+    skills: {
+      label: 'Compétence', icon: 'fa-code', titleKey: 'name', compact: true,
+      fields: [
+        { key: 'name', label: 'Compétence', placeholder: 'React' },
+        { key: 'group', type: 'group', label: 'Domaine', placeholder: 'Développement web' }
+      ]
     },
-    {
-      name: 'Professional Scrum Master I',
-      authority: 'Scrum.org',
-      date: '2023'
-    }
-  ],
-  design: {
-    accentColor: '#6366f1',
-    secondaryColor: '#ec4899'
-  }
-};
-
-// -------------------------------------------------------------
-// LIFE CYCLE EVENTS
-// -------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-  initTabs();
-  if (localStorage.getItem('portfolio_studio_draft')) {
-    loadDraftFromLocalStorage();
-  } else {
-    loadDefaultData();
-  }
-  setupEventListeners();
-  triggerUpdate();
-});
-
-// -------------------------------------------------------------
-// AUTHENTICATION MANAGEMENT
-// -------------------------------------------------------------
-
-
-// -------------------------------------------------------------
-// TAB NAVIGATION
-// -------------------------------------------------------------
-function initTabs() {
-  // Legacy - now handled by switchTab()
-  switchTab('about');
-}
-
-function switchTab(tabName) {
-  // Map tab names to section IDs
-  const sectionMap = {
-    about: 'sec-about',
-    skills: 'sec-skills',
-    projects: 'sec-projects',
-    timeline: 'sec-timeline',
-    education: 'sec-education',
-    design: 'sec-design',
-    cv: 'sec-cv',
-    export: 'sec-export',
-    extras: 'sec-extras'
-  };
-
-  const targetId = sectionMap[tabName];
-  if (!targetId) return;
-
-  // Update all editor sections visibility
-  document.querySelectorAll('.editor-section').forEach(sec => {
-    if (sec.id === targetId) {
-      sec.classList.add('active');
-      sec.style.display = '';
-    } else {
-      sec.classList.remove('active');
-      sec.style.display = 'none';
-    }
-  });
-
-  // Update nav active states
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  const activeTab = document.getElementById('tab-' + tabName);
-  if (activeTab) activeTab.classList.add('active');
-}
-
-// -------------------------------------------------------------
-// LOAD INITIAL DEFAULT DATA
-// -------------------------------------------------------------
-function loadDefaultData() {
-  // Profile info
-  document.getElementById('profile-name').value = defaultData.profile.name;
-  document.getElementById('profile-title').value = defaultData.profile.title;
-  document.getElementById('profile-tagline').value = defaultData.profile.tagline || '';
-  document.getElementById('profile-avatar-alt').value = defaultData.profile.avatarAlt || '';
-  document.getElementById('profile-bio').value = defaultData.profile.bio;
-  document.getElementById('profile-email').value = defaultData.profile.email;
-  document.getElementById('profile-phone').value = defaultData.profile.phone;
-  document.getElementById('profile-website').value = defaultData.profile.website || '';
-  document.getElementById('profile-age').value = defaultData.profile.age;
-  document.getElementById('profile-experience').value = defaultData.profile.experience;
-  document.getElementById('profile-location').value = defaultData.profile.location;
-  document.getElementById('profile-relocation').value = defaultData.profile.relocation || '';
-  document.getElementById('profile-address').value = defaultData.profile.address;
-  document.getElementById('profile-availability').value = defaultData.profile.availability;
-  document.getElementById('profile-contract').value = defaultData.profile.contract;
-  
-  document.getElementById('profile-github').value = defaultData.profile.github;
-  document.getElementById('profile-linkedin').value = defaultData.profile.linkedin;
-  document.getElementById('profile-twitter').value = defaultData.profile.twitter;
-  document.getElementById('profile-facebook').value = defaultData.profile.facebook;
-
-  // Skills
-  const skillsContainer = document.getElementById('skills-repeater');
-  skillsContainer.innerHTML = '';
-  defaultData.skills.forEach(skill => addSkillItem(skill.name, skill.level));
-    
-  // Default extra fields
-  const softSkillsContainer = document.getElementById('soft-skills-repeater');
-  if (softSkillsContainer) softSkillsContainer.innerHTML = '';
-  addSoftSkillItem('Leadership');
-  addSoftSkillItem('Esprit d\'équipe');
-
-  const languagesContainer = document.getElementById('languages-repeater');
-  if (languagesContainer) languagesContainer.innerHTML = '';
-  addLanguageItem('Français', 'Langue maternelle');
-  addLanguageItem('Anglais', 'Courant (C1)');
-
-  const hobbiesContainer = document.getElementById('hobbies-repeater');
-  if (hobbiesContainer) hobbiesContainer.innerHTML = '';
-  addHobbyItem('Photographie');
-  addHobbyItem('Voyages');
-
-  const referencesContainer = document.getElementById('references-repeater');
-  if (referencesContainer) referencesContainer.innerHTML = '';
-  addReferenceItem('', '', '');
-
-  // Projects
-  const projectsContainer = document.getElementById('projects-repeater');
-  projectsContainer.innerHTML = '';
-  defaultData.projects.forEach(project => addProjectItem(project));
-
-  // Timeline
-  const timelineContainer = document.getElementById('timeline-repeater');
-  timelineContainer.innerHTML = '';
-  defaultData.timeline.forEach(item => addTimelineItem(item));
-
-  // Certifications
-  const certsContainer = document.getElementById('certs-repeater');
-  if (certsContainer) certsContainer.innerHTML = '';
-  (defaultData.certifications || []).forEach(cert => addCertItem(cert.name, cert.authority, cert.date));
-
-  // Design info
-  document.getElementById('design-accent').value = defaultData.design.accentColor;
-  document.getElementById('accent-hex').innerText = defaultData.design.accentColor;
-  document.getElementById('design-secondary').value = defaultData.design.secondaryColor;
-  document.getElementById('secondary-hex').innerText = defaultData.design.secondaryColor;
-}
-
-function saveDraftToLocalStorage() {
-  if (isRestoringDraft) return;
-  const data = getFormData();
-  data.currentTheme = currentTheme;
-  data.currentCVTemplate = currentCVTemplate;
-  data.previewMode = previewMode;
-  
-  try {
-    localStorage.setItem('portfolio_studio_draft', JSON.stringify(data));
-    const saveStatus = document.getElementById('save-status');
-    if (saveStatus) {
-      saveStatus.innerText = "Brouillon auto";
-      saveStatus.style.color = "";
-    }
-  } catch (err) {
-    console.error("Failed to save draft:", err);
-  }
-}
-
-function loadDraftFromLocalStorage() {
-  const jsonStr = localStorage.getItem('portfolio_studio_draft');
-  if (!jsonStr) return;
-  try {
-    isRestoringDraft = true;
-    const draft = JSON.parse(jsonStr);
-    
-    // Restore profile fields
-    const p = draft.profile;
-    document.getElementById('profile-name').value = p.name || '';
-    document.getElementById('profile-title').value = p.title || '';
-    document.getElementById('profile-tagline').value = p.tagline || '';
-    document.getElementById('profile-avatar-alt').value = p.avatarAlt || '';
-    document.getElementById('profile-bio').value = p.bio || '';
-    document.getElementById('profile-email').value = p.email || '';
-    document.getElementById('profile-phone').value = p.phone || '';
-    document.getElementById('profile-website').value = p.website || '';
-    document.getElementById('profile-age').value = p.age || '';
-    document.getElementById('profile-experience').value = p.experience || '';
-    document.getElementById('profile-location').value = p.location || '';
-    document.getElementById('profile-relocation').value = p.relocation || '';
-    document.getElementById('profile-address').value = p.address || '';
-    document.getElementById('profile-availability').value = p.availability || '';
-    document.getElementById('profile-contract').value = p.contract || '';
-    document.getElementById('profile-github').value = p.github || '';
-    document.getElementById('profile-linkedin').value = p.linkedin || '';
-    document.getElementById('profile-twitter').value = p.twitter || '';
-    document.getElementById('profile-facebook').value = p.facebook || '';
-    
-    // Restore profile image assets
-    imageAssets.avatar = p.avatar || '';
-    const avatarPreview = document.getElementById('avatar-preview');
-    if (avatarPreview) {
-      if (imageAssets.avatar) {
-        avatarPreview.style.backgroundImage = `url(${imageAssets.avatar})`;
-        avatarPreview.innerHTML = '';
-      } else {
-        avatarPreview.style.backgroundImage = '';
-        avatarPreview.innerHTML = '<i class="fas fa-user"></i>';
-      }
-    }
-    
-    // Restore repeaters
-    const skillsContainer = document.getElementById('skills-repeater');
-    skillsContainer.innerHTML = '';
-    (draft.skills || []).forEach(skill => addSkillItem(skill.name, skill.level));
-    
-    const softSkillsContainer = document.getElementById('soft-skills-repeater');
-    if (softSkillsContainer) softSkillsContainer.innerHTML = '';
-    (draft.softSkills || []).forEach(s => addSoftSkillItem(s.name));
-    
-    const languagesContainer = document.getElementById('languages-repeater');
-    if (languagesContainer) languagesContainer.innerHTML = '';
-    (draft.languagesList || []).forEach(l => addLanguageItem(l.name, l.level));
-    
-    const hobbiesContainer = document.getElementById('hobbies-repeater');
-    if (hobbiesContainer) hobbiesContainer.innerHTML = '';
-    (draft.hobbiesList || []).forEach(h => addHobbyItem(h.name));
-    
-    const referencesContainer = document.getElementById('references-repeater');
-    if (referencesContainer) referencesContainer.innerHTML = '';
-    (draft.references || []).forEach(r => addReferenceItem(r.name, r.role, r.contact));
-    
-    // Restore projects
-    imageAssets.projects = {};
-    const projectsContainer = document.getElementById('projects-repeater');
-    projectsContainer.innerHTML = '';
-    (draft.projects || []).forEach(project => {
-      addProjectItem(project);
-    });
-
-    // Restore timeline
-    const timelineContainer = document.getElementById('timeline-repeater');
-    timelineContainer.innerHTML = '';
-    (draft.experience || draft.timeline || []).forEach(item => addTimelineItem(item));
-    
-    // Restore education
-    const educationContainer = document.getElementById('education-repeater');
-    educationContainer.innerHTML = '';
-    (draft.education || []).forEach(item => addEducationItem(item));
-
-    // Restore certifications
-    const certsContainer = document.getElementById('certs-repeater');
-    if (certsContainer) certsContainer.innerHTML = '';
-    (draft.certificationsList || []).forEach(c => addCertItem(c.name, c.authority, c.date));
-    
-    // Restore design settings
-    if (draft.design) {
-      document.getElementById('design-accent').value = draft.design.accentColor || '#6366f1';
-      document.getElementById('accent-hex').innerText = draft.design.accentColor || '#6366f1';
-      document.getElementById('design-secondary').value = draft.design.secondaryColor || '#ec4899';
-      document.getElementById('secondary-hex').innerText = draft.design.secondaryColor || '#ec4899';
-      
-      if (document.getElementById('cv-design-accent') && draft.design.cvAccent) {
-        document.getElementById('cv-design-accent').value = draft.design.cvAccent;
-        document.getElementById('cv-accent-hex').innerText = draft.design.cvAccent;
-      }
-    }
-    
-    // Theme & Mode settings
-    currentTheme = draft.currentTheme || 'minimalist';
-    currentCVTemplate = draft.currentCVTemplate || 'modern';
-    previewMode = draft.previewMode || 'portfolio';
-    
-    // Highlight active cards
-    document.querySelectorAll('#sec-design .theme-card').forEach(card => card.classList.remove('selected'));
-    const activeThemeCard = document.getElementById(`theme-${currentTheme}`);
-    if (activeThemeCard) activeThemeCard.classList.add('selected');
-    
-    document.querySelectorAll('#sec-cv .theme-card').forEach(card => card.classList.remove('selected'));
-    const activeCVCard = document.getElementById(`cv-tpl-${currentCVTemplate}`);
-    if (activeCVCard) activeCVCard.classList.add('selected');
-    
-    const previewSelect = document.getElementById('preview-mode-select');
-    if (previewSelect) previewSelect.value = previewMode;
-    
-  } catch (err) {
-    console.error("Failed to load draft:", err);
-    showToast("Erreur lors de la récupération du brouillon.", "error");
-  } finally {
-    isRestoringDraft = false;
-  }
-}
-
-function resetToDefaultData() {
-  if (confirm("Voulez-vous réinitialiser le formulaire avec les données de démonstration ? Tout votre brouillon actuel sera écrasé.")) {
-    localStorage.removeItem('portfolio_studio_draft');
-    
-    // Clear image assets
-    imageAssets.avatar = '';
-    imageAssets.projects = {};
-    
-    const avatarPreview = document.getElementById('avatar-preview');
-    if (avatarPreview) {
-      avatarPreview.style.backgroundImage = '';
-      avatarPreview.innerHTML = '<i class="fas fa-user"></i>';
-    }
-    
-    loadDefaultData();
-    triggerUpdate();
-    showToast("Données réinitialisées avec succès.", "success");
-  }
-}
-
-function setupEventListeners() {
-  // Input changes triggers live-update
-  const generalInputs = document.querySelectorAll('.editor-section input, .editor-section textarea');
-  generalInputs.forEach(input => {
-    input.addEventListener('input', triggerUpdate);
-  });
-}
-
-// -------------------------------------------------------------
-// REPEATER COMPONENT BUILDERS (DOM)
-// -------------------------------------------------------------
-
-// 1. Skill Repeater
-function addSkillItem(name = '', level = 50) {
-  const container = document.getElementById('skills-repeater');
-  const cardId = 'skill-' + Date.now() + Math.random().toString(36).substr(2, 4);
-
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-cog"></i> Compétence</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
-        <i class="fas fa-trash"></i>
-      </button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Nom de la compétence</label>
-        <input type="text" class="form-control skill-input-name" placeholder="ex: JavaScript" value="${name}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Niveau de maîtrise (${level}%)</label>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <input type="range" class="form-control skill-input-level" min="10" max="100" step="5" value="${level}" 
-            oninput="this.parentElement.querySelector('.level-val').innerText = this.value + '%'; triggerUpdate()">
-          <span class="level-val" style="font-weight: 600; width: 45px;">${level}%</span>
-        </div>
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-  triggerUpdate();
-}
-
-// 2. Project Repeater
-function addProjectItem(project = {}) {
-  const container = document.getElementById('projects-repeater');
-  const cardId = 'project-' + Date.now() + Math.random().toString(36).substr(2, 4);
-  const title = project.title || '';
-  const desc = project.description || '';
-  const cat = project.category || '';
-  const tech = project.technologies || '';
-  const live = project.liveUrl || '';
-  const git = project.githubUrl || '';
-  const base64Img = project.image || '';
-  const date = project.date || '';
-  const role = project.role || '';
-  const videoUrl = project.videoUrl || '';
-
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-briefcase"></i> Fiche Projet</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
-        <i class="fas fa-trash"></i>
-      </button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group form-group-full">
-        <label>Image de couverture du projet</label>
-        <div class="upload-wrapper">
-          <div id="${cardId}-preview" class="preview-thumb" style="${base64Img ? `background-image: url(${base64Img})` : ''}">
-            ${base64Img ? '' : '<i class="fas fa-image"></i>'}
-          </div>
-          <div class="upload-actions">
-            <label for="${cardId}-upload" class="upload-btn-label">Importer l'image</label>
-            <input type="file" id="${cardId}-upload" class="file-input project-image-input" accept="image/*" 
-              onchange="previewProjectImage(this, '${cardId}-preview', '${cardId}')">
-            <span class="upload-hint">Format PNG/JPG conseillé (max 2Mo)</span>
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Titre du projet</label>
-        <input type="text" class="form-control proj-input-title" placeholder="ex: Site E-commerce" value="${title}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Catégorie</label>
-        <input type="text" class="form-control proj-input-category" placeholder="ex: Web Design / Mobile" value="${cat}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Date / Durée du projet</label>
-        <input type="text" class="form-control proj-input-date" placeholder="ex: 2024 (3 mois)" value="${date}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Rôle joué dans le projet</label>
-        <input type="text" class="form-control proj-input-role" placeholder="ex: Lead Developer / Solo" value="${role}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group form-group-full">
-        <label>Description du projet</label>
-        <textarea class="form-control proj-input-desc" rows="3" placeholder="Décrivez en quelques lignes ce que fait le projet et vos accomplissements..." oninput="triggerUpdate()">${desc}</textarea>
-      </div>
-      <div class="form-group form-group-full">
-        <label>Technologies utilisées (séparées par virgules)</label>
-        <input type="text" class="form-control proj-input-tech" placeholder="ex: React, Tailwind, Node.js" value="${tech}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Lien Live Demo</label>
-        <input type="url" class="form-control proj-input-live" placeholder="https://..." value="${live}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Lien Source Code (GitHub)</label>
-        <input type="url" class="form-control proj-input-github" placeholder="https://github.com/..." value="${git}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group form-group-full">
-        <label>Lien Vidéo Démo (YouTube/Vimeo)</label>
-        <input type="url" class="form-control proj-input-video" placeholder="https://youtube.com/watch?v=..." value="${videoUrl}" oninput="triggerUpdate()">
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-  
-  if (base64Img) {
-    imageAssets.projects[cardId] = base64Img;
-  }
-  triggerUpdate();
-}
-
-function addTimelineItem(item = {}) {
-  const container = document.getElementById('timeline-repeater');
-  const cardId = 'timeline-' + Date.now() + Math.random().toString(36).substr(2, 4);
-  const role = item.role || '';
-  const org = item.organization || '';
-  const start = item.startDate || '';
-  const end = item.endDate || '';
-  const desc = item.description || '';
-  const achievements = item.achievements || '';
-
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-briefcase"></i> Expérience Professionnelle</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
-        <i class="fas fa-trash"></i>
-      </button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Titre / Rôle</label>
-        <input type="text" class="form-control time-input-role" placeholder="ex: Développeur Web" value="${role}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Entreprise</label>
-        <input type="text" class="form-control time-input-org" placeholder="ex: TechCorp" value="${org}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Date de début (MM/YYYY)</label>
-        <input type="text" class="form-control time-input-start" placeholder="ex: 09/2021" value="${start}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Date de fin</label>
-        <input type="text" class="form-control time-input-end" placeholder="ex: Présent" value="${end}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group form-group-full">
-        <label>Description des réalisations</label>
-        <textarea class="form-control time-input-desc" rows="3" placeholder="Qu'avez-vous réalisé ?" oninput="triggerUpdate()">${desc}</textarea>
-      </div>
-      <div class="form-group form-group-full">
-        <label>Réalisations clés & indicateurs (ATS-friendly, ex: +30% perf)</label>
-        <textarea class="form-control time-input-achievements" rows="2" placeholder="ex: Amélioration des temps de réponse de 30%..." oninput="triggerUpdate()">${achievements}</textarea>
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-}
-
-function addCertItem(name = '', authority = '', date = '') {
-  const container = document.getElementById('certs-repeater');
-  if (!container) return;
-  const cardId = 'cert-' + Date.now() + Math.random().toString(36).substr(2, 4);
-
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-certificate"></i> Certification</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
-        <i class="fas fa-trash"></i>
-      </button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Nom de la certification</label>
-        <input type="text" class="form-control cert-input-name" placeholder="ex: AWS Certified" value="${name}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Organisme émetteur</label>
-        <input type="text" class="form-control cert-input-authority" placeholder="ex: Amazon Web Services" value="${authority}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group form-group-full">
-        <label>Date / Année d'obtention</label>
-        <input type="text" class="form-control cert-input-date" placeholder="ex: 2024" value="${date}" oninput="triggerUpdate()">
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-  triggerUpdate();
-}
-
-function addEducationItem(item = {}) {
-  const container = document.getElementById('education-repeater');
-  const cardId = 'education-' + Date.now() + Math.random().toString(36).substr(2, 4);
-  const degree = item.degree || '';
-  const inst = item.institution || '';
-  const start = item.startDate || '';
-  const end = item.endDate || '';
-
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-graduation-cap"></i> Formation / Diplôme</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer">
-        <i class="fas fa-trash"></i>
-      </button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Diplôme / Spécialité</label>
-        <input type="text" class="form-control edu-input-degree" placeholder="ex: Master Informatique" value="${degree}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Établissement</label>
-        <input type="text" class="form-control edu-input-inst" placeholder="ex: Sorbonne Université" value="${inst}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Année de début</label>
-        <input type="text" class="form-control edu-input-start" placeholder="ex: 2018" value="${start}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Année d'obtention</label>
-        <input type="text" class="form-control edu-input-end" placeholder="ex: 2020" value="${end}" oninput="triggerUpdate()">
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-}
-
-
-function addSoftSkillItem(name = '') {
-  const container = document.getElementById('soft-skills-repeater');
-  if (!container) return;
-  const cardId = 'softskill-' + Date.now() + Math.random().toString(36).substr(2, 4);
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-comment-dots"></i> Soft Skill</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group form-group-full">
-        <label>Compétence (Ex: Leadership)</label>
-        <input type="text" class="form-control softskill-input-name" placeholder="Soft Skill" value="${name}" oninput="triggerUpdate()">
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-  triggerUpdate();
-}
-
-function addLanguageItem(name = '', level = '') {
-  const container = document.getElementById('languages-repeater');
-  if (!container) return;
-  const cardId = 'lang-' + Date.now() + Math.random().toString(36).substr(2, 4);
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-language"></i> Langue</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Langue</label>
-        <input type="text" class="form-control lang-input-name" placeholder="Ex: Anglais" value="${name}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Niveau</label>
-        <input type="text" class="form-control lang-input-level" placeholder="Ex: Courant (C1)" value="${level}" oninput="triggerUpdate()">
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-  triggerUpdate();
-}
-
-function addHobbyItem(name = '') {
-  const container = document.getElementById('hobbies-repeater');
-  if (!container) return;
-  const cardId = 'hobby-' + Date.now() + Math.random().toString(36).substr(2, 4);
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-heart"></i> Centre d'intérêt</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group form-group-full">
-        <label>Loisir / Passion</label>
-        <input type="text" class="form-control hobby-input-name" placeholder="Ex: Photographie" value="${name}" oninput="triggerUpdate()">
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-  triggerUpdate();
-}
-
-function addReferenceItem(name = '', role = '', contact = '') {
-  const container = document.getElementById('references-repeater');
-  if (!container) return;
-  const cardId = 'ref-' + Date.now() + Math.random().toString(36).substr(2, 4);
-  const card = document.createElement('div');
-  card.className = 'repeater-card';
-  card.id = cardId;
-  card.innerHTML = `
-    <div class="repeater-card-header">
-      <span class="repeater-card-title"><i class="fas fa-id-badge"></i> Référence</span>
-      <button class="btn-delete-item" onclick="removeRepeaterItem('${cardId}')" title="Supprimer"><i class="fas fa-trash"></i></button>
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Nom</label>
-        <input type="text" class="form-control ref-input-name" placeholder="Ex: Jean Dupont" value="${name}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group">
-        <label>Poste & Entreprise</label>
-        <input type="text" class="form-control ref-input-role" placeholder="Ex: CTO @ TechCorp" value="${role}" oninput="triggerUpdate()">
-      </div>
-      <div class="form-group form-group-full">
-        <label>Contact (Email / Tel)</label>
-        <input type="text" class="form-control ref-input-contact" placeholder="Ex: jean.dupont@email.com / +33..." value="${contact}" oninput="triggerUpdate()">
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-  triggerUpdate();
-}
-
-function removeRepeaterItem(cardId) {
-  const card = document.getElementById(cardId);
-  if (card) {
-    card.remove();
-    // clean images
-    if (cardId.startsWith('project-') && imageAssets.projects[cardId]) {
-      delete imageAssets.projects[cardId];
-    }
-    triggerUpdate();
-  }
-}
-
-// -------------------------------------------------------------
-// DESIGN MANAGEMENT
-// -------------------------------------------------------------
-function selectTheme(themeId) {
-  currentTheme = themeId;
-  
-  // Update selection UI for portfolio themes only
-  const themeCards = document.querySelectorAll('#sec-design .theme-card');
-  themeCards.forEach(card => card.classList.remove('selected'));
-  
-  document.getElementById(`theme-${themeId}`).classList.add('selected');
-  const themeNames = {
-    minimalist: 'Minimaliste Moderne',
-    creative: 'Créatif Dégradé',
-    developer: 'Terminal Développeur',
-    brutalist: 'Néo-Brutaliste Pop',
-    editorial: 'Chic Éditorial'
-  };
-  showToast(`Thème activé : ${themeNames[themeId] || themeId}.`, 'success');
-  
-  previewMode = 'portfolio';
-  const sel = document.getElementById('preview-mode-select');
-  if(sel) sel.value = 'portfolio';
-  
-  triggerUpdate();
-}
-
-function applyPreset(accentColor, secondaryColor, presetName) {
-  document.getElementById('design-accent').value = accentColor;
-  document.getElementById('design-secondary').value = secondaryColor;
-  
-  document.getElementById('accent-hex').innerText = accentColor;
-  document.getElementById('secondary-hex').innerText = secondaryColor;
-  
-  showToast(`Palette appliquée : ${presetName}.`, 'success');
-  triggerUpdate();
-}
-
-function selectCVTemplate(templateId) {
-  currentCVTemplate = templateId;
-  
-  const cvCards = document.querySelectorAll('#sec-cv .theme-card');
-  cvCards.forEach(card => card.classList.remove('selected'));
-  
-  const selectedCard = document.getElementById(`cv-tpl-${templateId}`);
-  if (selectedCard) {
-    selectedCard.classList.add('selected');
-  }
-  
-  previewMode = 'cv';
-  const sel = document.getElementById('preview-mode-select');
-  if(sel) sel.value = 'cv';
-  
-  triggerUpdate();
-}
-
-// -------------------------------------------------------------
-// IMAGE FILE READING (BASE64) & COMPRESSION
-// -------------------------------------------------------------
-function resizeAndCompressImage(file, maxWidth, maxHeight, quality, callback) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      let width = img.width;
-      let height = img.height;
-      
-      if (width > maxWidth) {
-        height = Math.round((height * maxWidth) / width);
-        width = maxWidth;
-      }
-      if (height > maxHeight) {
-        width = Math.round((width * maxHeight) / height);
-        height = maxHeight;
-      }
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      // Export as data URL (JPEG format)
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-      callback(compressedDataUrl);
-    };
-    img.onerror = function() {
-      showToast("Impossible de lire l'image.", "error");
-    };
-    img.src = e.target.result;
-  };
-  reader.onerror = function() {
-    showToast("Erreur lors de la lecture du fichier.", "error");
-  };
-  reader.readAsDataURL(file);
-}
-
-function previewImage(input, previewId) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
-  if (!validTypes.includes(file.type)) {
-    showToast("Format d'image non supporté (PNG, JPG, WEBP, GIF recommandés).", "error");
-    input.value = '';
-    return;
-  }
-
-  showToast("Optimisation de l'image...", "success");
-
-  resizeAndCompressImage(file, 800, 800, 0.8, (compressedDataUrl) => {
-    const preview = document.getElementById(previewId);
-    if (preview) {
-      preview.style.backgroundImage = `url(${compressedDataUrl})`;
-      preview.innerHTML = ''; // Clear icon placeholder
-    }
-    
-    // Save to global assets
-    imageAssets.avatar = compressedDataUrl;
-    triggerUpdate();
-    showToast("Image importée et optimisée !", "success");
-  });
-}
-
-function previewProjectImage(input, previewId, cardId) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
-  if (!validTypes.includes(file.type)) {
-    showToast("Format d'image non supporté (PNG, JPG, WEBP, GIF recommandés).", "error");
-    input.value = '';
-    return;
-  }
-
-  showToast("Optimisation de l'image...", "success");
-
-  resizeAndCompressImage(file, 800, 800, 0.8, (compressedDataUrl) => {
-    const preview = document.getElementById(previewId);
-    if (preview) {
-      preview.style.backgroundImage = `url(${compressedDataUrl})`;
-      preview.innerHTML = ''; // Clear icon
-    }
-    
-    // Store image
-    imageAssets.projects[cardId] = compressedDataUrl;
-    triggerUpdate();
-    showToast("Image importée et optimisée !", "success");
-  });
-}
-
-// -------------------------------------------------------------
-// DATA BINDING & LIVE PREVIEW SYSTEM
-// -------------------------------------------------------------
-function getFormData() {
-  // Color palette updates
-  const accentVal = document.getElementById('design-accent').value;
-  const secondaryVal = document.getElementById('design-secondary').value;
-  document.getElementById('accent-hex').innerText = accentVal;
-  document.getElementById('secondary-hex').innerText = secondaryVal;
-
-  // Profile data
-  const data = {
-    profile: {
-      name: document.getElementById('profile-name').value || 'Jean Dupont',
-      title: document.getElementById('profile-title').value || 'Profession',
-      tagline: document.getElementById('profile-tagline') ? document.getElementById('profile-tagline').value : '',
-      avatarAlt: document.getElementById('profile-avatar-alt') ? document.getElementById('profile-avatar-alt').value : '',
-      bio: document.getElementById('profile-bio').value || '',
-      email: document.getElementById('profile-email').value || '',
-      phone: document.getElementById('profile-phone').value || '',
-      website: document.getElementById('profile-website') ? document.getElementById('profile-website').value : '',
-      age: document.getElementById('profile-age').value || '',
-      experience: document.getElementById('profile-experience').value || '',
-      location: document.getElementById('profile-location').value || '',
-      relocation: document.getElementById('profile-relocation') ? document.getElementById('profile-relocation').value : '',
-      address: document.getElementById('profile-address').value || '',
-      availability: document.getElementById('profile-availability').value || '',
-      contract: document.getElementById('profile-contract').value || '',
-      github: document.getElementById('profile-github').value || '',
-      linkedin: document.getElementById('profile-linkedin').value || '',
-      twitter: document.getElementById('profile-twitter').value || '',
-      facebook: document.getElementById('profile-facebook').value || '',
-      avatar: imageAssets.avatar || ''
+    softSkills: {
+      label: 'Savoir-être', icon: 'fa-people-group', titleKey: 'name', compact: true,
+      fields: [{ key: 'name', label: 'Savoir-être', placeholder: 'Autonomie', full: true }]
     },
-    skills: [],
-    projects: [],
-    timeline: [],
-    experience: [],
-    education: [],
-    certificationsList: [],
-    softSkills: [],
-    languagesList: [],
-    hobbiesList: [],
-    references: [],
-    design: {
-      accentColor: accentVal,
-      secondaryColor: secondaryVal,
-      cvAccent: document.getElementById('cv-design-accent') ? document.getElementById('cv-design-accent').value : '#3b82f6',
-      cvTemplate: currentCVTemplate
+    education: {
+      label: 'Formation', icon: 'fa-graduation-cap', titleKey: 'degree',
+      fields: [
+        { key: 'degree', label: 'Diplôme', placeholder: 'Licence en informatique' },
+        { key: 'institution', label: 'Établissement', placeholder: 'Université…' },
+        { key: 'startDate', label: 'Début', placeholder: '2019' },
+        { key: 'endDate', label: 'Fin', placeholder: '2022' }
+      ]
+    },
+    certificationsList: {
+      label: 'Certification', icon: 'fa-award', titleKey: 'name',
+      fields: [
+        { key: 'name', label: 'Certification', placeholder: 'AWS Cloud Practitioner' },
+        { key: 'authority', label: 'Organisme', placeholder: 'Amazon Web Services' },
+        { key: 'date', label: 'Année', placeholder: '2025', full: true }
+      ]
+    },
+    languagesList: {
+      label: 'Langue', icon: 'fa-language', titleKey: 'name', compact: true,
+      fields: [
+        { key: 'name', label: 'Langue', placeholder: 'Anglais' },
+        { key: 'level', label: 'Niveau', placeholder: 'Courant (B2)' }
+      ]
+    },
+    hobbiesList: {
+      label: 'Centre d’intérêt', icon: 'fa-heart', titleKey: 'name', compact: true,
+      fields: [{ key: 'name', label: 'Centre d’intérêt', placeholder: 'Photographie', full: true }]
+    },
+    references: {
+      label: 'Référence', icon: 'fa-id-badge', titleKey: 'name',
+      fields: [
+        { key: 'name', label: 'Nom', placeholder: 'Jean Dupont' },
+        { key: 'role', label: 'Poste et entreprise', placeholder: 'CTO, Entreprise' },
+        { key: 'contact', label: 'Contact', placeholder: 'email ou téléphone', full: true }
+      ]
     }
   };
 
-  // Compile Skills
-  const skillCards = document.querySelectorAll('#skills-repeater .repeater-card');
-  skillCards.forEach(card => {
-    const name = card.querySelector('.skill-input-name').value;
-    const level = card.querySelector('.skill-input-level').value;
-    if (name.trim()) {
-      data.skills.push({ name: name.trim(), level: parseInt(level, 10) });
-    }
-  });
-
-  // Compile Projects
-  const projectCards = document.querySelectorAll('#projects-repeater .repeater-card');
-  projectCards.forEach(card => {
-    const title = card.querySelector('.proj-input-title').value;
-    const cat = card.querySelector('.proj-input-category').value;
-    const desc = card.querySelector('.proj-input-desc').value;
-    const tech = card.querySelector('.proj-input-tech').value;
-    const live = card.querySelector('.proj-input-live').value;
-    const git = card.querySelector('.proj-input-github').value;
-    const cardId = card.id;
-
-    if (title.trim()) {
-      data.projects.push({
-        title: title.trim(),
-        category: cat.trim(),
-        description: desc.trim(),
-        technologies: tech.trim(),
-        liveUrl: live.trim(),
-        githubUrl: git.trim(),
-        image: imageAssets.projects[cardId] || '',
-        date: card.querySelector('.proj-input-date') ? card.querySelector('.proj-input-date').value.trim() : '',
-        role: card.querySelector('.proj-input-role') ? card.querySelector('.proj-input-role').value.trim() : '',
-        videoUrl: card.querySelector('.proj-input-video') ? card.querySelector('.proj-input-video').value.trim() : ''
-      });
-    }
-  });
-
-  // Compile Experience (ATS)
-  const timelineCards = document.querySelectorAll('#timeline-repeater .repeater-card');
-  timelineCards.forEach(card => {
-    const role = card.querySelector('.time-input-role').value;
-    const org = card.querySelector('.time-input-org').value;
-    const start = card.querySelector('.time-input-start').value;
-    const end = card.querySelector('.time-input-end').value;
-    const desc = card.querySelector('.time-input-desc') ? card.querySelector('.time-input-desc').value : '';
-
-    if (role.trim()) {
-      const entry = {
-        role: role.trim(),
-        organization: org.trim(),
-        startDate: start.trim(),
-        endDate: end.trim(),
-        description: desc.trim(),
-        achievements: card.querySelector('.time-input-achievements') ? card.querySelector('.time-input-achievements').value.trim() : ''
-      };
-      data.experience.push(entry);
-      data.timeline.push(entry); // backward compat
-    }
-  });
-
-  // Compile Education (ATS)
-  const eduCards = document.querySelectorAll('#education-repeater .repeater-card');
-  eduCards.forEach(card => {
-    const degree = card.querySelector('.edu-input-degree').value;
-    const inst = card.querySelector('.edu-input-inst').value;
-    const start = card.querySelector('.edu-input-start').value;
-    const end = card.querySelector('.edu-input-end').value;
-    if (degree.trim()) {
-      data.education.push({
-        degree: degree.trim(),
-        institution: inst.trim(),
-        startDate: start.trim(),
-        endDate: end.trim()
-      });
-    }
-  });
-
-  // Compile Certifications
-  const certCards = document.querySelectorAll('#certs-repeater .repeater-card');
-  certCards.forEach(card => {
-    const name = card.querySelector('.cert-input-name').value;
-    const auth = card.querySelector('.cert-input-authority').value;
-    const date = card.querySelector('.cert-input-date').value;
-    if (name.trim()) {
-      data.certificationsList.push({
-        name: name.trim(),
-        authority: auth.trim(),
-        date: date.trim()
-      });
-    }
-  });
-
-  // Compile Soft Skills
-  const softSkillCards = document.querySelectorAll('#soft-skills-repeater .repeater-card');
-  softSkillCards.forEach(card => {
-    const name = card.querySelector('.softskill-input-name').value;
-    if (name.trim()) {
-      data.softSkills.push({ name: name.trim() });
-    }
-  });
-
-  // Compile Languages
-  const langCards = document.querySelectorAll('#languages-repeater .repeater-card');
-  langCards.forEach(card => {
-    const name = card.querySelector('.lang-input-name').value;
-    const level = card.querySelector('.lang-input-level').value;
-    if (name.trim()) {
-      data.languagesList.push({ name: name.trim(), level: level.trim() });
-    }
-  });
-
-  // Compile Hobbies
-  const hobbyCards = document.querySelectorAll('#hobbies-repeater .repeater-card');
-  hobbyCards.forEach(card => {
-    const name = card.querySelector('.hobby-input-name').value;
-    if (name.trim()) {
-      data.hobbiesList.push({ name: name.trim() });
-    }
-  });
-
-  // Compile References
-  const refCards = document.querySelectorAll('#references-repeater .repeater-card');
-  refCards.forEach(card => {
-    const name = card.querySelector('.ref-input-name').value;
-    const role = card.querySelector('.ref-input-role').value;
-    const contact = card.querySelector('.ref-input-contact').value;
-    if (name.trim()) {
-      data.references.push({ name: name.trim(), role: role.trim(), contact: contact.trim() });
-    }
-  });
-
-  return data;
-}
-
-// Throttle preview updates to avoid lag when typing fast
-let updateTimeout = null;
-function triggerUpdate() {
-  if (isRestoringDraft) return;
-  
-  const saveStatus = document.getElementById('save-status');
-  if (saveStatus) {
-    saveStatus.innerText = "Enregistrement...";
-    saveStatus.style.color = "#fbbf24";
-  }
-  
-  if (updateTimeout) clearTimeout(updateTimeout);
-  updateTimeout = setTimeout(() => {
-    updatePreview();
-    saveDraftToLocalStorage();
-  }, 350);
-}
-
-function updatePreview() {
-  const data = getFormData();
-  let htmlContent = '';
-  
-  if (previewMode === 'portfolio') {
-    const compiled = generatePortfolio(data, currentTheme);
-    htmlContent = compiled.html;
-    htmlContent = htmlContent.replace('<link rel="stylesheet" href="styles.css">', `<style>${compiled.css}</style>`);
-    htmlContent = htmlContent.replace('<script src="script.js"></script>', `<script>${compiled.js}</script>`);
-  } else {
-    htmlContent = generateCVTemplate(data);
-  }
-
-  const iframe = document.getElementById('preview-frame');
-  if (iframe) {
-    try {
-      const doc = iframe.contentDocument || iframe.contentWindow.document;
-      doc.open();
-      doc.write(htmlContent);
-      doc.close();
-    } catch (e) {
-      console.error("Iframe write failed, falling back to srcdoc:", e);
-      iframe.srcdoc = htmlContent;
-    }
-  }
-}
-
-// Fullscreen opening of compiled content
-function isValidUrl(string) {
-  if (!string) return true;
-  try {
-    const url = new URL(string);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch (_) {
-    return false;  
-  }
-}
-
-function validateForm() {
-  // 1. Required Name Check
-  const nameVal = document.getElementById('profile-name').value.trim();
-  if (!nameVal) {
-    showToast("Le nom complet est requis.", "error");
-    switchTab('about');
-    document.getElementById('profile-name').focus();
-    return false;
-  }
-
-  // 2. Email Validation
-  const emailVal = document.getElementById('profile-email').value.trim();
-  if (emailVal) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailVal)) {
-      showToast("Veuillez saisir une adresse email valide.", "error");
-      switchTab('about');
-      document.getElementById('profile-email').focus();
-      return false;
-    }
-  }
-  
-  // 3. Profile Social URLs Validation
-  const urlInputs = [
-    { id: 'profile-github', label: 'GitHub du profil' },
-    { id: 'profile-linkedin', label: 'LinkedIn du profil' },
-    { id: 'profile-twitter', label: 'Twitter du profil' },
-    { id: 'profile-facebook', label: 'Facebook du profil' },
-    { id: 'profile-website', label: 'Site Web du profil' }
+  const PRESETS = [
+    ['Terracotta', '#e8743b', '#f2b84b'],
+    ['Océan', '#2563eb', '#60a5fa'],
+    ['Émeraude', '#059669', '#34d399'],
+    ['Indigo', '#4f46e5', '#a78bfa'],
+    ['Rubis', '#be123c', '#fb7185'],
+    ['Lagune', '#0891b2', '#22d3ee'],
+    ['Or', '#ca8a04', '#facc15'],
+    ['Graphite', '#334155', '#94a3b8']
   ];
-  
-  for (const input of urlInputs) {
-    const element = document.getElementById(input.id);
-    if (element) {
-      const val = element.value.trim();
-      if (val && !isValidUrl(val)) {
-        showToast(`Le lien ${input.label} doit être une URL valide (ex: https://...).`, "error");
-        switchTab('about');
-        element.focus();
-        return false;
+
+  const LEGACY_THEMES = { minimalist: 'minimal', corporate: 'minimal', creative: 'signature', brutalist: 'signature', developer: 'terminal', editorial: 'editorial' };
+
+  /* ==========================================================
+     État
+     ========================================================== */
+
+  let state = null;
+  let previewMode = 'portfolio';
+  let device = 'desktop';
+  let saveWarned = false;
+
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const $ = (sel, el) => (el || document).querySelector(sel);
+  const $$ = (sel, el) => Array.prototype.slice.call((el || document).querySelectorAll(sel));
+
+  function getPath(obj, path) {
+    return path.split('.').reduce((o, k) => (o ? o[k] : undefined), obj);
+  }
+  function setPath(obj, path, value) {
+    const keys = path.split('.');
+    let o = obj;
+    keys.slice(0, -1).forEach(k => { if (!o[k] || typeof o[k] !== 'object') o[k] = {}; o = o[k]; });
+    o[keys[keys.length - 1]] = value;
+  }
+
+  /** Remet n'importe quel brouillon (ancienne ou nouvelle version) au format attendu. */
+  function migrate(saved) {
+    const s = { theme: 'signature', cvTemplate: 'modern', data: clone(DEMO.data) };
+    if (!saved || typeof saved !== 'object') return s;
+
+    const isV2 = saved.data && typeof saved.data === 'object';
+    const d = isV2 ? saved.data : saved;
+    const base = { profile: {}, design: {} };
+    Object.keys(REPEATERS).forEach(k => { base[k] = []; });
+    const out = Object.assign(base, d);
+
+    out.profile = Object.assign({}, d.profile || {});
+    out.design = Object.assign({ accentColor: '', secondaryColor: '', cvAccent: '' }, d.design || {});
+    out.experience = (d.experience && d.experience.length ? d.experience : d.timeline) || [];
+    out.skills = (d.skills || []).map(x => ({ name: x.name || '', group: x.group || '' }));
+    out.certificationsList = d.certificationsList || d.certifications || [];
+    delete out.timeline;
+    delete out.certifications;
+    Object.keys(REPEATERS).forEach(k => { if (!Array.isArray(out[k])) out[k] = []; });
+
+    s.data = out;
+    const theme = isV2 ? saved.theme : (saved.currentTheme || '');
+    s.theme = THEMES[theme] ? theme : (LEGACY_THEMES[theme] || 'signature');
+    const cv = isV2 ? saved.cvTemplate : (d.design && d.design.cvTemplate) || saved.currentCVTemplate;
+    s.cvTemplate = CV_TEMPLATES[cv] ? cv : 'modern';
+    return s;
+  }
+
+  function loadState() {
+    try {
+      const v2 = localStorage.getItem(DRAFT_KEY);
+      if (v2) return migrate(JSON.parse(v2));
+      const v1 = localStorage.getItem(LEGACY_DRAFT_KEY);
+      if (v1) return migrate(JSON.parse(v1));
+    } catch (e) {
+      console.warn('Brouillon illisible, retour aux données d’exemple.', e);
+    }
+    return clone(DEMO);
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
+      setSaveStatus('saved');
+    } catch (e) {
+      setSaveStatus('error');
+      if (!saveWarned) {
+        saveWarned = true;
+        toast('Le brouillon est trop lourd pour être enregistré dans le navigateur (images ?). Pensez à exporter vos données.', 'error');
       }
     }
   }
 
-  // 4. Projects URLs Validation
-  const projectCards = document.querySelectorAll('#projects-repeater .repeater-card');
-  for (let i = 0; i < projectCards.length; i++) {
-    const card = projectCards[i];
-    const title = card.querySelector('.proj-input-title').value.trim();
-    const live = card.querySelector('.proj-input-live').value.trim();
-    const git = card.querySelector('.proj-input-github').value.trim();
-    const video = card.querySelector('.proj-input-video') ? card.querySelector('.proj-input-video').value.trim() : '';
-
-    if (live && !isValidUrl(live)) {
-      showToast(`Le lien de démonstration pour le projet "${title || (i + 1)}" n'est pas valide.`, "error");
-      switchTab('projects');
-      card.querySelector('.proj-input-live').focus();
-      return false;
-    }
-    if (git && !isValidUrl(git)) {
-      showToast(`Le lien GitHub pour le projet "${title || (i + 1)}" n'est pas valide.`, "error");
-      switchTab('projects');
-      card.querySelector('.proj-input-github').focus();
-      return false;
-    }
-    if (video && !isValidUrl(video)) {
-      showToast(`Le lien vidéo pour le projet "${title || (i + 1)}" n'est pas valide.`, "error");
-      switchTab('projects');
-      card.querySelector('.proj-input-video').focus();
-      return false;
-    }
+  function setSaveStatus(kind) {
+    const el = $('#save-status');
+    if (!el) return;
+    el.dataset.state = kind;
+    el.innerHTML = kind === 'saving'
+      ? '<i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> Enregistrement…'
+      : kind === 'error'
+        ? '<i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Non enregistré'
+        : '<i class="fas fa-circle-check" aria-hidden="true"></i> Brouillon enregistré';
   }
 
-  return true;
-}
+  /* ==========================================================
+     Données envoyées au moteur
+     ========================================================== */
 
-function openPreviewWindow() {
-  if (!validateForm()) return;
-  const data = getFormData();
-  const compiled = generatePortfolio(data, currentTheme);
-  
-  let htmlContent = compiled.html;
-  htmlContent = htmlContent.replace('<link rel="stylesheet" href="styles.css">', `<style>${compiled.css}</style>`);
-  htmlContent = htmlContent.replace('<script src="script.js"></script>', `<script>${compiled.js}</script>`);
-
-  const newWindow = window.open();
-  if (newWindow) {
-    newWindow.document.write(htmlContent);
-    newWindow.document.close();
-  } else {
-    showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
+  function payload() {
+    const d = clone(state.data);
+    const theme = THEMES[state.theme];
+    d.design.accentColor = d.design.accentColor || theme.accent;
+    d.design.secondaryColor = d.design.secondaryColor || theme.accent2;
+    d.design.cvAccent = d.design.cvAccent || CV_TEMPLATES[state.cvTemplate].accent;
+    d.design.cvTemplate = state.cvTemplate;
+    return d;
   }
-}
 
-// -------------------------------------------------------------
-// CV GENERATION SYSTEM
-// -------------------------------------------------------------
-function getCVHtml() {
-  const data = getFormData();
-  // Call the template generator from templates.js
-  return generateCVTemplate(data);
-}
+  /* ==========================================================
+     Mise à jour (aperçu + sauvegarde) avec anti-rebond
+     ========================================================== */
 
-function previewCV() {
-  if (!validateForm()) return;
-  const html = getCVHtml();
-  const newWindow = window.open();
-  if (newWindow) {
-    newWindow.document.write(html);
-    newWindow.document.close();
-  } else {
-    showToast("Impossible d'ouvrir l'aperçu. Veuillez autoriser les popups pour ce site.", "error");
+  let timer = null;
+  function changed() {
+    setSaveStatus('saving');
+    clearTimeout(timer);
+    timer = setTimeout(() => { renderPreview(); saveState(); }, 300);
   }
-}
 
-function downloadCV() {
-  if (!validateForm()) return;
-  const data = getFormData();
-  const htmlStr = generateCVTemplate(data);
-  
-  // Parse the generated HTML to extract the styles and the main container
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlStr, 'text/html');
-  const cvPage = doc.querySelector('.cv-page');
-  const styleElements = doc.querySelectorAll('style');
-  
-  // Create a hidden container in the body
-  const container = document.createElement('div');
-  container.style.position = 'absolute';
-  container.style.left = '-9999px';
-  container.style.top = '-9999px';
-  styleElements.forEach(s => container.appendChild(s.cloneNode(true)));
-  container.appendChild(cvPage);
-  document.body.appendChild(container);
-  
-  showToast("Génération du PDF en cours...", "success");
-  
-  // Give it a moment to load any images or fonts
-  setTimeout(() => {
-    const opt = {
-      margin:       0,
-      filename:     `CV_${data.profile.name.replace(/\s+/g, '_')}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    
-    // Check if html2pdf is available
-    if (typeof html2pdf !== 'undefined') {
-      html2pdf().set(opt).from(cvPage).save().then(() => {
-        document.body.removeChild(container);
-        showToast("CV téléchargé avec succès !", "success");
-      }).catch(err => {
-        console.error(err);
-        document.body.removeChild(container);
-        showToast("Erreur lors de la génération.", "error");
-      });
+  function renderPreview() {
+    const frame = $('#preview-frame');
+    if (!frame) return;
+    let html;
+    try {
+      html = previewMode === 'cv'
+        ? window.generateCV(payload())
+        : E.generatePortfolio(payload(), state.theme, { preview: true }).html;
+    } catch (e) {
+      console.error(e);
+      html = '<p style="font-family:sans-serif;padding:2rem">Erreur de génération : ' + E.esc(e.message) + '</p>';
+    }
+    const win = frame.contentWindow;
+    const y = win ? win.scrollY : 0;
+    const doc = frame.contentDocument || (win && win.document);
+    if (doc) {
+      doc.open();
+      doc.write(html);
+      doc.close();
+      if (y) setTimeout(() => { try { frame.contentWindow.scrollTo(0, y); } catch (e) {} }, 30);
     } else {
-      document.body.removeChild(container);
-      showToast("La librairie PDF n'est pas chargée.", "error");
+      frame.srcdoc = html;
     }
-  }, 500);
-}
-
-// -------------------------------------------------------------
-// ZIP EXPORT COMPILER (CLIENT-SIDE)
-// -------------------------------------------------------------
-function exportZip() {
-  if (!validateForm()) return;
-  const data = getFormData();
-  const compiled = generatePortfolio(data, currentTheme, true);
-  
-  const zip = new JSZip();
-  
-  // Write basic bundle files
-  zip.file("index.html", compiled.html);
-  zip.file("styles.css", compiled.css);
-  zip.file("script.js", compiled.js);
-  
-  // Create images folder
-  const imgFolder = zip.folder("images");
-  
-  // Bundle files and uploader assets
-  compiled.images.forEach(img => {
-    // img.base64 is the pure base64 data string
-    imgFolder.file(img.filename, img.base64, { base64: true });
-  });
-  
-  showToast("Génération du package ZIP en cours...", "success");
-  
-  zip.generateAsync({ type: "blob" })
-    .then((content) => {
-      // Create download trigger
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(content);
-      link.download = `portfolio_${data.profile.name.toLowerCase().replace(/\s+/g, '_')}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      showToast("Fichier ZIP téléchargé avec succès ! Prêt à être déployé.", "success");
-    })
-    .catch((err) => {
-      console.error(err);
-      showToast("Erreur lors de la création du fichier ZIP.", "error");
-    });
-}
-
-// -------------------------------------------------------------
-// NOTIFICATION TOAST
-// -------------------------------------------------------------
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('studio-toast');
-  const toastMsg = document.getElementById('toast-message');
-  
-  // Configure icon
-  const icon = toast.querySelector('i');
-  if (type === 'success') {
-    toast.className = 'toast success show';
-    icon.className = 'fas fa-check-circle';
-    icon.style.color = '#10b981';
-  } else {
-    toast.className = 'toast error show';
-    icon.className = 'fas fa-exclamation-circle';
-    icon.style.color = '#ef4444';
   }
 
-  toastMsg.innerText = message;
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 4000);
-}
+  /* ==========================================================
+     Champs simples (data-bind)
+     ========================================================== */
 
+  function bindFields() {
+    $$('[data-bind]').forEach(el => {
+      const path = el.dataset.bind;
+      const value = getPath(state.data, path);
+      if (el.type === 'color') {
+        el.value = value || defaultColorFor(path);
+      } else {
+        el.value = value || '';
+      }
+      validateField(el);
+    });
+    updateColorLabels();
+  }
+
+  function defaultColorFor(path) {
+    const theme = THEMES[state.theme];
+    if (path === 'design.accentColor') return theme.accent;
+    if (path === 'design.secondaryColor') return theme.accent2;
+    if (path === 'design.cvAccent') return CV_TEMPLATES[state.cvTemplate].accent;
+    return '#000000';
+  }
+
+  function updateColorLabels() {
+    const set = (id, path) => { const el = $(id); if (el) el.textContent = (getPath(state.data, path) || defaultColorFor(path)).toUpperCase(); };
+    set('#accent-hex', 'design.accentColor');
+    set('#secondary-hex', 'design.secondaryColor');
+    set('#cv-accent-hex', 'design.cvAccent');
+  }
+
+  function validateField(el) {
+    let ok = true;
+    const v = el.value.trim();
+    if (v && (el.hasAttribute('data-url') || el.type === 'url')) ok = !!E.safeUrl(v);
+    if (v && el.type === 'email') ok = E.isEmail(v);
+    el.classList.toggle('invalid', !ok);
+    el.setAttribute('aria-invalid', String(!ok));
+    return ok;
+  }
+
+  function onFieldInput(e) {
+    const el = e.target;
+    if (!el.matches('[data-bind]')) return;
+    setPath(state.data, el.dataset.bind, el.value);
+    validateField(el);
+    if (el.type === 'color') updateColorLabels();
+    changed();
+  }
+
+  /* ==========================================================
+     Listes répétables
+     ========================================================== */
+
+  function el(tag, attrs, children) {
+    const node = document.createElement(tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => {
+      if (v === undefined || v === null || v === false) return;
+      if (k === 'class') node.className = v;
+      else if (k === 'text') node.textContent = v;
+      else if (k === 'html') node.innerHTML = v; // uniquement du HTML statique (icônes)
+      else node.setAttribute(k, v === true ? '' : v);
+    });
+    (children || []).forEach(c => c && node.appendChild(c));
+    return node;
+  }
+
+  function cardTitle(name, item, index) {
+    const def = REPEATERS[name];
+    const t = (item[def.titleKey] || '').trim();
+    return t || def.label + ' ' + (index + 1);
+  }
+
+  function renderRepeater(name) {
+    const def = REPEATERS[name];
+    const container = $('[data-repeater="' + name + '"]');
+    if (!container) return;
+    const items = state.data[name];
+    container.innerHTML = '';
+
+    if (!items.length) {
+      container.appendChild(el('p', { class: 'empty', text: 'Rien pour le moment.' }));
+    }
+
+    items.forEach((item, index) => {
+      const header = el('div', { class: 'repeater-card-header' }, [
+        el('span', { class: 'repeater-card-title' }, [
+          el('i', { class: 'fas ' + def.icon, 'aria-hidden': 'true' }),
+          el('span', { class: 'card-title-text', text: cardTitle(name, item, index) })
+        ]),
+        el('div', { class: 'card-actions' }, [
+          el('button', { type: 'button', class: 'icon-btn-sm', title: 'Monter', 'aria-label': 'Monter', 'data-move': '-1', disabled: index === 0, html: '<i class="fas fa-arrow-up" aria-hidden="true"></i>' }),
+          el('button', { type: 'button', class: 'icon-btn-sm', title: 'Descendre', 'aria-label': 'Descendre', 'data-move': '1', disabled: index === items.length - 1, html: '<i class="fas fa-arrow-down" aria-hidden="true"></i>' }),
+          el('button', { type: 'button', class: 'icon-btn-sm danger', title: 'Supprimer', 'aria-label': 'Supprimer', 'data-remove': '', html: '<i class="fas fa-trash" aria-hidden="true"></i>' })
+        ])
+      ]);
+
+      const grid = el('div', { class: 'form-grid' });
+      def.fields.forEach(f => grid.appendChild(renderField(name, item, index, f)));
+
+      const card = el('div', { class: 'repeater-card' + (def.compact ? ' compact' : ''), 'data-index': index }, [header, grid]);
+      container.appendChild(card);
+    });
+  }
+
+  function renderField(name, item, index, f) {
+    const id = name + '-' + index + '-' + f.key;
+    const group = el('div', { class: 'form-group' + (f.full ? ' form-group-full' : '') });
+
+    if (f.type === 'image') {
+      const thumb = el('div', { class: 'preview-thumb wide' });
+      setThumb(thumb, item.image, 'fa-image');
+      const input = el('input', { type: 'file', id: id, class: 'file-input', accept: 'image/png,image/jpeg,image/webp', 'data-image': f.key });
+      const removeBtn = el('button', { type: 'button', class: 'link-btn', 'data-image-remove': f.key, text: 'Retirer', hidden: !item.image });
+      group.appendChild(el('span', { class: 'label', text: f.label }));
+      group.appendChild(el('div', { class: 'upload-wrapper' }, [
+        thumb,
+        el('div', { class: 'upload-actions' }, [
+          el('div', { class: 'upload-buttons' }, [el('label', { for: id, class: 'upload-btn-label', text: 'Importer une image' }), removeBtn]),
+          input,
+          el('span', { class: 'upload-hint', text: 'Une capture de la page d’accueil, au format paysage.' })
+        ])
+      ]));
+      return group;
+    }
+
+    group.appendChild(el('label', { for: id, text: f.label }));
+    let input;
+    if (f.type === 'textarea') {
+      input = el('textarea', { id: id, class: 'form-control', rows: '4', placeholder: f.placeholder });
+    } else {
+      input = el('input', {
+        id: id, class: 'form-control',
+        type: f.type === 'url' ? 'url' : 'text',
+        placeholder: f.placeholder,
+        list: f.type === 'group' ? 'skill-groups' : null,
+        'data-url': f.type === 'url' ? '' : null
+      });
+    }
+    input.value = item[f.key] || '';
+    input.dataset.field = f.key;
+    validateField(input);
+    group.appendChild(input);
+    return group;
+  }
+
+  function setThumb(thumb, src, iconName) {
+    if (src) {
+      thumb.style.backgroundImage = 'url("' + src.replace(/"/g, '%22') + '")';
+      thumb.innerHTML = '';
+    } else {
+      thumb.style.backgroundImage = '';
+      thumb.innerHTML = '<i class="fas ' + iconName + '" aria-hidden="true"></i>';
+    }
+  }
+
+  function updateGroupSuggestions() {
+    const list = $('#skill-groups');
+    if (!list) return;
+    const groups = Array.from(new Set(['Développement web', 'Design', 'IA & automatisation', 'Marketing digital', 'Outils']
+      .concat(state.data.skills.map(s => (s.group || '').trim()).filter(Boolean))));
+    list.innerHTML = '';
+    groups.forEach(g => { const o = document.createElement('option'); o.value = g; list.appendChild(o); });
+  }
+
+  function onRepeaterEvent(e) {
+    const container = e.target.closest('[data-repeater]');
+    if (!container) return;
+    const name = container.dataset.repeater;
+    const card = e.target.closest('.repeater-card');
+    if (!card) return;
+    const index = Number(card.dataset.index);
+    const item = state.data[name][index];
+
+    if (e.type === 'input' && e.target.dataset.field) {
+      item[e.target.dataset.field] = e.target.value;
+      validateField(e.target);
+      if (e.target.dataset.field === REPEATERS[name].titleKey) {
+        $('.card-title-text', card).textContent = cardTitle(name, item, index);
+      }
+      if (name === 'skills' && e.target.dataset.field === 'group') updateGroupSuggestions();
+      changed();
+      return;
+    }
+
+    if (e.type === 'change' && e.target.dataset.image) {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      readImage(file, 1200, dataUrl => {
+        item.image = dataUrl;
+        setThumb($('.preview-thumb', card), dataUrl, 'fa-image');
+        $('[data-image-remove]', card).hidden = false;
+        changed();
+      });
+      return;
+    }
+
+    if (e.type !== 'click') return;
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    if (btn.hasAttribute('data-remove')) {
+      const label = cardTitle(name, item, index);
+      if (!confirm('Supprimer « ' + label + ' » ?')) return;
+      state.data[name].splice(index, 1);
+      renderRepeater(name);
+      changed();
+    } else if (btn.dataset.move) {
+      const to = index + Number(btn.dataset.move);
+      if (to < 0 || to >= state.data[name].length) return;
+      const list = state.data[name];
+      [list[index], list[to]] = [list[to], list[index]];
+      renderRepeater(name);
+      const moved = $('[data-repeater="' + name + '"] .repeater-card[data-index="' + to + '"]');
+      if (moved) moved.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      changed();
+    } else if (btn.hasAttribute('data-image-remove')) {
+      item.image = '';
+      setThumb($('.preview-thumb', card), '', 'fa-image');
+      btn.hidden = true;
+      changed();
+    }
+  }
+
+  function addItem(name) {
+    const item = {};
+    REPEATERS[name].fields.forEach(f => { item[f.key] = ''; });
+    state.data[name].push(item);
+    renderRepeater(name);
+    const cards = $$('[data-repeater="' + name + '"] .repeater-card');
+    const last = cards[cards.length - 1];
+    if (last) {
+      last.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      const first = $('input.form-control, textarea', last);
+      if (first) first.focus({ preventScroll: true });
+    }
+    changed();
+  }
+
+  /* ==========================================================
+     Images : redimensionnement et compression côté navigateur
+     ========================================================== */
+
+  function readImage(file, maxSize, done) {
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
+      toast('Format non pris en charge. Utilisez JPG, PNG ou WEBP.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => toast('Impossible de lire ce fichier.', 'error');
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => toast('Cette image semble corrompue.', 'error');
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        done(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function renderAvatar() {
+    setThumb($('#avatar-preview'), state.data.profile.avatar, 'fa-user');
+    $('#avatar-remove').hidden = !state.data.profile.avatar;
+  }
+
+  /* ==========================================================
+     Thèmes, couleurs, modèles de CV
+     ========================================================== */
+
+  function renderThemeCards() {
+    const grid = $('#theme-grid');
+    grid.innerHTML = '';
+    Object.values(THEMES).forEach(t => {
+      const card = el('button', {
+        type: 'button', class: 'theme-card' + (state.theme === t.id ? ' selected' : ''),
+        role: 'radio', 'aria-checked': String(state.theme === t.id), 'data-theme': t.id
+      }, [
+        el('span', { class: 'theme-swatch', 'aria-hidden': 'true' }, [
+          el('span', { class: 'sw-bg' }), el('span', { class: 'sw-line l1' }), el('span', { class: 'sw-line l2' }), el('span', { class: 'sw-dot' })
+        ]),
+        el('span', { class: 'theme-card-name', text: t.name }),
+        el('span', { class: 'theme-card-desc', text: t.description }),
+        el('span', { class: 'theme-badge', html: '<i class="fas fa-check" aria-hidden="true"></i>' })
+      ]);
+      const sw = $('.theme-swatch', card);
+      sw.style.setProperty('--sw-bg', t.swatch[0]);
+      sw.style.setProperty('--sw-accent', t.swatch[1]);
+      sw.style.setProperty('--sw-text', t.defaultMode === 'dark' ? t.dark.text : t.light.text);
+      sw.style.setProperty('--sw-font', t.fonts.display);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderCvCards() {
+    const grid = $('#cv-grid');
+    grid.innerHTML = '';
+    Object.values(CV_TEMPLATES).forEach(t => {
+      const card = el('button', {
+        type: 'button', class: 'theme-card cv-card' + (state.cvTemplate === t.id ? ' selected' : ''),
+        role: 'radio', 'aria-checked': String(state.cvTemplate === t.id), 'data-cv': t.id
+      }, [
+        el('span', { class: 'cv-swatch cv-sw-' + t.id, 'aria-hidden': 'true' }, [el('span'), el('span'), el('span')]),
+        el('span', { class: 'theme-card-name', text: t.name }),
+        el('span', { class: 'theme-card-desc', text: t.description }),
+        el('span', { class: 'theme-badge', html: '<i class="fas fa-check" aria-hidden="true"></i>' })
+      ]);
+      $('.cv-swatch', card).style.setProperty('--sw-accent', t.accent);
+      grid.appendChild(card);
+    });
+  }
+
+  function renderPresets() {
+    const grid = $('#preset-grid');
+    grid.innerHTML = '';
+    PRESETS.forEach(([name, a, b]) => {
+      const btn = el('button', { type: 'button', class: 'preset-color-card', 'data-preset': a + ',' + b, title: name }, [
+        el('span', { class: 'preset-colors', 'aria-hidden': 'true' }, [el('span'), el('span')]),
+        el('span', { class: 'preset-name', text: name })
+      ]);
+      const spans = $$('.preset-colors span', btn);
+      spans[0].style.background = a;
+      spans[1].style.background = b;
+      grid.appendChild(btn);
+    });
+  }
+
+  function selectTheme(id) {
+    if (!THEMES[id] || id === state.theme) return;
+    const prev = THEMES[state.theme];
+    const design = state.data.design;
+    // Si l'utilisateur n'a pas personnalisé la couleur, on prend celle du nouveau thème.
+    if (!design.accentColor || design.accentColor.toLowerCase() === prev.accent) design.accentColor = '';
+    if (!design.secondaryColor || design.secondaryColor.toLowerCase() === prev.accent2) design.secondaryColor = '';
+    state.theme = id;
+    renderThemeCards();
+    bindFields();
+    setPreviewMode('portfolio');
+    changed();
+  }
+
+  function selectCv(id) {
+    if (!CV_TEMPLATES[id]) return;
+    const prev = CV_TEMPLATES[state.cvTemplate];
+    if (!state.data.design.cvAccent || state.data.design.cvAccent.toLowerCase() === prev.accent) state.data.design.cvAccent = '';
+    state.cvTemplate = id;
+    renderCvCards();
+    bindFields();
+    setPreviewMode('cv');
+    changed();
+  }
+
+  /* ==========================================================
+     Navigation, aperçu, affichage mobile
+     ========================================================== */
+
+  function switchTab(tab) {
+    $$('.editor-section').forEach(s => s.classList.toggle('active', s.id === 'sec-' + tab));
+    $$('.nav-item').forEach(b => {
+      const on = b.dataset.tab === tab;
+      b.classList.toggle('active', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    $('#editor').scrollTop = 0;
+    if (tab === 'cv') setPreviewMode('cv');
+    else if (previewMode === 'cv' && tab !== 'export') setPreviewMode('portfolio');
+  }
+
+  function setPreviewMode(mode) {
+    if (previewMode === mode) return;
+    previewMode = mode;
+    $$('[data-preview]').forEach(b => b.classList.toggle('active', b.dataset.preview === mode));
+    $('#preview-frame').setAttribute('title', mode === 'cv' ? 'Aperçu du CV' : 'Aperçu du portfolio');
+    fitPreview();
+    renderPreview();
+  }
+
+  function setDevice(d) {
+    device = d;
+    $$('[data-device]').forEach(b => b.classList.toggle('active', b.dataset.device === d));
+    $('#preview-wrapper').dataset.device = d;
+    fitPreview();
+  }
+
+  /**
+   * En mode « ordinateur », la page est rendue à 1280 px de large puis réduite
+   * pour tenir dans le panneau : on voit la vraie mise en page desktop.
+   * Le CV est rendu à sa largeur A4 (≈ 800 px) de la même façon.
+   */
+  function fitPreview() {
+    const wrapper = $('#preview-wrapper');
+    const frame = $('#preview-frame');
+    if (!wrapper || !frame) return;
+    wrapper.dataset.device = previewMode === 'cv' ? 'desktop' : device; // un CV A4 n'a pas de version mobile
+    if (device === 'mobile' && previewMode !== 'cv') {
+      frame.style.cssText = '';
+      return;
+    }
+    const styles = getComputedStyle(wrapper);
+    const availW = wrapper.clientWidth - parseFloat(styles.paddingLeft) - parseFloat(styles.paddingRight);
+    const availH = wrapper.clientHeight - parseFloat(styles.paddingTop) - parseFloat(styles.paddingBottom);
+    const target = previewMode === 'cv' ? 820 : 1280;
+    const scale = Math.min(1, availW / target);
+    frame.style.width = target + 'px';
+    frame.style.height = (availH / scale) + 'px';
+    frame.style.transform = 'scale(' + scale + ')';
+    frame.style.transformOrigin = 'top left';
+    frame.style.flex = 'none';
+    // Un élément mis à l'échelle garde sa taille d'origine dans la mise en page :
+    // des marges négatives lui rendent sa taille visible.
+    frame.style.marginRight = -(target * (1 - scale)) + 'px';
+    frame.style.marginBottom = -((availH / scale) * (1 - scale)) + 'px';
+  }
+
+  function setView(view) {
+    $('.studio').dataset.view = view;
+    $$('[data-view-btn]').forEach(b => b.classList.toggle('active', b.dataset.viewBtn === view));
+    if (view === 'preview') { fitPreview(); renderPreview(); }
+  }
+
+  /* ==========================================================
+     Vérifications avant export
+     ========================================================== */
+
+  function validateAll() {
+    if (!state.data.profile.name || !state.data.profile.name.trim()) {
+      switchTab('about');
+      setView('edit');
+      const f = $('#profile-name');
+      f.classList.add('invalid');
+      f.focus();
+      toast('Indiquez au moins votre nom.', 'error');
+      return false;
+    }
+    const bad = $$('.form-control.invalid');
+    if (bad.length) {
+      const section = bad[0].closest('.editor-section');
+      if (section) switchTab(section.id.replace('sec-', ''));
+      setView('edit');
+      bad[0].focus();
+      toast(bad.length > 1 ? bad.length + ' champs sont invalides (liens ou email). Ils seront ignorés si vous ne les corrigez pas.'
+        : 'Un lien ou un email est invalide. Il sera ignoré si vous ne le corrigez pas.', 'error');
+      return confirm('Certains liens ou emails sont invalides et seront ignorés. Continuer quand même ?');
+    }
+    return true;
+  }
+
+  function slug(s) {
+    return String(s || 'portfolio').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'portfolio';
+  }
+
+  function download(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  function openInNewWindow(html) {
+    const w = window.open('', '_blank');
+    if (!w) { toast('Autorisez les fenêtres pop-up pour ouvrir l’aperçu.', 'error'); return null; }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    return w;
+  }
+
+  function exportZip() {
+    if (!validateAll()) return;
+    if (typeof JSZip === 'undefined') { toast('La bibliothèque ZIP n’a pas pu être chargée (connexion ?).', 'error'); return; }
+    const out = E.generatePortfolio(payload(), state.theme, { export: true });
+    const zip = new JSZip();
+    zip.file('index.html', out.html);
+    zip.file('styles.css', out.css);
+    zip.file('script.js', out.js);
+    const images = zip.folder('images');
+    out.images.forEach(img => images.file(img.filename, img.base64, { base64: true }));
+    toast('Préparation du fichier ZIP…');
+    zip.generateAsync({ type: 'blob' })
+      .then(blob => { download(blob, 'portfolio-' + slug(state.data.profile.name) + '.zip'); toast('ZIP téléchargé. Il est prêt à être mis en ligne.'); })
+      .catch(err => { console.error(err); toast('Erreur lors de la création du ZIP.', 'error'); });
+  }
+
+  function openFullscreen() {
+    if (!validateAll()) return;
+    openInNewWindow(E.generatePortfolio(payload(), state.theme).html);
+  }
+
+  function previewCv() {
+    openInNewWindow(window.generateCV(payload()));
+  }
+
+  function downloadCv() {
+    if (!validateAll()) return;
+    const html = window.generateCV(payload());
+    const filename = 'CV-' + slug(state.data.profile.name) + '.pdf';
+
+    if (typeof html2pdf === 'undefined') {
+      // Sans la bibliothèque PDF : on ouvre la fenêtre d'impression (Enregistrer en PDF).
+      const w = openInNewWindow(html);
+      if (w) setTimeout(() => w.print(), 400);
+      return;
+    }
+
+    // Le CV est inséré hors écran dans la page : ses styles sont limités au bloc
+    // .cv-page (voir cv.js), ils n'affectent donc pas l'éditeur.
+    const frag = window.generateCV(payload(), { fragment: true });
+    const holder = document.createElement('div');
+    holder.setAttribute('aria-hidden', 'true');
+    holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:210mm;background:#fff;pointer-events:none;';
+    holder.innerHTML = '<style>' + frag.css + '</style>' + frag.html;
+    document.body.appendChild(holder);
+    const page = holder.querySelector('.cv-page');
+    page.style.margin = '0';
+    toast('Génération du PDF…');
+
+    const imgs = Array.prototype.slice.call(page.querySelectorAll('img'));
+    Promise.all(imgs.map(img => img.complete ? null : new Promise(r => { img.onload = img.onerror = r; })))
+      .then(() => (document.fonts && document.fonts.ready) || null)
+      .then(() => html2pdf().set({
+        margin: [8, 0, 8, 0], // marges haut/bas en mm, pour que les pages suivantes ne collent pas au bord
+        filename,
+        image: { type: 'jpeg', quality: 0.96 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['.cv-item', '.cv-skill-group'] }
+      }).from(page).save())
+      .then(() => toast('CV téléchargé.'))
+      .catch(err => { console.error(err); toast('Erreur lors de la génération du PDF.', 'error'); })
+      .finally(() => holder.remove());
+  }
+
+  function exportJson() {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    download(blob, 'portfolio-studio-' + slug(state.data.profile.name) + '.json');
+  }
+
+  function importJson(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        state = migrate(JSON.parse(reader.result));
+        renderAll();
+        saveState();
+        toast('Données importées.');
+      } catch (e) {
+        toast('Ce fichier n’est pas une sauvegarde valide.', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetDemo() {
+    if (!confirm('Remplacer toutes vos informations par les données d’exemple ? Pensez à exporter vos données avant si vous voulez les garder.')) return;
+    state = clone(DEMO);
+    renderAll();
+    saveState();
+    toast('Données d’exemple rechargées.');
+  }
+
+  /* ==========================================================
+     Notifications
+     ========================================================== */
+
+  let toastTimer = null;
+  function toast(message, type) {
+    const t = $('#studio-toast');
+    if (!t) return;
+    $('#toast-message').textContent = message;
+    t.className = 'toast show ' + (type === 'error' ? 'error' : 'success');
+    $('i', t).className = type === 'error' ? 'fas fa-circle-exclamation' : 'fas fa-circle-check';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), type === 'error' ? 6000 : 3500);
+  }
+
+  /* ==========================================================
+     Démarrage
+     ========================================================== */
+
+  function renderAll() {
+    bindFields();
+    renderAvatar();
+    Object.keys(REPEATERS).forEach(renderRepeater);
+    updateGroupSuggestions();
+    renderThemeCards();
+    renderCvCards();
+    renderPreview();
+  }
+
+  function init() {
+    state = loadState();
+    renderPresets();
+    renderAll();
+
+    const editor = $('#editor');
+    editor.addEventListener('input', onFieldInput);
+    editor.addEventListener('input', onRepeaterEvent);
+    editor.addEventListener('change', onRepeaterEvent);
+    editor.addEventListener('click', onRepeaterEvent);
+
+    $$('[data-add]').forEach(b => b.addEventListener('click', () => addItem(b.dataset.add)));
+    $$('.nav-item').forEach(b => b.addEventListener('click', () => { switchTab(b.dataset.tab); setView('edit'); }));
+    $$('[data-preview]').forEach(b => b.addEventListener('click', () => setPreviewMode(b.dataset.preview)));
+    $$('[data-device]').forEach(b => b.addEventListener('click', () => setDevice(b.dataset.device)));
+    $$('[data-view-btn]').forEach(b => b.addEventListener('click', () => setView(b.dataset.viewBtn)));
+
+    $('#theme-grid').addEventListener('click', e => { const c = e.target.closest('[data-theme]'); if (c) selectTheme(c.dataset.theme); });
+    $('#cv-grid').addEventListener('click', e => { const c = e.target.closest('[data-cv]'); if (c) selectCv(c.dataset.cv); });
+    $('#preset-grid').addEventListener('click', e => {
+      const c = e.target.closest('[data-preset]');
+      if (!c) return;
+      const [a, b] = c.dataset.preset.split(',');
+      state.data.design.accentColor = a;
+      state.data.design.secondaryColor = b;
+      bindFields();
+      changed();
+    });
+
+    $('#avatar-upload').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      readImage(file, 800, url => { state.data.profile.avatar = url; renderAvatar(); changed(); });
+    });
+    $('#avatar-remove').addEventListener('click', () => { state.data.profile.avatar = ''; renderAvatar(); changed(); });
+
+    $('#zip-btn').addEventListener('click', exportZip);
+    $('#fullscreen-btn').addEventListener('click', openFullscreen);
+    $('#cv-preview-btn').addEventListener('click', previewCv);
+    $('#cv-download-btn').addEventListener('click', downloadCv);
+    $('#json-export-btn').addEventListener('click', exportJson);
+    $('#json-import').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) importJson(f); });
+    $('#reset-btn').addEventListener('click', resetDemo);
+
+    setDevice(window.matchMedia('(max-width: 960px)').matches ? 'mobile' : 'desktop');
+    if ('ResizeObserver' in window) new ResizeObserver(fitPreview).observe($('#preview-wrapper'));
+    else window.addEventListener('resize', fitPreview);
+    setSaveStatus('saved');
+  }
+
+  // Exposé pour les tests et le débogage
+  window.PortfolioStudio = { get state() { return state; }, migrate, payload: () => payload(), exportZip, switchTab, selectTheme, selectCv };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();

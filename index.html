@@ -2,586 +2,319 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio Builder Studio</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio Studio — créez votre portfolio et votre CV</title>
+  <meta name="description" content="Créez un portfolio web et un CV professionnels, avec aperçu en direct, puis téléchargez un site prêt à publier.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="bg-glow-orb orb-left"></div>
-  <div class="bg-glow-orb orb-right"></div>
-
-  <!-- TOAST NOTIFICATION -->
-  <div id="studio-toast" class="toast">
-    <i class="fas fa-info-circle"></i>
-    <span id="toast-message">Message</span>
+  <div id="studio-toast" class="toast" role="status" aria-live="polite">
+    <i class="fas fa-circle-check" aria-hidden="true"></i>
+    <span id="toast-message"></span>
   </div>
 
-
-
-  <!-- STUDIO WORKSPACE -->
-  <div class="studio-container">
-    
-    <!-- Sidebar Navigation -->
+  <div class="studio" data-view="edit">
+    <!-- ================= Navigation ================= -->
     <aside class="studio-sidebar">
       <div class="sidebar-brand">
-        <div class="brand-icon"><i class="fas fa-sliders-h"></i></div>
-        <span class="brand-name">PortfolioStudio</span>
+        <div class="brand-icon"><i class="fas fa-layer-group" aria-hidden="true"></i></div>
+        <span class="brand-name">Portfolio Studio</span>
       </div>
-      
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" onclick="switchTab('about'); return false;" id="tab-about">
-          <i class="fas fa-user-circle"></i> Info Générale
-        </a>
-        <a href="#" class="nav-item" onclick="switchTab('skills'); return false;" id="tab-skills">
-          <i class="fas fa-tasks"></i> Compétences
-        </a>
-        <a href="#" class="nav-item" onclick="switchTab('projects'); return false;" id="tab-projects">
-          <i class="fas fa-project-diagram"></i> Projets
-        </a>
-        <a href="#" class="nav-item" onclick="switchTab('timeline'); return false;" id="tab-timeline">
-          <i class="fas fa-briefcase"></i> Expériences
-        </a>
-        <a href="#" class="nav-item" onclick="switchTab('education'); return false;" id="tab-education">
-          <i class="fas fa-graduation-cap"></i> Formations
-        </a>
-                <a href="#" class="nav-item" onclick="switchTab('extras'); return false;" id="tab-extras">
-          <i class="fas fa-plus-circle"></i> Infos Compl.
-        </a>
-        <a href="#" class="nav-item" onclick="switchTab('design'); return false;" id="tab-design">
-          <i class="fas fa-palette"></i> Design & Thème
-        </a>
-        <a href="#" class="nav-item" onclick="switchTab('cv'); return false;" id="tab-cv">
-          <i class="fas fa-file-pdf"></i> Création de CV
-        </a>
-        <a href="#" class="nav-item" onclick="switchTab('export'); return false;" id="tab-export">
-          <i class="fas fa-file-archive"></i> Téléchargement
-        </a>
+
+      <nav class="sidebar-nav" aria-label="Sections de l'éditeur">
+        <button type="button" class="nav-item active" data-tab="about"><i class="fas fa-user" aria-hidden="true"></i><span>Profil</span></button>
+        <button type="button" class="nav-item" data-tab="projects"><i class="fas fa-folder-open" aria-hidden="true"></i><span>Projets</span></button>
+        <button type="button" class="nav-item" data-tab="timeline"><i class="fas fa-briefcase" aria-hidden="true"></i><span>Expériences</span></button>
+        <button type="button" class="nav-item" data-tab="skills"><i class="fas fa-code" aria-hidden="true"></i><span>Compétences</span></button>
+        <button type="button" class="nav-item" data-tab="education"><i class="fas fa-graduation-cap" aria-hidden="true"></i><span>Formation</span></button>
+        <button type="button" class="nav-item" data-tab="extras"><i class="fas fa-language" aria-hidden="true"></i><span>Langues &amp; plus</span></button>
+        <button type="button" class="nav-item" data-tab="design"><i class="fas fa-palette" aria-hidden="true"></i><span>Design</span></button>
+        <button type="button" class="nav-item" data-tab="cv"><i class="fas fa-file-lines" aria-hidden="true"></i><span>CV</span></button>
+        <button type="button" class="nav-item" data-tab="export"><i class="fas fa-download" aria-hidden="true"></i><span>Exporter</span></button>
       </nav>
-      
-      <div class="sidebar-user">
-        <div class="user-info">
-          <div class="user-avatar-placeholder"><i class="fas fa-save"></i></div>
-          <span class="user-name" id="save-status">Brouillon auto</span>
-        </div>
-        <button class="logout-btn btn-reset" onclick="resetToDefaultData()" title="Réinitialiser les données">
-          <i class="fas fa-undo"></i>
+
+      <div class="sidebar-footer">
+        <span class="save-status" id="save-status"><i class="fas fa-circle-check" aria-hidden="true"></i> Brouillon enregistré</span>
+        <button type="button" class="icon-btn" id="reset-btn" title="Repartir des données d'exemple" aria-label="Repartir des données d'exemple">
+          <i class="fas fa-rotate-left" aria-hidden="true"></i>
         </button>
       </div>
     </aside>
 
-    <!-- split workspace -->
-    <div class="studio-workspace">
-      
-      <!-- Editor Panel (Left Column) -->
-      <section class="editor-panel">
-        
-        <!-- SECTION 1: ABOUT / INFO GENERALE -->
-        <div id="sec-about" class="editor-section active">
-          <h2 class="section-title">Informations Générales</h2>
-          <p class="section-desc">Renseignez vos coordonnées de base, votre biographie et vos réseaux sociaux.</p>
-          
-          <div class="form-grid">
-            <div class="form-group form-group-full">
-              <label>Photo de Profil</label>
-              <div class="upload-wrapper">
-                <div id="avatar-preview" class="preview-thumb">
-                  <i class="fas fa-user"></i>
+    <!-- ================= Éditeur ================= -->
+    <main class="editor-panel" id="editor">
+
+      <!-- PROFIL -->
+      <section id="sec-about" class="editor-section active">
+        <h1 class="section-title">Profil</h1>
+        <p class="section-desc">Les informations qui apparaissent en haut de votre portfolio et de votre CV.</p>
+
+        <div class="form-grid">
+          <div class="form-group form-group-full">
+            <span class="label">Photo de profil</span>
+            <div class="upload-wrapper">
+              <div id="avatar-preview" class="preview-thumb"><i class="fas fa-user" aria-hidden="true"></i></div>
+              <div class="upload-actions">
+                <div class="upload-buttons">
+                  <label for="avatar-upload" class="upload-btn-label">Choisir une image</label>
+                  <button type="button" class="link-btn" id="avatar-remove" hidden>Retirer</button>
                 </div>
-                 <div class="upload-actions">
-                   <label for="avatar-upload" class="upload-btn-label">Choisir une image</label>
-                   <input type="file" id="avatar-upload" class="file-input" accept="image/*" onchange="previewImage(this, 'avatar-preview')">
-                   <span class="upload-hint">Format PNG/JPG conseillé (max 2Mo)</span>
-                   <input type="text" id="profile-avatar-alt" class="form-control avatar-alt-input" placeholder="Description photo pour lecteur d'écran (Alt)">
-                 </div>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="profile-name">Nom complet</label>
-              <input type="text" id="profile-name" class="form-control" placeholder="Jean Dupont" value="Jean Dupont">
-            </div>
-             <div class="form-group">
-               <label for="profile-title">Rôle / Profession</label>
-               <input type="text" id="profile-title" class="form-control" placeholder="Développeur Web Fullstack" value="Développeur Web Fullstack">
-             </div>
-             <div class="form-group">
-               <label for="profile-tagline">Accroche / Phrase de présentation courte</label>
-               <input type="text" id="profile-tagline" class="form-control" placeholder="ex: Spécialiste React & architectures résilientes">
-             </div>
-            
-            <div class="form-group form-group-full">
-              <label for="profile-bio">Bio / Résumé</label>
-              <textarea id="profile-bio" class="form-control" rows="4" placeholder="Décrivez votre parcours et ce qui vous passionne..."></textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="profile-email">Adresse Email</label>
-              <input type="email" id="profile-email" class="form-control" placeholder="jean.dupont@example.com" value="jean.dupont@example.com">
-            </div>
-             <div class="form-group">
-               <label for="profile-phone">Téléphone / WhatsApp</label>
-               <input type="tel" id="profile-phone" class="form-control" placeholder="+33 6 12 34 56 78">
-             </div>
-             <div class="form-group">
-               <label for="profile-website">Site Web Personnel / Blog</label>
-               <input type="url" id="profile-website" class="form-control" placeholder="https://mon-site.fr">
-             </div>
-            <div class="form-group">
-              <label for="profile-age">Âge</label>
-              <input type="number" id="profile-age" class="form-control" placeholder="28">
-            </div>
-            <div class="form-group">
-              <label for="profile-experience">Années d'expérience</label>
-              <input type="number" id="profile-experience" class="form-control" placeholder="5">
-            </div>
-             <div class="form-group">
-               <label for="profile-location">Localisation (Ville, Pays)</label>
-               <input type="text" id="profile-location" class="form-control" placeholder="Paris, France">
-             </div>
-             <div class="form-group">
-               <label for="profile-relocation">Mobilité / Relocalisation recherchée</label>
-               <input type="text" id="profile-relocation" class="form-control" placeholder="ex: Disponible pour relocalisation / Hybride">
-             </div>
-            <div class="form-group">
-              <label for="profile-address">Adresse complète</label>
-              <input type="text" id="profile-address" class="form-control" placeholder="12 Rue de la Paix, 75002">
-            </div>
-            <div class="form-group">
-              <label for="profile-availability">Disponibilité</label>
-              <input type="text" id="profile-availability" class="form-control" placeholder="Immédiate / Sous 1 mois">
-            </div>
-            <div class="form-group">
-              <label for="profile-contract">Type de contrat recherché</label>
-              <input type="text" id="profile-contract" class="form-control" placeholder="Freelance / CDI / Alternance">
-            </div>
-            <div class="form-group">
-              <label for="profile-languages">Langues parlées (séparées par virgules)</label>
-              <input type="text" id="profile-languages" class="form-control" placeholder="Français (Natif), Anglais (C1)">
-            </div>
-            <div class="form-group">
-              <label for="profile-hobbies">Loisirs (séparés par virgules)</label>
-              <input type="text" id="profile-hobbies" class="form-control" placeholder="Voyages, Photographie, Échecs">
-            </div>
-            
-            <div class="form-group form-group-full form-section-divider">
-              <h3 class="form-section-header">Réseaux Sociaux</h3>
-            </div>
-            
-            <div class="form-group">
-              <label for="profile-github">Lien GitHub</label>
-              <input type="url" id="profile-github" class="form-control" placeholder="https://github.com/jeandupont">
-            </div>
-            <div class="form-group">
-              <label for="profile-linkedin">Lien LinkedIn</label>
-              <input type="url" id="profile-linkedin" class="form-control" placeholder="https://linkedin.com/in/jeandupont">
-            </div>
-            <div class="form-group">
-              <label for="profile-twitter">Lien Twitter (X)</label>
-              <input type="url" id="profile-twitter" class="form-control" placeholder="https://twitter.com/jeandupont">
-            </div>
-            <div class="form-group">
-              <label for="profile-facebook">Lien Facebook</label>
-              <input type="url" id="profile-facebook" class="form-control" placeholder="https://facebook.com/jeandupont">
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION 2: SKILLS / COMPETENCES -->
-        <div id="sec-skills" class="editor-section">
-          <h2 class="section-title">Hard Skills (Techniques)</h2>
-          <p class="section-desc">Ajoutez vos compétences techniques ou interpersonnelles et évaluez votre niveau d'expertise.</p>
-          
-          <div id="skills-repeater" class="repeater-container">
-            <!-- Repated skill cards will go here dynamically -->
-          </div>
-          
-          <button type="button" class="btn-add-item" onclick="addSkillItem()">
-            <i class="fas fa-plus"></i> Ajouter une compétence
-          </button>
-        </div>
-
-          <h3 class="subsection-title">Soft Skills (Savoir-être)</h3>
-          <p class="section-desc text-muted-sm">Ex: Leadership, Esprit d'équipe, Gestion du stress.</p>
-          <div id="soft-skills-repeater" class="repeater-container"></div>
-          <button type="button" class="btn-add-item" onclick="addSoftSkillItem()">
-            <i class="fas fa-plus"></i> Ajouter un soft skill
-          </button>
-
-
-        <!-- SECTION 3: PROJECTS / PROJETS -->
-        <div id="sec-projects" class="editor-section">
-          <h2 class="section-title">Mes Projets</h2>
-          <p class="section-desc">Présentez vos plus belles créations avec images, liens et descriptifs.</p>
-          
-          <div id="projects-repeater" class="repeater-container">
-            <!-- Repeated project cards will go here dynamically -->
-          </div>
-          
-          <button type="button" class="btn-add-item" onclick="addProjectItem()">
-            <i class="fas fa-plus"></i> Ajouter un projet
-          </button>
-        </div>
-
-        <!-- SECTION 4: TIMELINE / EXPERIENCES -->
-        <div id="sec-timeline" class="editor-section">
-          <h2 class="section-title">Expériences Professionnelles</h2>
-          <p class="section-desc">Détaillez votre parcours professionnel pour l'optimisation ATS.</p>
-          
-          <div id="timeline-repeater" class="repeater-container">
-            <!-- Repeated timeline items will go here dynamically -->
-          </div>
-          
-          <button type="button" class="btn-add-item" onclick="addTimelineItem()">
-            <i class="fas fa-plus"></i> Ajouter une expérience
-          </button>
-        </div>
-
-        <!-- SECTION 4B: EDUCATION / FORMATIONS -->
-        <div id="sec-education" class="editor-section">
-          <h2 class="section-title">Formations & Diplômes</h2>
-          <p class="section-desc">Ajoutez vos diplômes, écoles et certifications pour les systèmes de recrutement.</p>
-          
-          <div id="education-repeater" class="repeater-container">
-            <!-- Repeated education items will go here dynamically -->
-          </div>
-          <button type="button" class="btn-add-item" onclick="addEducationItem()" style="margin-bottom: 2rem;">
-             <i class="fas fa-plus"></i> Ajouter une formation
-           </button>
-           
-           <h3 class="subsection-title-mt-sm">Certifications</h3>
-           <p class="section-desc text-muted-sm">Ajoutez vos certifications pro (ex: AWS, Scrum Master, TOEFL...) distinctes des diplômes.</p>
-           <div id="certs-repeater" class="repeater-container">
-             <!-- Repeated cert cards will go here dynamically -->
-           </div>
-           
-           <button type="button" class="btn-add-item" onclick="addCertItem()">
-             <i class="fas fa-plus"></i> Ajouter une certification
-           </button>
-        </div>
-
-        <!-- SECTION 5: DESIGN / STYLE -->
-        
-        <!-- SECTION 4C: EXTRAS (LANGUAGES, HOBBIES, REFERENCES) -->
-        <div id="sec-extras" class="editor-section" style="display: none;">
-          <h2 class="section-title">Informations Complémentaires</h2>
-          <p class="section-desc">Langues, centres d'intérêt et références professionnelles.</p>
-          
-          <h3 class="subsection-title-mt-sm">Langues</h3>
-          <div id="languages-repeater" class="repeater-container"></div>
-          <button type="button" class="btn-add-item" onclick="addLanguageItem()">
-            <i class="fas fa-plus"></i> Ajouter une langue
-          </button>
-
-          <h3 class="subsection-title">Centres d'intérêt</h3>
-          <div id="hobbies-repeater" class="repeater-container"></div>
-          <button type="button" class="btn-add-item" onclick="addHobbyItem()">
-            <i class="fas fa-plus"></i> Ajouter un centre d'intérêt
-          </button>
-
-          <h3 class="subsection-title">Références</h3>
-          <div id="references-repeater" class="repeater-container"></div>
-          <button type="button" class="btn-add-item" onclick="addReferenceItem()">
-            <i class="fas fa-plus"></i> Ajouter une référence
-          </button>
-        </div>
-
-        <div id="sec-design" class="editor-section">
-          <h2 class="section-title">Design & Style</h2>
-          <p class="section-desc">Sélectionnez le style graphique de votre portfolio et personnalisez la palette de couleurs.</p>
-          
-          <h3 class="subsection-title-no-mt">1. Modèle de Portfolio</h3>
-          <div class="design-themes-grid">
-            <div class="theme-card selected" onclick="selectTheme('minimalist')" id="theme-minimalist">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)"></div>
-              <h4 class="theme-card-name">Minimaliste Moderne</h4>
-              <p class="theme-card-desc">Design épuré et clair, idéal pour les profils sobres et élégants.</p>
-            </div>
-            <div class="theme-card" onclick="selectTheme('creative')" id="theme-creative">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)"></div>
-              <h4 class="theme-card-name">Créatif Dégradé</h4>
-              <p class="theme-card-desc">Couleurs vibrantes, effets glassmorphic et animations fluides.</p>
-            </div>
-            <div class="theme-card" onclick="selectTheme('developer')" id="theme-developer">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #090d16 0%, #1e293b 100%)"></div>
-              <h4 class="theme-card-name">Terminal Développeur</h4>
-              <p class="theme-card-desc">Aperçu rétro style console système, idéal pour les programmeurs.</p>
-            </div>
-            <div class="theme-card" onclick="selectTheme('brutalist')" id="theme-brutalist">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #fde047 0%, #f97316 100%)"></div>
-              <h4 class="theme-card-name">Néo-Brutaliste Pop</h4>
-              <p class="theme-card-desc">Bordures épaisses, ombres marquées et couleurs vives rétro-pop.</p>
-            </div>
-             <div class="theme-card" onclick="selectTheme('editorial')" id="theme-editorial">
-               <div class="theme-badge"><i class="fas fa-check"></i></div>
-               <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f5f5f4 0%, #d7c49e 100%)"></div>
-               <h4 class="theme-card-name">Chic Éditorial</h4>
-               <p class="theme-card-desc">Polices Serif raffinées, tons crème et mise en page littéraire.</p>
-             </div>
-             <div class="theme-card" onclick="selectTheme('corporate')" id="theme-corporate">
-               <div class="theme-badge"><i class="fas fa-check"></i></div>
-               <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #1e3a8a 0%, #475569 100%)"></div>
-               <h4 class="theme-card-name">Corporate / Sobre</h4>
-               <p class="theme-card-desc">Structure classique, bleus institutionnels. Idéal pour la finance, le conseil et le juridique.</p>
-             </div>
-          </div>
-          
-          <h3 class="subsection-title">2. Palettes Prédéfinies</h3>
-          <div class="presets-palette-grid">
-            <div class="preset-color-card" onclick="applyPreset('#6366f1', '#ec4899', 'Sunset Indigo')">
-              <div class="preset-colors">
-                <span style="background-color: #6366f1"></span>
-                <span style="background-color: #ec4899"></span>
-              </div>
-              <span class="preset-name">Sunset Indigo</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#10b981', '#059669', 'Emerald Mint')">
-              <div class="preset-colors">
-                <span style="background-color: #10b981"></span>
-                <span style="background-color: #059669"></span>
-              </div>
-              <span class="preset-name">Emerald Mint</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#f43f5e', '#fb7185', 'Rose Sakura')">
-              <div class="preset-colors">
-                <span style="background-color: #f43f5e"></span>
-                <span style="background-color: #fb7185"></span>
-              </div>
-              <span class="preset-name">Rose Sakura</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#0ea5e9', '#2563eb', 'Ocean Blue')">
-              <div class="preset-colors">
-                <span style="background-color: #0ea5e9"></span>
-                <span style="background-color: #2563eb"></span>
-              </div>
-              <span class="preset-name">Ocean Blue</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#f59e0b', '#d97706', 'Amber Gold')">
-              <div class="preset-colors">
-                <span style="background-color: #f59e0b"></span>
-                <span style="background-color: #d97706"></span>
-              </div>
-              <span class="preset-name">Amber Gold</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#2e7d32', '#8d6e63', 'Forest Timber')">
-              <div class="preset-colors">
-                <span style="background-color: #2e7d32"></span>
-                <span style="background-color: #8d6e63"></span>
-              </div>
-              <span class="preset-name">Forest Timber</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#06b6d4', '#d946ef', 'Cyber Neon')">
-              <div class="preset-colors">
-                <span style="background-color: #06b6d4"></span>
-                <span style="background-color: #d946ef"></span>
-              </div>
-              <span class="preset-name">Cyber Neon</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#4c1d95', '#7e22ce', 'Royal Velvet')">
-              <div class="preset-colors">
-                <span style="background-color: #4c1d95"></span>
-                <span style="background-color: #7e22ce"></span>
-              </div>
-              <span class="preset-name">Royal Velvet</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#111827', '#374151', 'Obsidian')">
-              <div class="preset-colors">
-                <span style="background-color: #111827"></span>
-                <span style="background-color: #374151"></span>
-              </div>
-              <span class="preset-name">Obsidian</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#ea580c', '#f97316', 'Tangerine')">
-              <div class="preset-colors">
-                <span style="background-color: #ea580c"></span>
-                <span style="background-color: #f97316"></span>
-              </div>
-              <span class="preset-name">Tangerine</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#475569', '#64748b', 'Slate Blue')">
-              <div class="preset-colors">
-                <span style="background-color: #475569"></span>
-                <span style="background-color: #64748b"></span>
-              </div>
-              <span class="preset-name">Slate Blue</span>
-            </div>
-            <div class="preset-color-card" onclick="applyPreset('#9f1239', '#be123c', 'Berry Red')">
-              <div class="preset-colors">
-                <span style="background-color: #9f1239"></span>
-                <span style="background-color: #be123c"></span>
-              </div>
-              <span class="preset-name">Berry Red</span>
-            </div>
-          </div>
-          
-          <h3 class="subsection-title">3. Ajustement Manuel</h3>
-          <div class="color-picker-grid">
-            <div class="color-input-wrapper">
-              <input type="color" id="design-accent" value="#6366f1" onchange="triggerUpdate()">
-              <div class="color-picker-lbl">
-                <span>Couleur d'Accent</span>
-                <span id="accent-hex">#6366f1</span>
-              </div>
-            </div>
-            <div class="color-input-wrapper">
-              <input type="color" id="design-secondary" value="#ec4899" onchange="triggerUpdate()">
-              <div class="color-picker-lbl">
-                <span>Couleur Secondaire</span>
-                <span id="secondary-hex">#ec4899</span>
+                <input type="file" id="avatar-upload" class="file-input" accept="image/png,image/jpeg,image/webp">
+                <span class="upload-hint">JPG, PNG ou WEBP. Redimensionnée automatiquement. Sans photo, vos initiales s'affichent.</span>
+                <input type="text" id="profile-avatarAlt" class="form-control" data-bind="profile.avatarAlt" placeholder="Description de la photo (lecteurs d'écran)">
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- SECTION 6: CREATION DE CV -->
-        <div id="sec-cv" class="editor-section">
-          <h2 class="section-title">Création de CV (PDF)</h2>
-          <p class="section-desc">Générez un Curriculum Vitae personnalisé. Ajustez le design puis téléchargez-le directement en PDF.</p>
-          
-          <h3 class="subsection-title-mt-sm">1. Modèle de CV</h3>
-          <div class="design-themes-grid" style="margin-bottom: 2rem;">
-            <div class="theme-card selected" onclick="selectCVTemplate('modern')" id="cv-tpl-modern">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%)"></div>
-              <h4 class="theme-card-name">Moderne</h4>
-              <p class="theme-card-desc">2 colonnes, dynamique et coloré.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('classic')" id="cv-tpl-classic">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%)"></div>
-              <h4 class="theme-card-name">Classique</h4>
-              <p class="theme-card-desc">1 colonne, sobre et structuré.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('minimalist')" id="cv-tpl-minimalist">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)"></div>
-              <h4 class="theme-card-name">Minimaliste</h4>
-              <p class="theme-card-desc">Épuré, large typo, aéré.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('terminal')" id="cv-tpl-terminal">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #0f172a 0%, #22c55e 100%)"></div>
-              <h4 class="theme-card-name">Terminal</h4>
-              <p class="theme-card-desc">Sombre, monospace, style codeur.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('split')" id="cv-tpl-split">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(90deg, #3b82f6 50%, #ffffff 50%)"></div>
-              <h4 class="theme-card-name">Split Créatif</h4>
-              <p class="theme-card-desc">Coupé en deux, fort contraste.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('academic')" id="cv-tpl-academic">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)"></div>
-              <h4 class="theme-card-name">Académique</h4>
-              <p class="theme-card-desc">Très strict, Serif, formel.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('executive')" id="cv-tpl-executive">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #334155 0%, #cbd5e1 100%)"></div>
-              <h4 class="theme-card-name">Executive</h4>
-              <p class="theme-card-desc">Layout centré, imposant.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('startup')" id="cv-tpl-startup">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #f0fdf4 0%, #86efac 100%)"></div>
-              <h4 class="theme-card-name">Startup Tech</h4>
-              <p class="theme-card-desc">Blocs arrondis, tags, moderne.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('twotone')" id="cv-tpl-twotone">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(90deg, #1e293b 30%, #ffffff 70%)"></div>
-              <h4 class="theme-card-name">Two-Tone</h4>
-              <p class="theme-card-desc">Barre latérale sombre.</p>
-            </div>
-            <div class="theme-card" onclick="selectCVTemplate('artistic')" id="cv-tpl-artistic">
-              <div class="theme-badge"><i class="fas fa-check"></i></div>
-              <div class="theme-preview-placeholder" style="background-image: linear-gradient(135deg, #fdf4ff 0%, #d946ef 100%)"></div>
-              <h4 class="theme-card-name">Artiste</h4>
-              <p class="theme-card-desc">Dégradés subtils, design asymétrique.</p>
-            </div>
+          <div class="form-group">
+            <label for="profile-name">Nom complet <span class="req">*</span></label>
+            <input type="text" id="profile-name" class="form-control" data-bind="profile.name" placeholder="Awa Koffi" autocomplete="name">
           </div>
-          
-          <h3 class="subsection-title-mt-sm">2. Couleur d'Accent</h3>
-          <div class="color-picker-grid" style="margin-bottom: 2rem;">
-            <div class="color-input-wrapper">
-              <input type="color" id="cv-design-accent" value="#3b82f6" onchange="triggerUpdate(); document.getElementById('cv-accent-hex').innerText = this.value;">
-              <div class="color-picker-lbl">
-                <span>Couleur d'Accent</span>
-                <span id="cv-accent-hex">#3b82f6</span>
-              </div>
-            </div>
+          <div class="form-group">
+            <label for="profile-title">Métier</label>
+            <input type="text" id="profile-title" class="form-control" data-bind="profile.title" placeholder="Développeuse web full-stack">
           </div>
-          
-          <div class="export-card" style="margin-top: 1rem;">
-            <div class="export-icon" style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text;"><i class="fas fa-file-pdf"></i></div>
-            <h3 style="margin-bottom: 0.5rem">Votre CV est prêt</h3>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem">
-              Le CV compile votre profil, vos compétences, vos projets et votre parcours professionnel dans une mise en page claire et professionnelle.
-            </p>
-            <div style="display: flex; gap: 1rem; justify-content: center;">
-              <button class="export-btn" style="background: var(--bg-input); border: 1px solid var(--border-light); color: white;" onclick="previewCV()">
-                <i class="fas fa-eye"></i> Aperçu
-              </button>
-              <button class="export-btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="downloadCV()">
-                <i class="fas fa-download"></i> Télécharger en PDF
-              </button>
-            </div>
+          <div class="form-group form-group-full">
+            <label for="profile-tagline">Accroche</label>
+            <input type="text" id="profile-tagline" class="form-control" data-bind="profile.tagline" placeholder="Je construis des plateformes web qui font tourner de vrais business.">
+            <span class="hint">Une phrase qui dit ce que vous apportez. C'est la première chose qu'un recruteur lit.</span>
           </div>
-        </div>
+          <div class="form-group form-group-full">
+            <label for="profile-bio">Présentation</label>
+            <textarea id="profile-bio" class="form-control" rows="4" data-bind="profile.bio" placeholder="Quelques lignes sur votre parcours et ce qui vous motive."></textarea>
+            <span class="hint">Astuce : commencez une ligne par « - » pour créer une liste à puces.</span>
+          </div>
 
-        <!-- SECTION 7: EXPORT / TÉLÉCHARGEMENT -->
-        <div id="sec-export" class="editor-section">
-          <h2 class="section-title">Téléchargement Direct</h2>
-          <p class="section-desc">Générez et téléchargez votre portfolio compressé en fichier ZIP autonome, prêt à être hébergé partout (Vercel, Netlify, Github Pages, etc.).</p>
-          
-          <div class="export-card">
-            <div class="export-icon"><i class="fas fa-file-zipper"></i></div>
-            <h3 style="margin-bottom: 0.5rem">Exporter votre Projet</h3>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem">
-              L'archive ZIP contiendra la structure complète : <code>index.html</code>, <code>styles.css</code>, <code>script.js</code> ainsi qu'un dossier <code>images/</code> autonome.
-            </p>
-            <button class="export-btn" onclick="exportZip()">
-              <i class="fas fa-download"></i> Télécharger le ZIP
-            </button>
+          <div class="form-group">
+            <label for="profile-email">Email</label>
+            <input type="email" id="profile-email" class="form-control" data-bind="profile.email" placeholder="awa@exemple.com" autocomplete="email">
           </div>
-        </div>
-
-      </section>
-
-      <!-- Live Preview Panel (Right Column) -->
-      <section class="preview-panel">
-        <div class="preview-bar">
-          <span class="preview-title">
-            <select id="preview-mode-select" onchange="previewMode = this.value; triggerUpdate();" style="background:transparent; border:none; color:white; font-size:1.1rem; outline:none; font-weight:bold; cursor:pointer;">
-              <option value="portfolio" style="color:black;">Aperçu : Portfolio Web</option>
-              <option value="cv" style="color:black;">Aperçu : CV (Format A4)</option>
-            </select>
-          </span>
-          <div class="preview-actions">
-            <button class="preview-btn" onclick="openPreviewWindow()">
-              <i class="fas fa-external-link-alt"></i> Plein Écran
-            </button>
+          <div class="form-group">
+            <label for="profile-phone">Téléphone / WhatsApp</label>
+            <input type="tel" id="profile-phone" class="form-control" data-bind="profile.phone" placeholder="+229 01 23 45 67 89" autocomplete="tel">
+            <span class="hint">Avec l'indicatif pays pour activer le bouton WhatsApp.</span>
           </div>
-        </div>
-        <div class="preview-frame-wrapper">
-          <iframe id="preview-frame" class="preview-iframe"></iframe>
+          <div class="form-group">
+            <label for="profile-location">Ville, pays</label>
+            <input type="text" id="profile-location" class="form-control" data-bind="profile.location" placeholder="Cotonou, Bénin">
+          </div>
+          <div class="form-group">
+            <label for="profile-relocation">Mobilité</label>
+            <input type="text" id="profile-relocation" class="form-control" data-bind="profile.relocation" placeholder="Ouvert à la relocalisation / télétravail">
+          </div>
+          <div class="form-group">
+            <label for="profile-availability">Disponibilité</label>
+            <input type="text" id="profile-availability" class="form-control" data-bind="profile.availability" placeholder="Immédiate">
+          </div>
+          <div class="form-group">
+            <label for="profile-contract">Type de contrat recherché</label>
+            <input type="text" id="profile-contract" class="form-control" data-bind="profile.contract" placeholder="Freelance / CDI / Alternance">
+          </div>
+          <div class="form-group">
+            <label for="profile-experience">Années d'expérience</label>
+            <input type="text" id="profile-experience" class="form-control" data-bind="profile.experience" placeholder="3" inputmode="numeric">
+          </div>
+          <div class="form-group">
+            <label for="profile-website">Site personnel / blog</label>
+            <input type="url" id="profile-website" class="form-control" data-bind="profile.website" data-url placeholder="https://mon-site.com">
+          </div>
+
+          <div class="form-group form-group-full form-divider"><span class="label">Réseaux</span></div>
+          <div class="form-group">
+            <label for="profile-github">GitHub</label>
+            <input type="url" id="profile-github" class="form-control" data-bind="profile.github" data-url placeholder="https://github.com/pseudo">
+          </div>
+          <div class="form-group">
+            <label for="profile-linkedin">LinkedIn</label>
+            <input type="url" id="profile-linkedin" class="form-control" data-bind="profile.linkedin" data-url placeholder="https://linkedin.com/in/pseudo">
+          </div>
+          <div class="form-group">
+            <label for="profile-twitter">X / Twitter</label>
+            <input type="url" id="profile-twitter" class="form-control" data-bind="profile.twitter" data-url placeholder="https://x.com/pseudo">
+          </div>
+          <div class="form-group">
+            <label for="profile-facebook">Facebook</label>
+            <input type="url" id="profile-facebook" class="form-control" data-bind="profile.facebook" data-url placeholder="https://facebook.com/pseudo">
+          </div>
         </div>
       </section>
 
+      <!-- PROJETS -->
+      <section id="sec-projects" class="editor-section">
+        <h1 class="section-title">Projets</h1>
+        <p class="section-desc">Vos meilleures réalisations, du plus impressionnant au moins récent. Trois bons projets valent mieux que dix moyens.</p>
+        <div class="repeater-container" data-repeater="projects"></div>
+        <button type="button" class="btn-add-item" data-add="projects"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter un projet</button>
+      </section>
+
+      <!-- EXPÉRIENCES -->
+      <section id="sec-timeline" class="editor-section">
+        <h1 class="section-title">Expériences</h1>
+        <p class="section-desc">Du poste le plus récent au plus ancien. Mettez des résultats chiffrés quand vous le pouvez.</p>
+        <div class="repeater-container" data-repeater="experience"></div>
+        <button type="button" class="btn-add-item" data-add="experience"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter une expérience</button>
+      </section>
+
+      <!-- COMPÉTENCES -->
+      <section id="sec-skills" class="editor-section">
+        <h1 class="section-title">Compétences</h1>
+        <p class="section-desc">Regroupez vos compétences par domaine (ex. « Développement web », « Design »). Elles s'affichent en blocs, sans pourcentage.</p>
+        <div class="repeater-container repeater-compact" data-repeater="skills"></div>
+        <button type="button" class="btn-add-item" data-add="skills"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter une compétence</button>
+
+        <h2 class="subsection-title">Savoir-être</h2>
+        <p class="section-desc">Ex. : autonomie, esprit d'équipe, gestion du stress.</p>
+        <div class="repeater-container repeater-compact" data-repeater="softSkills"></div>
+        <button type="button" class="btn-add-item" data-add="softSkills"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter un savoir-être</button>
+        <datalist id="skill-groups"></datalist>
+      </section>
+
+      <!-- FORMATION -->
+      <section id="sec-education" class="editor-section">
+        <h1 class="section-title">Formation</h1>
+        <p class="section-desc">Diplômes et écoles.</p>
+        <div class="repeater-container" data-repeater="education"></div>
+        <button type="button" class="btn-add-item" data-add="education"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter une formation</button>
+
+        <h2 class="subsection-title">Certifications</h2>
+        <p class="section-desc">Certifications professionnelles, distinctes des diplômes.</p>
+        <div class="repeater-container" data-repeater="certificationsList"></div>
+        <button type="button" class="btn-add-item" data-add="certificationsList"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter une certification</button>
+      </section>
+
+      <!-- LANGUES & PLUS -->
+      <section id="sec-extras" class="editor-section">
+        <h1 class="section-title">Langues &amp; plus</h1>
+        <p class="section-desc">Langues, centres d'intérêt et références (les références n'apparaissent que sur le CV).</p>
+
+        <h2 class="subsection-title subsection-first">Langues</h2>
+        <div class="repeater-container repeater-compact" data-repeater="languagesList"></div>
+        <button type="button" class="btn-add-item" data-add="languagesList"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter une langue</button>
+
+        <h2 class="subsection-title">Centres d'intérêt</h2>
+        <div class="repeater-container repeater-compact" data-repeater="hobbiesList"></div>
+        <button type="button" class="btn-add-item" data-add="hobbiesList"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter un centre d'intérêt</button>
+
+        <h2 class="subsection-title">Références</h2>
+        <div class="repeater-container" data-repeater="references"></div>
+        <button type="button" class="btn-add-item" data-add="references"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter une référence</button>
+      </section>
+
+      <!-- DESIGN -->
+      <section id="sec-design" class="editor-section">
+        <h1 class="section-title">Design</h1>
+        <p class="section-desc">Choisissez un thème, puis une couleur. Chaque thème a un mode clair et un mode sombre ; vos visiteurs peuvent basculer.</p>
+
+        <h2 class="subsection-title subsection-first">Thème</h2>
+        <div class="theme-grid" id="theme-grid" role="radiogroup" aria-label="Thème du portfolio"></div>
+
+        <h2 class="subsection-title">Couleur d'accent</h2>
+        <div class="preset-grid" id="preset-grid"></div>
+        <div class="color-row">
+          <label class="color-input-wrapper">
+            <input type="color" id="design-accentColor" data-bind="design.accentColor">
+            <span class="color-picker-lbl"><span>Couleur principale</span><span id="accent-hex"></span></span>
+          </label>
+          <label class="color-input-wrapper">
+            <input type="color" id="design-secondaryColor" data-bind="design.secondaryColor">
+            <span class="color-picker-lbl"><span>Couleur secondaire</span><span id="secondary-hex"></span></span>
+          </label>
+        </div>
+        <p class="hint">Le contraste est ajusté automatiquement pour rester lisible en mode clair comme en mode sombre.</p>
+      </section>
+
+      <!-- CV -->
+      <section id="sec-cv" class="editor-section">
+        <h1 class="section-title">CV</h1>
+        <p class="section-desc">Un CV au format A4 généré à partir des mêmes informations. S'il dépasse une page, il continue sur la suivante : rien n'est coupé.</p>
+
+        <h2 class="subsection-title subsection-first">Modèle</h2>
+        <div class="theme-grid" id="cv-grid" role="radiogroup" aria-label="Modèle de CV"></div>
+
+        <h2 class="subsection-title">Couleur</h2>
+        <div class="color-row">
+          <label class="color-input-wrapper">
+            <input type="color" id="design-cvAccent" data-bind="design.cvAccent">
+            <span class="color-picker-lbl"><span>Couleur d'accent du CV</span><span id="cv-accent-hex"></span></span>
+          </label>
+        </div>
+
+        <div class="export-card">
+          <div class="export-icon"><i class="fas fa-file-pdf" aria-hidden="true"></i></div>
+          <h2>Télécharger le CV</h2>
+          <p>Le CV reprend votre profil, vos expériences, vos projets, votre formation et vos compétences.</p>
+          <div class="export-actions">
+            <button type="button" class="btn btn-secondary" id="cv-preview-btn"><i class="fas fa-eye" aria-hidden="true"></i> Aperçu</button>
+            <button type="button" class="btn btn-primary" id="cv-download-btn"><i class="fas fa-download" aria-hidden="true"></i> Télécharger en PDF</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXPORT -->
+      <section id="sec-export" class="editor-section">
+        <h1 class="section-title">Exporter</h1>
+        <p class="section-desc">Téléchargez votre portfolio sous forme de site prêt à publier.</p>
+
+        <div class="export-card">
+          <div class="export-icon"><i class="fas fa-file-zipper" aria-hidden="true"></i></div>
+          <h2>Votre site en un fichier ZIP</h2>
+          <p>Il contient <code>index.html</code>, <code>styles.css</code>, <code>script.js</code> et le dossier <code>images/</code>.</p>
+          <div class="export-actions">
+            <button type="button" class="btn btn-secondary" id="fullscreen-btn"><i class="fas fa-up-right-from-square" aria-hidden="true"></i> Ouvrir en plein écran</button>
+            <button type="button" class="btn btn-primary" id="zip-btn"><i class="fas fa-download" aria-hidden="true"></i> Télécharger le ZIP</button>
+          </div>
+        </div>
+
+        <h2 class="subsection-title">Mettre le site en ligne</h2>
+        <ol class="steps">
+          <li><strong>GitHub Pages</strong> — créez un dépôt, déposez le contenu du ZIP (Add file → Upload files), puis activez Settings → Pages sur la branche <code>main</code>.</li>
+          <li><strong>Netlify</strong> — glissez le dossier décompressé sur <em>app.netlify.com/drop</em>.</li>
+          <li><strong>Vercel</strong> — importez le dossier comme projet statique.</li>
+        </ol>
+
+        <h2 class="subsection-title">Sauvegarde</h2>
+        <p class="section-desc">Votre brouillon est enregistré dans ce navigateur. Pour le garder ou le transférer sur un autre appareil, exportez-le.</p>
+        <div class="export-actions export-actions-left">
+          <button type="button" class="btn btn-secondary" id="json-export-btn"><i class="fas fa-file-export" aria-hidden="true"></i> Exporter mes données</button>
+          <label class="btn btn-secondary" for="json-import"><i class="fas fa-file-import" aria-hidden="true"></i> Importer des données</label>
+          <input type="file" id="json-import" class="file-input" accept="application/json,.json">
+        </div>
+      </section>
+    </main>
+
+    <!-- ================= Aperçu ================= -->
+    <section class="preview-panel" aria-label="Aperçu en direct">
+      <div class="preview-bar">
+        <div class="segmented" role="group" aria-label="Que prévisualiser">
+          <button type="button" class="seg-btn active" data-preview="portfolio">Portfolio</button>
+          <button type="button" class="seg-btn" data-preview="cv">CV</button>
+        </div>
+        <div class="segmented" role="group" aria-label="Taille d'écran">
+          <button type="button" class="seg-btn active" data-device="desktop" title="Ordinateur" aria-label="Aperçu ordinateur"><i class="fas fa-desktop" aria-hidden="true"></i></button>
+          <button type="button" class="seg-btn" data-device="mobile" title="Mobile" aria-label="Aperçu mobile"><i class="fas fa-mobile-screen" aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <div class="preview-frame-wrapper" id="preview-wrapper">
+        <iframe id="preview-frame" class="preview-iframe" title="Aperçu du portfolio"></iframe>
+      </div>
+    </section>
+
+    <!-- Bascule édition / aperçu sur mobile -->
+    <div class="mobile-switch" role="group" aria-label="Affichage">
+      <button type="button" class="seg-btn active" data-view-btn="edit"><i class="fas fa-pen" aria-hidden="true"></i> Éditer</button>
+      <button type="button" class="seg-btn" data-view-btn="preview"><i class="fas fa-eye" aria-hidden="true"></i> Aperçu</button>
     </div>
-
   </div>
 
-  <!-- CDN dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="templates.js"></script>
+  <script src="engine.js"></script>
+  <script src="themes.js"></script>
+  <script src="cv.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
-

@@ -1,0 +1,11 @@
+{
+  "name": "portfolio-studio",
+  "version": "2.0.0",
+  "description": "Éditeur de portfolio et de CV dans le navigateur, avec export d'un site statique prêt à publier.",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes http-server -c-1 .",
+    "test": "node tests/test.js"
+  },
+  "license": "MIT"
+}
