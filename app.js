@@ -104,7 +104,7 @@
       languagesList: [{ name: 'Français', level: 'Langue maternelle' }, { name: 'Anglais', level: 'Courant (B2)' }],
       hobbiesList: [{ name: 'Photographie' }],
       references: [],
-      design: { accentColor: '', secondaryColor: '', cvAccent: '' }
+      design: { accentColor: '', secondaryColor: '', cvAccent: '', cvPages: 'one' }
     }
   };
 
@@ -237,7 +237,7 @@
     const out = Object.assign(base, d);
 
     out.profile = Object.assign({}, d.profile || {});
-    out.design = Object.assign({ accentColor: '', secondaryColor: '', cvAccent: '' }, d.design || {});
+    out.design = Object.assign({ accentColor: '', secondaryColor: '', cvAccent: '', cvPages: 'one' }, d.design || {});
     out.experience = (d.experience && d.experience.length ? d.experience : d.timeline) || [];
     out.skills = (d.skills || []).map(x => ({ name: x.name || '', group: x.group || '' }));
     out.certificationsList = d.certificationsList || d.certifications || [];
@@ -300,6 +300,7 @@
     d.design.secondaryColor = d.design.secondaryColor || theme.accent2;
     d.design.cvAccent = d.design.cvAccent || CV_TEMPLATES[state.cvTemplate].accent;
     d.design.cvTemplate = state.cvTemplate;
+    d.design.cvPages = d.design.cvPages === 'multi' ? 'multi' : 'one';
     return d;
   }
 
@@ -333,10 +334,37 @@
       doc.open();
       doc.write(html);
       doc.close();
+      if (previewMode === 'cv') showFitStatus(frame.contentWindow.__cvFit);
       if (y) setTimeout(() => { try { frame.contentWindow.scrollTo(0, y); } catch (e) {} }, 30);
     } else {
       frame.srcdoc = html;
     }
+  }
+
+  function showFitStatus(fit) {
+    const el = $('#cv-fit-status');
+    if (!el || !fit) return;
+    const multi = state.data.design.cvPages === 'multi';
+    let icon = 'fa-circle-check', text, warn = false;
+    if (fit.pages === 1 && fit.scale < 1) {
+      text = 'Votre CV tient sur une page (texte réduit à ' + Math.round(fit.scale * 100) + ' %).';
+    } else if (fit.pages === 1) {
+      text = 'Votre CV tient sur une page.';
+    } else if (multi) {
+      text = 'Votre CV fait environ ' + fit.pages + ' pages.';
+    } else {
+      warn = true;
+      icon = 'fa-triangle-exclamation';
+      text = 'Trop de contenu pour une page, même en réduisant : votre CV fera au moins ' + fit.pages + ' pages. Raccourcissez les descriptions ou retirez un projet ou une expérience.';
+    }
+    el.className = 'fit-status' + (warn ? ' warn' : '');
+    el.innerHTML = '<i class="fas ' + icon + '" aria-hidden="true"></i>';
+    el.appendChild(document.createTextNode(text));
+  }
+
+  function bindCvPages() {
+    const mode = state.data.design.cvPages === 'multi' ? 'multi' : 'one';
+    $$('[data-cv-pages]').forEach(r => { r.checked = r.value === mode; });
   }
 
   /* ==========================================================
@@ -866,20 +894,24 @@
     document.body.appendChild(holder);
     const page = holder.querySelector('.cv-page');
     page.style.margin = '0';
+    const fit = window.fitCV(page, frag.mode);
+    if (fit.pages === 1) page.style.minHeight = '0';
     toast('Génération du PDF…');
 
     const imgs = Array.prototype.slice.call(page.querySelectorAll('img'));
     Promise.all(imgs.map(img => img.complete ? null : new Promise(r => { img.onload = img.onerror = r; })))
       .then(() => (document.fonts && document.fonts.ready) || null)
       .then(() => html2pdf().set({
-        margin: [8, 0, 8, 0], // marges haut/bas en mm, pour que les pages suivantes ne collent pas au bord
+        // Une page : la marge est déjà dans le CV. Plusieurs pages : marges haut/bas
+        // pour que les pages suivantes ne collent pas au bord.
+        margin: fit.pages === 1 ? 0 : [8, 0, 8, 0],
         filename,
         image: { type: 'jpeg', quality: 0.96 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'], avoid: ['.cv-item', '.cv-skill-group'] }
       }).from(page).save())
-      .then(() => toast('CV téléchargé.'))
+      .then(() => toast(fit.pages === 1 ? 'CV téléchargé (1 page).' : 'CV téléchargé (' + fit.pages + ' pages).'))
       .catch(err => { console.error(err); toast('Erreur lors de la génération du PDF.', 'error'); })
       .finally(() => holder.remove());
   }
@@ -933,6 +965,7 @@
 
   function renderAll() {
     bindFields();
+    bindCvPages();
     renderAvatar();
     Object.keys(REPEATERS).forEach(renderRepeater);
     updateGroupSuggestions();
@@ -977,6 +1010,12 @@
       readImage(file, 800, url => { state.data.profile.avatar = url; renderAvatar(); changed(); });
     });
     $('#avatar-remove').addEventListener('click', () => { state.data.profile.avatar = ''; renderAvatar(); changed(); });
+
+    $$('[data-cv-pages]').forEach(r => r.addEventListener('change', () => {
+      state.data.design.cvPages = r.value;
+      setPreviewMode('cv');
+      changed();
+    }));
 
     $('#zip-btn').addEventListener('click', exportZip);
     $('#fullscreen-btn').addEventListener('click', openFullscreen);

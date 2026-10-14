@@ -216,6 +216,19 @@ textarea.form-control { resize: vertical; min-height: 96px; line-height: 1.55; }
 .color-picker-lbl span:first-child { font-weight: 600; font-size: .88rem; }
 .color-picker-lbl span:last-child { font-size: .78rem; color: var(--text-muted); font-family: ui-monospace, Menlo, monospace; }
 
+/* Choix (boutons radio en cartes) */
+.choice-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.choice { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--surface); cursor: pointer; transition: border-color .15s; }
+.choice:hover { border-color: var(--border-strong); }
+.choice:has(input:checked) { border-color: var(--accent); }
+.choice input { margin-top: 4px; accent-color: var(--accent); }
+.choice span { display: flex; flex-direction: column; gap: 2px; }
+.choice small { color: var(--text-muted); font-size: .8rem; }
+.fit-status { margin-top: 12px; font-size: .88rem; color: var(--text-soft); display: flex; gap: 8px; align-items: baseline; }
+.fit-status:empty { display: none; }
+.fit-status i { color: var(--success); }
+.fit-status.warn i { color: #f5b041; }
+
 /* Export */
 .export-card { margin-top: 28px; padding: 32px 24px; text-align: center; border-radius: 16px; border: 1px solid var(--border); background: radial-gradient(80% 100% at 50% 0%, var(--accent-soft), transparent 70%), var(--surface); }
 .export-icon { font-size: 2.4rem; color: var(--accent); margin-bottom: 12px; }

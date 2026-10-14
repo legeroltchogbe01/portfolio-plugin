@@ -235,6 +235,15 @@
         <h2 class="subsection-title subsection-first">Modèle</h2>
         <div class="theme-grid" id="cv-grid" role="radiogroup" aria-label="Modèle de CV"></div>
 
+        <h2 class="subsection-title">Nombre de pages</h2>
+        <div class="choice-row" role="radiogroup" aria-label="Nombre de pages du CV">
+          <label class="choice"><input type="radio" name="cv-pages" value="one" data-cv-pages>
+            <span><strong>Tenir sur une page</strong><small>Recommandé. Les espacements puis le texte sont réduits légèrement si besoin.</small></span></label>
+          <label class="choice"><input type="radio" name="cv-pages" value="multi" data-cv-pages>
+            <span><strong>Autoriser plusieurs pages</strong><small>Taille normale ; le CV continue sur la page suivante.</small></span></label>
+        </div>
+        <p class="fit-status" id="cv-fit-status" role="status" aria-live="polite"></p>
+
         <h2 class="subsection-title">Couleur</h2>
         <div class="color-row">
           <label class="color-input-wrapper">

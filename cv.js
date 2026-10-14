@@ -123,7 +123,7 @@ body { background: #e9ecef; }
   const BASE = `
 .cv-page, .cv-page * { box-sizing: border-box; margin: 0; padding: 0; }
 .cv-page { width: 210mm; min-height: 297mm; margin: 0 auto; background: #fff;
-  color: var(--ink); font-family: var(--font); font-size: 10pt; line-height: 1.5; text-align: left;
+  color: var(--ink); font-family: var(--font); font-size: 10pt; line-height: var(--lh, 1.5); text-align: left;
   -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 h1 { font-size: 24pt; line-height: 1.1; letter-spacing: -0.01em; }
 .cv-title { font-size: 12pt; color: var(--accent-text); font-weight: 600; margin-top: 3px; }
@@ -152,6 +152,7 @@ h1 { font-size: 24pt; line-height: 1.1; letter-spacing: -0.01em; }
 .cv-contact li { margin-bottom: 3px; overflow-wrap: anywhere; }
 .cv-contact span { display: block; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
 .cv-avatar { object-fit: cover; display: block; }
+.cv-extra { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; align-items: start; }
 .cv-monogram { display: grid; place-items: center; font-weight: 800; }
 `;
 
@@ -207,21 +208,80 @@ h1 { font-size: 28pt; font-weight: 400; }
 `
   };
 
-  /** Préfixe chaque sélecteur par .cv-page (règles « plates », sans @media). */
+  const SPACING_PROP = /^(margin|padding|gap|row-gap|column-gap)(-(top|right|bottom|left))?$/;
+
+  /** Multiplie chaque longueur (pt, px, mm) d'une valeur CSS par une variable d'ajustement. */
+  function scaleValue(value, varName) {
+    return value.replace(/(-?\d*\.?\d+)(pt|px|mm)\b/g, (m) => 'calc(' + m + ' * var(' + varName + ', 1))');
+  }
+
+  /**
+   * Préfixe chaque sélecteur par .cv-page (règles « plates », sans @media) et
+   * rend ajustables les tailles de texte (--fs) et les espacements (--sp) :
+   * c'est ce qui permet de faire tenir un CV sur une page (voir fitCV).
+   */
   function scope(css) {
     return css.replace(/([^{}]+)\{([^{}]*)\}/g, (all, selectors, body) => {
-      const scoped = selectors.split(',').map(sel => {
-        sel = sel.trim();
-        if (!sel) return sel;
-        return sel.indexOf('.cv-page') === 0 ? sel : '.cv-page ' + sel;
-      }).join(', ');
-      return '\n' + scoped + ' {' + body + '}';
+      const sels = selectors.split(',').map(sel => sel.trim()).filter(Boolean);
+      const scoped = sels.map(sel => (sel.indexOf('.cv-page') === 0 ? sel : '.cv-page ' + sel)).join(', ');
+      const isPhoto = /cv-avatar|cv-monogram/.test(selectors);
+      const decls = body.split(';').map(decl => {
+        const i = decl.indexOf(':');
+        if (i < 0) return decl;
+        const prop = decl.slice(0, i).trim();
+        const value = decl.slice(i + 1);
+        if (prop === 'font-size') return decl.slice(0, i + 1) + scaleValue(value, '--fs');
+        if (SPACING_PROP.test(prop)) return decl.slice(0, i + 1) + scaleValue(value, '--sp');
+        if (isPhoto && (prop === 'width' || prop === 'height')) return decl.slice(0, i + 1) + scaleValue(value, '--sp');
+        return decl;
+      }).join(';');
+      return '\n' + scoped + ' {' + decls + '}';
     });
   }
 
   /**
+   * Fait tenir le CV sur une page A4 en réduisant d'abord les espacements,
+   * puis légèrement le texte (jamais sous 8,5 pt). Si c'est impossible, le CV
+   * garde sa taille normale et s'étend sur plusieurs pages.
+   * Fonction autonome : elle est aussi recopiée dans le HTML du CV.
+   *
+   * @param {HTMLElement} page  l'élément .cv-page
+   * @param {string} mode       'one' (une page) ou 'multi' (plusieurs pages autorisées)
+   * @returns {{ pages: number, fitted: boolean, scale: number }}
+   */
+  function fitCV(page, mode) {
+    var STEPS = [
+      [1, 1, 1.5], [0.85, 1, 1.45], [0.72, 1, 1.42], [0.62, 0.96, 1.4],
+      [0.55, 0.92, 1.38], [0.5, 0.88, 1.35], [0.46, 0.85, 1.32]
+    ];
+    var apply = function (st) {
+      page.style.setProperty('--sp', st[0]);
+      page.style.setProperty('--fs', st[1]);
+      page.style.setProperty('--lh', st[2]);
+    };
+    var previousMin = page.style.minHeight;
+    page.style.minHeight = '0';
+    var a4 = page.offsetWidth * 297 / 210;
+    var result = null;
+    if (mode !== 'multi') {
+      for (var i = 0; i < STEPS.length; i++) {
+        apply(STEPS[i]);
+        if (page.scrollHeight <= a4 + 1) { result = { pages: 1, fitted: true, scale: STEPS[i][1] }; break; }
+      }
+    }
+    if (!result) {
+      apply(STEPS[0]);
+      result = { pages: Math.max(1, Math.ceil((page.scrollHeight - 2) / a4)), fitted: false, scale: 1 };
+    }
+    page.style.minHeight = previousMin;
+    page.setAttribute('data-pages', result.pages);
+    return result;
+  }
+
+  /**
    * @param {object} raw     données du formulaire
-   * @param {object} [opts]  { fragment: true } renvoie { css, html } à insérer dans une page existante
+   * @param {object} [opts]  { fragment: true } renvoie { css, html, mode } à insérer dans une page existante
+   *                          (appeler ensuite fitCV sur l'élément .cv-page)
    */
   function generateCV(raw, opts) {
     opts = opts || {};
@@ -268,8 +328,9 @@ h1 { font-size: 28pt; font-weight: 400; }
       body = '<header class="cv-head"><div class="cv-head-id">' + avatar + identity + '</div>' + contactList + '</header>' +
         '<div class="cv-cols"><main>' + mainBlocks.join('') + '</main><aside>' + sideBlocks.join('') + '</aside></div>';
     } else {
+      // Modèles sur une colonne : les sections courtes passent sur deux colonnes en bas.
       body = '<header class="cv-head">' + (p.avatar || id === 'elegant' ? avatar : '') + '<div>' + identity + contactInline + '</div></header>' +
-        mainBlocks.join('') + sideBlocks.join('');
+        mainBlocks.join('') + '<div class="cv-extra">' + sideBlocks.join('') + '</div>';
     }
 
     const font = id === 'elegant' ? "Georgia, 'Times New Roman', serif"
@@ -280,15 +341,19 @@ h1 { font-size: 28pt; font-weight: 400; }
       '--accent:' + accent + ';--accent-ink:' + inkOn(accent) + ';--accent-text:' + accentText + ';' +
       '--side-bg:' + sideBg + ';--side-ink:' + inkOn(sideBg) + ';}' + scope(BASE + LAYOUT_CSS[id]);
     const page = '<div class="cv-page cv-' + id + '">' + body + '</div>';
-    if (opts.fragment) return { css, html: page };
+    const mode = raw && raw.design && raw.design.cvPages === 'multi' ? 'multi' : 'one';
+    if (opts.fragment) return { css, html: page, mode };
+
+    const fitScript = '<script>window.__cvFit=(' + fitCV.toString() + ')(document.querySelector(".cv-page"),"' + mode + '");</script>';
 
     return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
       '<title>CV — ' + esc(p.name) + '</title><style>' + STANDALONE + css + '</style></head>' +
-      '<body>' + page + '</body></html>';
+      '<body>' + page + fitScript + '</body></html>';
   }
 
   root.CV_TEMPLATES = TEMPLATES;
   root.generateCV = generateCV;
+  root.fitCV = fitCV;
   root.generateCVTemplate = generateCV; // compatibilité avec l'ancien nom
-  if (typeof module !== 'undefined' && module.exports) module.exports = { TEMPLATES, generateCV };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { TEMPLATES, generateCV, fitCV };
 })(typeof window !== 'undefined' ? window : globalThis);
